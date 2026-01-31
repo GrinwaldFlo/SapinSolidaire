@@ -37,6 +37,7 @@ Elle est composée de deux parties distinctes :
 L'application disposera d'une interface de configuration accessible par les administrateurs pour gérer les paramètres suivants :
 - Nombre maximum d'années consécutives de demande de cadeaux (défaut : 3)
 - Liste des codes postaux autorisés (format : liste séparée par des virgules)
+- Texte d'introduction (affiché aux familles)
 - Limite de débit pour l'envoi d'e-mails de demande initial (défaut : 1 e-mail par 5 secondes, configurable via `.env`)
 
 ## Workflow famille
@@ -119,6 +120,8 @@ Les paramètres suivants sont modifiables depuis l'interface:
 - Liste des code postaux autorisé à demander un cadeau
 - Nombre d'année où une famille a le droit de demander des cadeaux.
 - Liste de propositions de cadeaux que l'on peut demander. (un seul champ texte multi-ligne)
+- Texte d'introduction (affiché aux familles)
+- Adresse de réponse aux emails
 
 ### Gestion des rôles et permissions
 
@@ -150,7 +153,6 @@ L'interface permet de créer et modifier les saisons.
 - Nom (obligatoire)
 - Date de début (obligatoire)
 - Date de fin (obligatoire)
-- Texte d'introduction (affiché aux familles)
 - Date limite de modification (après laquelle les familles ne peuvent plus modifier leur demande)
 - Date depuis laquelle le cadeau peut être cherché
 - Adresse où venir chercher le cadeau
