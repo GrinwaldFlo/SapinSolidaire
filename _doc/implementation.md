@@ -25,10 +25,34 @@ Elle est composée de deux parties distinctes :
 ### Framework et outils
 
 - **Framework** : Laravel (version minimale). Le starter kit est fourni et peut être modifié selon les besoins.
+- **Frontend** : Laravel Livewire
+- **PDF** : DomPDF (avec marges d'environ 1cm)
 - **Internationalisation** : Toutes les interfaces doivent être en français uniquement.
 - **Code** : Tout le code source (variables, commentaires, etc.) doit être écrit en anglais.
+- **Email queue** : Database
+- **Email templates** : HTML avec design convivial et accessible
+
+### Paramètres applicatifs
+
+L'application disposera d'une interface de configuration accessible par les administrateurs pour gérer les paramètres suivants :
+- Nombre maximum d'années consécutives de demande de cadeaux (défaut : 3)
+- Liste des codes postaux autorisés (format : liste séparée par des virgules)
+- Limite de débit pour l'envoi d'e-mails de demande initial (défaut : 1 e-mail par 5 secondes, configurable via `.env`)
 
 ## Workflow famille
+
+### Accès à l'application
+
+**Cas 1 : Une saison est active**
+- L'accès au formulaire de demande est possible
+
+**Cas 2 : Aucune saison n'est actuellement active mais une saison future existe**
+- Un message affiche la date de la prochaine saison avec une invitation à revenir
+- Les familles ne peuvent pas accéder au formulaire
+
+**Cas 3 : Aucune saison n'existe ou n'est programmée**
+- Un message invite les familles à revenir plus tard
+- Les familles ne peuvent pas accéder au formulaire
 
 ### Processus de demande de cadeau
 
@@ -36,16 +60,17 @@ Elle est composée de deux parties distinctes :
 2. Le système valide qu'une saison est actuellement active selon les dates définies
 3. L'utilisateur entre son adresse e-mail
 4. Un e-mail est envoyé contenant un lien sécurisé au format `/cadeau/XXX/EMAIL`
-   - `XXX` : token unique permettant de valider l'authenticité de l'adresse e-mail
+   - `XXX` : token unique permettant de valider l'authenticité de l'adresse e-mail (valide 48 heures)
    - `EMAIL` : l'adresse e-mail de la famille utilisée par la suite
 5. La famille clique sur le lien reçu et accède au formulaire de demande. Le token est validé
 6. **Vérification des conditions d'éligibilité** : Les conditions suivantes s'affichent une à une et doivent être acceptées
-   - La famille ne peut pas demander des cadeaux plus de 3 années consécutives
-   - La famille doit habiter dans le Nord Vaudois
+   - La famille ne peut pas demander des cadeaux plus de N années consécutives (N est configurable, défaut : 3)
+   - La famille doit habiter dans les codes postaux autorisés
 7. Une fois les conditions acceptées, le formulaire principal s'affiche
-   - L'adresse e-mail est affichée mais non modifiable
-   - Si l'e-mail existe dans la base de données, les informations de base sont préremplies et restent modifiables
-   - Seules les données des enfants pour l'année en cours sont affichées
+- L'adresse e-mail est affichée mais non modifiable
+- Si l'e-mail existe dans la base de données, les informations de base sont préremplies et restent modifiables
+- Seules les données des enfants pour l'année en cours sont affichées
+- Si une demande a déjà été soumise pour cette saison, un message indique que la famille consulte ou modifie sa demande existante
 
 ### Formulaire d'information familiale
 
@@ -63,15 +88,18 @@ Elle est composée de deux parties distinctes :
 11. Une fois tous les champs complétés, la famille peut soumettre sa demande
 12. Le système effectue une validation complète :
     - Vérification que le numéro de téléphone est valide et au format suisse
-    - Validation et géolocalisation de l'adresse via API externe
+    - Validation et géolocalisation de l'adresse via API externe. Si la validation échoue, un message invite la famille à corriger son adresse
     - Vérification que tous les champs obligatoires sont remplis
 13. Les données de la famille sont sauvegardées en base de données
 14. Les données de chaque enfant sont sauvegardées avec :
     - Lien vers la famille et à la saison en cours
     - **Limitation** : Une seule demande par famille par saison
-    - **Modification** : Si la famille a déjà soumis une demande pour la saison, elle peut modifier ses choix
+    - **Modification** : 
+      - Les informations familiales peuvent être modifiées à tout moment avant la date limite de modification
+      - Les préférences de cadeaux des enfants peuvent être modifiées uniquement si le statut de l'enfant est "À valider", "Refusé" ou "Validé"
+      - Après la date limite de modification, une famille peut consulter sa demande mais ne peut plus la modifier (message explicatif affiché)
     - **Statut initial** : "À valider" (pour les informations familiales et chaque enfant)
-    - **Code unique** : Un code de 4 lettres majuscules est généré pour chaque demande d'enfant
+    - **Code unique** : Un code de 4 lettres majuscules unique est généré aléatoirement pour chaque demande d'enfant
 
 ## Workflow personnel (staff)
 
@@ -81,6 +109,17 @@ Elle est composée de deux parties distinctes :
 - Toutes les données affichées sont liées à la saison en cours, sauf indication contraire
 - Par défaut, toutes les pages n'affichent que les données de la saison active
 
+### Gestion des paramètres du site
+
+**Accessible par** : Admin
+
+Les paramètres suivants sont modifiables depuis l'interface:
+
+- Nom du site
+- Liste des code postaux autorisé à demander un cadeau
+- Nombre d'année où une famille a le droit de demander des cadeaux.
+- Liste de propositions de cadeaux que l'on peut demander. (un seul champ texte multi-ligne)
+
 ### Gestion des rôles et permissions
 
 **Rôles disponibles**
@@ -89,6 +128,10 @@ Elle est composée de deux parties distinctes :
 - **Organisateur** : Peut imprimer les étiquettes, valider les cadeaux reçus et gérer les listes
 - **Accueil** : Peut enregistrer la remise des cadeaux
 - **Admin** : Accès complet, gestion des saisons et des rôles
+
+**Attribution des rôles**
+- Un utilisateur peut avoir plusieurs rôles simultanément
+- Les permissions sont cumulatives (chaque rôle ajoute ses permissions)
 
 ### Inscription du personnel
 
@@ -109,12 +152,15 @@ L'interface permet de créer et modifier les saisons.
 - Date de fin (obligatoire)
 - Texte d'introduction (affiché aux familles)
 - Date limite de modification (après laquelle les familles ne peuvent plus modifier leur demande)
-- Date depuis laquelle le cadeau pour être cherché
+- Date depuis laquelle le cadeau peut être cherché
 - Adresse où venir chercher le cadeau
 
 **Règles**
 - Les dates des saisons ne doivent pas se chevaucher
 - Une seule saison peut être active à la fois
+
+**Archivage des données**
+- Les données de toutes les saisons (familles, enfants, demandes) sont conservées indéfiniment pour les statistiques et le suivi
 
 ### Validation des demandes familiales
 
@@ -203,10 +249,11 @@ Cette interface permet d'enregistrer la remise effective des cadeaux aux enfants
 L'interface affiche une liste complète de tous les enfants pour surveiller leurs statuts.
 
 **Fonctionnalités**
-- Par défaut, affiche la saison en cours
-- Permet de sélectionner une saison précédente
+- Permet de sélectionner une saison (affichage de la saison en cours par défaut)
 - Filtrage par statut pour afficher un workflow spécifique
 - Bouton **Modifier** pour chaque ligne permettant de corriger les informations
+
+**Note** : Cette page est la seule qui dispose d'un sélecteur de saison. Toutes les autres pages affichent par défaut la saison active.
 
 ### Envoi des confirmations de réception
 
@@ -236,6 +283,5 @@ L'email doit contenir les informations suivantes:
 L'interface permet de lister et gérer toutes les familles.
 
 **Fonctionnalités**
-- Filtrage par saison
 - Affichage du nombre d'enfants demandés par la famille pour chaque saison
 - Permettre la modification des données
