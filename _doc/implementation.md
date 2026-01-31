@@ -75,7 +75,7 @@ L'application disposera d'une interface de configuration accessible par les admi
 
 ### Formulaire d'information familiale
 
-8. La famille complète les informations de base : Nom, Prénom, Adresse, Code postal, Ville, NPA, Téléphone
+8. La famille complète les informations de base : Nom, Prénom, Adresse, Code postal, Ville, Téléphone
 9. La famille indique le nombre d'enfants qui doivent recevoir un cadeau
 10. Pour chaque enfant, les informations suivantes sont demandées :
     - Année de naissance
@@ -88,16 +88,17 @@ L'application disposera d'une interface de configuration accessible par les admi
 
 11. Une fois tous les champs complétés, la famille peut soumettre sa demande
 12. Le système effectue une validation complète :
-    - Vérification que le numéro de téléphone est valide et au format suisse
-    - Validation et géolocalisation de l'adresse via API externe. Si la validation échoue, un message invite la famille à corriger son adresse
-    - Vérification que tous les champs obligatoires sont remplis
+- Vérification que le numéro de téléphone est valide en utilisant la bibliothèque `libphonenumber` (giggsey/libphonenumber-for-php). Le numéro est stocké au format E.164
+- Validation de l'adresse via l'API Swiss Post Address Database. Si l'API n'est pas disponible, l'adresse est acceptée sans un avertissement. Si la validation échoue, un message invite la famille à corriger son adresse
+- Vérification que tous les champs obligatoires sont remplis
 13. Les données de la famille sont sauvegardées en base de données
 14. Les données de chaque enfant sont sauvegardées avec :
     - Lien vers la famille et à la saison en cours
     - **Limitation** : Une seule demande par famille par saison
     - **Modification** : 
-      - Les informations familiales peuvent être modifiées à tout moment avant la date limite de modification
-      - Les préférences de cadeaux des enfants peuvent être modifiées uniquement si le statut de l'enfant est "À valider", "Refusé" ou "Validé"
+    - Les informations familiales peuvent être modifiées à tout moment
+    - Les préférences de cadeaux des enfants peuvent être modifiées uniquement si le statut de l'enfant est "À valider", "Refusé" ou "Validé"
+    - **Réinitialisation du statut** : Lorsqu'une famille modifie sa demande ou les informations d'un enfant, le statut concerné revient automatiquement à "À valider"
       - Après la date limite de modification, une famille peut consulter sa demande mais ne peut plus la modifier (message explicatif affiché)
     - **Statut initial** : "À valider" (pour les informations familiales et chaque enfant)
     - **Code unique** : Un code de 4 lettres majuscules unique est généré aléatoirement pour chaque demande d'enfant

@@ -119,7 +119,6 @@ Family information (persistent across seasons).
 | `address` | VARCHAR(255) | NULLABLE | Street address |
 | `postal_code` | VARCHAR(10) | NULLABLE | Postal code |
 | `city` | VARCHAR(255) | NULLABLE | City |
-| `npa` | VARCHAR(10) | NULLABLE | NPA (Swiss postal code) |
 | `phone` | VARCHAR(20) | NULLABLE | Phone number (Swiss format) |
 | `created_at` | TIMESTAMP | NULLABLE | Creation timestamp |
 | `updated_at` | TIMESTAMP | NULLABLE | Update timestamp |
@@ -290,6 +289,93 @@ Standard Laravel failed jobs table.
 
 ---
 
+### 12. `job_batches` (Laravel Queue)
+
+Standard Laravel job batches table for batch processing.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| `id` | VARCHAR(255) | PK | Batch ID |
+| `name` | VARCHAR(255) | NOT NULL | Batch name |
+| `total_jobs` | INT | NOT NULL | Total jobs in batch |
+| `pending_jobs` | INT | NOT NULL | Pending jobs count |
+| `failed_jobs` | INT | NOT NULL | Failed jobs count |
+| `failed_job_ids` | LONGTEXT | NOT NULL | IDs of failed jobs |
+| `options` | MEDIUMTEXT | NULLABLE | Batch options |
+| `cancelled_at` | INT | NULLABLE | Cancellation timestamp |
+| `created_at` | INT | NOT NULL | Creation timestamp |
+| `finished_at` | INT | NULLABLE | Completion timestamp |
+
+**Indexes:**
+- PRIMARY (`id`)
+
+---
+
+### 13. `password_reset_tokens` (Laravel Auth)
+
+Standard Laravel password reset tokens table.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| `email` | VARCHAR(255) | PK | User email |
+| `token` | VARCHAR(255) | NOT NULL | Reset token |
+| `created_at` | TIMESTAMP | NULLABLE | Creation timestamp |
+
+**Indexes:**
+- PRIMARY (`email`)
+
+---
+
+### 14. `sessions` (Laravel Session)
+
+Standard Laravel sessions table for database session driver.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| `id` | VARCHAR(255) | PK | Session ID |
+| `user_id` | BIGINT UNSIGNED | NULLABLE, INDEX | Reference to user |
+| `ip_address` | VARCHAR(45) | NULLABLE | Client IP address |
+| `user_agent` | TEXT | NULLABLE | Browser user agent |
+| `payload` | LONGTEXT | NOT NULL | Session data |
+| `last_activity` | INT | NOT NULL, INDEX | Last activity timestamp |
+
+**Indexes:**
+- PRIMARY (`id`)
+- INDEX (`user_id`)
+- INDEX (`last_activity`)
+
+---
+
+### 15. `cache` (Laravel Cache)
+
+Standard Laravel cache table for database cache driver.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| `key` | VARCHAR(255) | PK | Cache key |
+| `value` | MEDIUMTEXT | NOT NULL | Cached value |
+| `expiration` | INT | NOT NULL | Expiration timestamp |
+
+**Indexes:**
+- PRIMARY (`key`)
+
+---
+
+### 16. `cache_locks` (Laravel Cache)
+
+Standard Laravel cache locks table for atomic locks.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| `key` | VARCHAR(255) | PK | Lock key |
+| `owner` | VARCHAR(255) | NOT NULL | Lock owner |
+| `expiration` | INT | NOT NULL | Expiration timestamp |
+
+**Indexes:**
+- PRIMARY (`key`)
+
+---
+
 ## Relationships Summary
 
 | Parent Table | Child Table | Relationship | Description |
@@ -327,8 +413,9 @@ pending → validated → printed → received → given
 ```
 
 ### Modification Rules
-- Family info: Modifiable until `modification_deadline`
-- Child preferences: Modifiable only if status is `pending`, `rejected`, or `validated`
+- Family info: Modifiable anytime
+- Child preferences: Modifiable only if child status is `pending`, `rejected`, or `validated`
+- **Status reset**: When a family modifies a gift request or child information, the status is automatically reset to `pending` (À valider)
 
 ---
 
@@ -346,4 +433,5 @@ MAIL_RATE_LIMIT_SECONDS=5
 - All timestamps use the database server timezone
 - Soft deletes are NOT used; data is retained for statistics
 - The `code` field in `children` table uses 4 uppercase letters (26^4 = 456,976 combinations)
-- Phone validation should follow Swiss format (+41 or 0xx xxx xx xx)
+- Phone validation uses `libphonenumber` library (giggsey/libphonenumber-for-php) for Swiss phone number validation and E.164 formatting
+- Address validation uses Swiss Post Address Database API (requires API key in `.env`)
