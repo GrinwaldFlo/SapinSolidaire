@@ -47,7 +47,7 @@
                         Suivi enfants
                     </flux:sidebar.item>
 
-                    <flux:sidebar.item icon="mail" :href="route('admin.confirmations')" :current="request()->routeIs('admin.confirmations')" wire:navigate>
+                    <flux:sidebar.item icon="envelope" :href="route('admin.confirmations')" :current="request()->routeIs('admin.confirmations')" wire:navigate>
                         Confirmations
                     </flux:sidebar.item>
 
