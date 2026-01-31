@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11415.280 d18.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{13B669BE-BB05-4DDF-9536-439F39A36129}") = "SapinSolidaire", "SapinSolidaire.phpproj", "{883C550E-1302-40EF-0658-1130BDFF3B28}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{883C550E-1302-40EF-0658-1130BDFF3B28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{883C550E-1302-40EF-0658-1130BDFF3B28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{883C550E-1302-40EF-0658-1130BDFF3B28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{883C550E-1302-40EF-0658-1130BDFF3B28}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {98E55FFB-9875-41B7-87FF-A96A78CD0656}
+	EndGlobalSection
+EndGlobal
