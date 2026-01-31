@@ -6,29 +6,76 @@
     <body class="min-h-screen bg-white dark:bg-zinc-800">
         <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.header>
-                <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
+                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 px-2" wire:navigate>
+                    <span class="text-2xl">🎄</span>
+                    <span class="font-semibold text-zinc-900 dark:text-white">Sapin Solidaire</span>
+                </a>
                 <flux:sidebar.collapse class="lg:hidden" />
             </flux:sidebar.header>
 
             <flux:sidebar.nav>
-                <flux:sidebar.group :heading="__('Platform')" class="grid">
-                    <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
-                        {{ __('Dashboard') }}
+                @can('access-admin')
+                <flux:sidebar.group heading="Gestion" class="grid">
+                    <flux:sidebar.item icon="home" :href="route('admin.dashboard')" :current="request()->routeIs('admin.dashboard')" wire:navigate>
+                        Tableau de bord
+                    </flux:sidebar.item>
+
+                    @can('validate')
+                    <flux:sidebar.item icon="check-circle" :href="route('admin.validation')" :current="request()->routeIs('admin.validation')" wire:navigate>
+                        Validation
+                    </flux:sidebar.item>
+                    @endcan
+
+                    @can('organize')
+                    <flux:sidebar.item icon="tag" :href="route('admin.labels')" :current="request()->routeIs('admin.labels')" wire:navigate>
+                        Étiquettes
+                    </flux:sidebar.item>
+                    @endcan
+
+                    @can('reception')
+                    <flux:sidebar.item icon="inbox" :href="route('admin.reception')" :current="request()->routeIs('admin.reception')" wire:navigate>
+                        Réception
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item icon="gift" :href="route('admin.delivery')" :current="request()->routeIs('admin.delivery')" wire:navigate>
+                        Remise
+                    </flux:sidebar.item>
+                    @endcan
+
+                    @can('organize')
+                    <flux:sidebar.item icon="users" :href="route('admin.monitoring')" :current="request()->routeIs('admin.monitoring')" wire:navigate>
+                        Suivi enfants
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item icon="mail" :href="route('admin.confirmations')" :current="request()->routeIs('admin.confirmations')" wire:navigate>
+                        Confirmations
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item icon="home" :href="route('admin.families')" :current="request()->routeIs('admin.families')" wire:navigate>
+                        Familles
+                    </flux:sidebar.item>
+                    @endcan
+                </flux:sidebar.group>
+                @endcan
+
+                @can('admin')
+                <flux:sidebar.group heading="Administration" class="grid">
+                    <flux:sidebar.item icon="calendar" :href="route('admin.seasons')" :current="request()->routeIs('admin.seasons')" wire:navigate>
+                        Saisons
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item icon="users" :href="route('admin.users')" :current="request()->routeIs('admin.users')" wire:navigate>
+                        Utilisateurs
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item icon="cog" :href="route('admin.settings')" :current="request()->routeIs('admin.settings')" wire:navigate>
+                        Paramètres
                     </flux:sidebar.item>
                 </flux:sidebar.group>
+                @endcan
             </flux:sidebar.nav>
 
             <flux:spacer />
-
-            <flux:sidebar.nav>
-                <flux:sidebar.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                    {{ __('Repository') }}
-                </flux:sidebar.item>
-
-                <flux:sidebar.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
-                    {{ __('Documentation') }}
-                </flux:sidebar.item>
-            </flux:sidebar.nav>
 
             <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
         </flux:sidebar>
@@ -67,7 +114,7 @@
 
                     <flux:menu.radio.group>
                         <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>
-                            {{ __('Settings') }}
+                            Paramètres
                         </flux:menu.item>
                     </flux:menu.radio.group>
 
@@ -82,7 +129,7 @@
                             class="w-full cursor-pointer"
                             data-test="logout-button"
                         >
-                            {{ __('Log Out') }}
+                            Déconnexion
                         </flux:menu.item>
                     </form>
                 </flux:menu>

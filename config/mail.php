@@ -115,4 +115,16 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Rate Limiting
+    |--------------------------------------------------------------------------
+    |
+    | This value controls the rate limit for sending emails, in seconds.
+    | This is used to prevent abuse of the email sending functionality.
+    |
+    */
+
+    'rate_limit_seconds' => env('MAIL_RATE_LIMIT_SECONDS', 5),
+
 ];

@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'swisspost' => [
+        'api_key' => env('SWISSPOST_API_KEY'),
+    ],
+
 ];
