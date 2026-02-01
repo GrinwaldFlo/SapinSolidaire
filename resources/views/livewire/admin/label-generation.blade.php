@@ -30,5 +30,19 @@
                 @endif
             </div>
         </div>
+
+        <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
+            <div class="text-center">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    🔄 Réinitialiser les étiquettes imprimées
+                </h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-4">
+                    Réinitialiser tous les enfants marqués comme "Imprimés" vers le statut "Validé"
+                </p>
+                <button wire:click="resetPrintedLabels" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold">
+                    🔄 Réinitialiser
+                </button>
+            </div>
+        </div>
     @endif
 </div>
