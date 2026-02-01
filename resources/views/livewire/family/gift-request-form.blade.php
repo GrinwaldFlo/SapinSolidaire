@@ -205,6 +205,27 @@
                                 </div>
 
                                 <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Genre *</label>
+                                    <select wire:model="children.{{ $index }}.gender" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white" {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
+                                        <option value="unspecified">Non précisé</option>
+                                        <option value="boy">Garçon</option>
+                                        <option value="girl">Fille</option>
+                                    </select>
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" wire:model="children.{{ $index }}.anonymous" class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 dark:border-zinc-600 dark:bg-zinc-700" {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
+                                        <span class="text-sm text-gray-700 dark:text-gray-300">
+                                            Anonyme (le prénom ne sera pas affiché sur l'étiquette du cadeau)
+                                        </span>
+                                    </label>
+                                    <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
+                                        Si coché, la personne qui achètera le cadeau ne verra pas le prénom de l'enfant.
+                                    </p>
+                                </div>
+
+                                <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Année de naissance *</label>
                                     <input type="number" wire:model="children.{{ $index }}.birth_year" min="2000" max="{{ date('Y') }}" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white" {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
                                     @error("children.{$index}.birth_year") <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror

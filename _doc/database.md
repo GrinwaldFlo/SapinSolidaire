@@ -172,6 +172,8 @@ Child gift requests linked to a family and season.
 | `id` | BIGINT UNSIGNED | PK, AUTO_INCREMENT | Primary key |
 | `gift_request_id` | BIGINT UNSIGNED | FK → gift_requests.id, NOT NULL | Reference to gift request |
 | `first_name` | VARCHAR(255) | NOT NULL | Child's first name |
+| `gender` | ENUM | NOT NULL, DEFAULT 'unspecified' | Child's gender |
+| `anonymous` | BOOLEAN | NOT NULL, DEFAULT FALSE | Hide first name on labels |
 | `birth_year` | SMALLINT UNSIGNED | NOT NULL | Year of birth |
 | `height` | SMALLINT UNSIGNED | NULLABLE | Height in cm |
 | `gift` | VARCHAR(255) | NOT NULL | Requested gift |
@@ -184,6 +186,15 @@ Child gift requests linked to a family and season.
 | `confirmation_email_sent_at` | TIMESTAMP | NULLABLE | Last confirmation email date |
 | `created_at` | TIMESTAMP | NULLABLE | Creation timestamp |
 | `updated_at` | TIMESTAMP | NULLABLE | Update timestamp |
+
+**Gender values:**
+- `boy` (Garçon)
+- `girl` (Fille)
+- `unspecified` (Non précisé)
+
+**Anonymous field:**
+- When `anonymous` is TRUE, the child's first name will not be displayed on generated labels
+- Families should be informed that checking this option means the gift purchaser will not see the child's first name
 
 **Status values:**
 - `pending` (À valider)

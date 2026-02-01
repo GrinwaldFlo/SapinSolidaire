@@ -52,7 +52,16 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <span class="text-sm text-gray-500 dark:text-gray-400">Prénom</span>
-                                <p class="font-medium text-gray-900 dark:text-white">{{ $selectedChild->first_name }}</p>
+                                <p class="font-medium text-gray-900 dark:text-white">
+                                    {{ $selectedChild->first_name }}
+                                    @if($selectedChild->anonymous)
+                                        <span class="ml-1 text-xs text-orange-600 dark:text-orange-400">(Anonyme)</span>
+                                    @endif
+                                </p>
+                            </div>
+                            <div>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">Genre</span>
+                                <p class="font-medium text-gray-900 dark:text-white">{{ $selectedChild->gender_label }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500 dark:text-gray-400">Âge</span>

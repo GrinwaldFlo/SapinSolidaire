@@ -19,12 +19,18 @@ class Child extends Model
     public const STATUS_RECEIVED = 'received';
     public const STATUS_GIVEN = 'given';
 
+    public const GENDER_BOY = 'boy';
+    public const GENDER_GIRL = 'girl';
+    public const GENDER_UNSPECIFIED = 'unspecified';
+
     /**
      * @var array<int, string>
      */
     protected $fillable = [
         'gift_request_id',
         'first_name',
+        'gender',
+        'anonymous',
         'birth_year',
         'height',
         'gift',
@@ -43,6 +49,7 @@ class Child extends Model
     protected $casts = [
         'birth_year' => 'integer',
         'height' => 'integer',
+        'anonymous' => 'boolean',
         'status_changed_at' => 'datetime',
         'validated_at' => 'datetime',
         'confirmation_email_sent_at' => 'datetime',
@@ -153,6 +160,19 @@ class Child extends Model
             self::STATUS_RECEIVED => 'Reçu',
             self::STATUS_GIVEN => 'Donné',
             default => $this->status,
+        };
+    }
+
+    /**
+     * Get gender label in French.
+     */
+    public function getGenderLabelAttribute(): string
+    {
+        return match ($this->gender) {
+            self::GENDER_BOY => 'Garçon',
+            self::GENDER_GIRL => 'Fille',
+            self::GENDER_UNSPECIFIED => 'Non précisé',
+            default => 'Non précisé',
         };
     }
 }

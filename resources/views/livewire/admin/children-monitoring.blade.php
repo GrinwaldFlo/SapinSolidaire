@@ -32,6 +32,7 @@
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Code</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Prénom</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Genre</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Âge</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Cadeau</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Famille</th>
@@ -42,7 +43,15 @@
                     @forelse($children as $child)
                         <tr>
                             <td class="px-6 py-4 font-mono font-bold text-gray-900 dark:text-white">{{ $child->code }}</td>
-                            <td class="px-6 py-4 text-gray-900 dark:text-white">{{ $child->first_name }}</td>
+                            <td class="px-6 py-4 text-gray-900 dark:text-white">
+                                {{ $child->first_name }}
+                                @if($child->anonymous)
+                                    <span class="ml-1 text-xs text-orange-600 dark:text-orange-400">(A)</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 text-gray-600 dark:text-gray-300">
+                                @if($child->gender !== 'unspecified') {{ $child->gender_label }} @else - @endif
+                            </td>
                             <td class="px-6 py-4 text-gray-600 dark:text-gray-300">{{ $child->age }} ans</td>
                             <td class="px-6 py-4 text-gray-600 dark:text-gray-300">{{ $child->gift }}</td>
                             <td class="px-6 py-4 text-gray-600 dark:text-gray-300">{{ $child->giftRequest->family->last_name }}</td>
@@ -64,7 +73,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Aucun enfant trouvé</td>
+                            <td colspan="7" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Aucun enfant trouvé</td>
                         </tr>
                     @endforelse
                 </tbody>

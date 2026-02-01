@@ -128,6 +128,8 @@ class GiftRequestForm extends Component
             $this->children[] = [
                 'id' => $child->id,
                 'first_name' => $child->first_name,
+                'gender' => $child->gender,
+                'anonymous' => $child->anonymous,
                 'birth_year' => $child->birth_year,
                 'height' => $child->height,
                 'gift' => $child->gift,
@@ -163,6 +165,8 @@ class GiftRequestForm extends Component
         $this->children[] = [
             'id' => null,
             'first_name' => '',
+            'gender' => 'unspecified',
+            'anonymous' => false,
             'birth_year' => '',
             'height' => '',
             'gift' => '',
@@ -304,6 +308,8 @@ class GiftRequestForm extends Component
                     // Update existing child
                     $childRecord->update([
                         'first_name' => $childData['first_name'],
+                        'gender' => $childData['gender'] ?? 'unspecified',
+                        'anonymous' => $childData['anonymous'] ?? false,
                         'birth_year' => $childData['birth_year'],
                         'height' => $childData['height'] ?: null,
                         'gift' => $childData['gift'],
@@ -317,6 +323,8 @@ class GiftRequestForm extends Component
                     $newChild = Child::create([
                         'gift_request_id' => $this->giftRequest->id,
                         'first_name' => $childData['first_name'],
+                        'gender' => $childData['gender'] ?? 'unspecified',
+                        'anonymous' => $childData['anonymous'] ?? false,
                         'birth_year' => $childData['birth_year'],
                         'height' => $childData['height'] ?: null,
                         'gift' => $childData['gift'],

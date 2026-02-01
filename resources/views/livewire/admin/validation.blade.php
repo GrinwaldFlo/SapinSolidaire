@@ -71,6 +71,13 @@
                             <div>
                                 <span class="text-sm text-gray-500 dark:text-gray-400">Prénom :</span>
                                 <span class="ml-2 text-gray-900 dark:text-white font-medium">{{ $child->first_name }}</span>
+                                @if($child->anonymous)
+                                    <span class="ml-2 text-xs text-orange-600 dark:text-orange-400">(Anonyme)</span>
+                                @endif
+                            </div>
+                            <div>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">Genre :</span>
+                                <span class="ml-2 text-gray-900 dark:text-white">{{ $child->gender_label }}</span>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500 dark:text-gray-400">Âge :</span>
