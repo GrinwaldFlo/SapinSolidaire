@@ -68,6 +68,24 @@ class LabelGeneration extends Component
         );
     }
 
+    public function resetPrintedLabels(): void
+    {
+        if (! $this->activeSeason) {
+            return;
+        }
+
+        Child::whereHas('giftRequest', function ($q) {
+                $q->where('season_id', $this->activeSeason->id);
+            })
+            ->where('status', Child::STATUS_PRINTED)
+            ->get()
+            ->each(fn ($child) => $child->setStatus(Child::STATUS_VALIDATED));
+
+        $this->loadCount();
+
+        session()->flash('message', 'Étiquettes réinitialisées avec succès.');
+    }
+
     public function render()
     {
         return view('livewire.admin.label-generation');
