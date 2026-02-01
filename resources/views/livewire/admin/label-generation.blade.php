@@ -39,7 +39,10 @@
                 <p class="text-gray-600 dark:text-gray-400 mb-4">
                     Réinitialiser tous les enfants marqués comme "Imprimés" vers le statut "Validé"
                 </p>
-                <button wire:click="resetPrintedLabels" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold">
+                <button
+                    wire:click="resetPrintedLabels"
+                    onclick="confirm('Êtes-vous sûr de vouloir réinitialiser toutes les étiquettes imprimées vers le statut « Validé » ? Cette action peut annuler du travail déjà effectué.') || event.stopImmediatePropagation()"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold">
                     🔄 Réinitialiser
                 </button>
             </div>
