@@ -8,7 +8,7 @@
             margin: 10mm;
         }
         body {
-            font-family: Arial, sans-serif;
+            font-family: "DejaVu Sans", Arial, sans-serif;
             margin: 0;
             padding: 0;
         }
@@ -19,19 +19,20 @@
             display: table;
             width: 100%;
             table-layout: fixed;
+            page-break-inside: avoid;
         }
         .label {
             display: table-cell;
             width: 50%;
-            height: 67mm;
+            height: 57mm;
             padding: 5mm;
             vertical-align: top;
             border: 1px dashed #ccc;
             box-sizing: border-box;
+            page-break-inside: avoid;
         }
         .label-content {
-            height: 100%;
-            position: relative;
+            width: 100%;
         }
         .label-code {
             text-align: center;
@@ -39,9 +40,8 @@
             font-weight: bold;
             font-family: monospace;
             color: #2d5a27;
-            margin-bottom: 3mm;
+            margin: 0 0 3mm 0;
             letter-spacing: 3mm;
-            margin: 0;
         }
         .label-name {
             text-align: center;
