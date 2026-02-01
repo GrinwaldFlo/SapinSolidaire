@@ -74,8 +74,7 @@ class LabelGeneration extends Component
             return;
         }
 
-        Child::with('giftRequest')
-            ->whereHas('giftRequest', function ($q) {
+        Child::whereHas('giftRequest', function ($q) {
                 $q->where('season_id', $this->activeSeason->id);
             })
             ->where('status', Child::STATUS_PRINTED)
