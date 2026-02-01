@@ -82,6 +82,8 @@ class LabelGeneration extends Component
             ->each(fn ($child) => $child->setStatus(Child::STATUS_VALIDATED));
 
         $this->loadCount();
+
+        session()->flash('message', 'Étiquettes réinitialisées avec succès.');
     }
 
     public function render()
