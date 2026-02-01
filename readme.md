@@ -16,6 +16,14 @@ Instead of `composer run dev`, you can run these in separate terminals:
 - `php artisan queue:work` - Process email queue
 - `npm run dev` - Vite asset bundler
 
+# For development
+
+
+
+# For production
+
+`npm run build`
+
 
 ## Use PHP 8.4
 

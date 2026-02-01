@@ -85,13 +85,13 @@
                             <div class="label-code">{{ $child->code }}</div>
                             <div class="label-name">{{ $child->anonymous ? '***' : $child->first_name }}</div>
                             <div class="label-age">{{ $child->age }} ans @if($child->gender !== 'unspecified') ({{ $child->gender_label }}) @endif</div>
-                            <div class="label-gift">🎁 {{ $child->gift }}</div>
+                            <div class="label-gift">{{ $child->gift }}</div>
                             <div class="label-details">
                                 @if($child->height)
-                                    <span class="label-detail-item">📏 {{ $child->height }} cm</span>
+                                    <span class="label-detail-item">Taille: {{ $child->height }} cm</span>
                                 @endif
                                 @if($child->shoe_size)
-                                    <span class="label-detail-item">👟 {{ $child->shoe_size }}</span>
+                                    <span class="label-detail-item">Pointure: {{ $child->shoe_size }}</span>
                                 @endif
                             </div>
                         </div>
