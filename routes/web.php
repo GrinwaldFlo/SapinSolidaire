@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Route;
 
 // Family routes (public)
 Route::get('/', Home::class)->name('home');
-Route::get('/cadeau/{token}/{email}', GiftRequestForm::class)->name('gift.form');
+Route::get('/cadeau/{token}', GiftRequestForm::class)->name('gift.form');
 
 // Admin routes
 Route::prefix('admin')->middleware(['auth'])->group(function () {

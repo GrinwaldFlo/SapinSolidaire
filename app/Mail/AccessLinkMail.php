@@ -43,7 +43,7 @@ class AccessLinkMail extends Mailable implements ShouldQueue
         return new Content(
             view: 'emails.access-link',
             with: [
-                'accessUrl' => url("/cadeau/{$this->token}/{$this->email}"),
+                'accessUrl' => url("/cadeau/{$this->token}"),
                 'siteName' => Setting::getSiteName(),
             ],
         );
