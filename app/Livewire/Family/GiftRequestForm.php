@@ -20,7 +20,7 @@ class GiftRequestForm extends Component
 {
     // Token and email
     public string $token;
-    public string $email;
+    public string $email = '';
 
     // States
     public int $step = 1; // 1: eligibility, 2: form
@@ -53,70 +53,80 @@ class GiftRequestForm extends Component
     public array $allowedPostalCodes = [];
     public array $giftSuggestions = [];
 
-    public function mount(string $token, string $email): void
+    public function mount(string $token): void
     {
-        $this->token = $token;
-        $this->email = $email;
+        try {
+            $this->token = $token;
 
-        // Validate token
-        $emailToken = EmailToken::findValidToken($token);
-        if (! $emailToken || $emailToken->email !== $email) {
-            $this->tokenValid = false;
+            // Validate token and retrieve email
+            $emailToken = EmailToken::findValidToken($token);
+            if (! $emailToken) {
+                $this->tokenValid = false;
 
-            return;
-        }
-
-        $this->tokenValid = true;
-
-        // Check active season
-        $seasonService = app(SeasonService::class);
-        $status = $seasonService->getCurrentStatus();
-
-        if ($status['status'] !== 'active') {
-            $this->tokenValid = false;
-
-            return;
-        }
-
-        $this->season = $status['season'];
-
-        // Load settings
-        $this->maxConsecutiveYears = Setting::getMaxConsecutiveYears();
-        $this->allowedPostalCodes = Setting::getAllowedPostalCodes();
-        $this->giftSuggestions = Setting::getGiftSuggestions();
-
-        // Check if family exists
-        $this->family = Family::where('email', $email)->first();
-
-        if ($this->family) {
-            // Load family data
-            $this->firstName = $this->family->first_name ?? '';
-            $this->lastName = $this->family->last_name ?? '';
-            $this->address = $this->family->address ?? '';
-            $this->postalCode = $this->family->postal_code ?? '';
-            $this->city = $this->family->city ?? '';
-            $this->phone = $this->family->phone ?? '';
-
-            // Check for existing request this season
-            $this->giftRequest = $this->family->getRequestForSeason($this->season);
-
-            if ($this->giftRequest) {
-                $this->isModifying = true;
-                $this->canModify = $this->season->canModify();
-
-                // Load children for this request
-                $this->loadChildrenFromRequest();
-
-                // Skip eligibility if already accepted
-                $this->step = 2;
-                $this->consecutiveYearsAccepted = true;
-                $this->postalCodeAccepted = true;
+                return;
             }
-        }
 
-        // Initialize one child if none exist
-        if (empty($this->children)) {
-            $this->addChild();
+            $this->email = $emailToken->email;
+
+            $this->tokenValid = true;
+
+            // Check active season
+            $seasonService = app(SeasonService::class);
+            $status = $seasonService->getCurrentStatus();
+
+            if ($status['status'] !== 'active') {
+                $this->tokenValid = false;
+
+                return;
+            }
+
+            $this->season = $status['season'];
+
+            // Load settings
+            $this->maxConsecutiveYears = Setting::getMaxConsecutiveYears();
+            $this->allowedPostalCodes = Setting::getAllowedPostalCodes();
+            $this->giftSuggestions = Setting::getGiftSuggestions();
+
+            // Check if family exists
+            $this->family = Family::where('email', $this->email)->first();
+
+            if ($this->family) {
+                // Load family data
+                $this->firstName = $this->family->first_name ?? '';
+                $this->lastName = $this->family->last_name ?? '';
+                $this->address = $this->family->address ?? '';
+                $this->postalCode = $this->family->postal_code ?? '';
+                $this->city = $this->family->city ?? '';
+                $this->phone = $this->family->phone ?? '';
+
+                // Check for existing request this season
+                $this->giftRequest = $this->family->getRequestForSeason($this->season);
+
+                if ($this->giftRequest) {
+                    $this->isModifying = true;
+                    $this->canModify = $this->season->canModify();
+
+                    // Load children for this request
+                    $this->loadChildrenFromRequest();
+
+                    // Skip eligibility if already accepted
+                    $this->step = 2;
+                    $this->consecutiveYearsAccepted = true;
+                    $this->postalCodeAccepted = true;
+                }
+            }
+
+            // Initialize one child if none exist
+            if (empty($this->children)) {
+                $this->addChild();
+            }
+        } catch (\Throwable $e) {
+            // Log the error but don't throw it - let the component render with tokenValid=false
+            \Illuminate\Support\Facades\Log::error('GiftRequestForm mount error: '.$e->getMessage(), [
+                'token' => $token,
+                'exception' => $e,
+            ]);
+            $this->tokenValid = false;
         }
     }
 

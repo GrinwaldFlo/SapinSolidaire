@@ -135,6 +135,28 @@ class DevTools extends Component
         $this->flash("{$familiesValidated} famille(s) et {$childrenValidated} enfant(s) validé(s).", 'success');
     }
 
+    public function batchReceive(): void
+    {
+        if (! $this->activeSeason) {
+            $this->flash('Aucune saison active.', 'error');
+
+            return;
+        }
+
+        $childrenReceived = Child::whereHas('giftRequest', function ($q) {
+            $q->where('season_id', $this->activeSeason->id);
+        })->where('status', Child::STATUS_PRINTED)->count();
+
+        Child::whereHas('giftRequest', function ($q) {
+            $q->where('season_id', $this->activeSeason->id);
+        })->where('status', Child::STATUS_PRINTED)->update([
+            'status' => Child::STATUS_RECEIVED,
+            'status_changed_at' => now(),
+        ]);
+
+        $this->flash("{$childrenReceived} cadeau(x) marqué(s) comme reçu(s).", 'success');
+    }
+
     protected function flash(string $message, string $type): void
     {
         $this->flashMessage = $message;
@@ -152,6 +174,8 @@ class DevTools extends Component
                 'totalChildren' => Child::whereHas('giftRequest', fn ($q) => $q->where('season_id', $this->activeSeason->id))->count(),
                 'pendingChildren' => Child::whereHas('giftRequest', fn ($q) => $q->where('season_id', $this->activeSeason->id))
                     ->where('status', Child::STATUS_PENDING)->count(),
+                'printedChildren' => Child::whereHas('giftRequest', fn ($q) => $q->where('season_id', $this->activeSeason->id))
+                    ->where('status', Child::STATUS_PRINTED)->count(),
             ];
         }
 

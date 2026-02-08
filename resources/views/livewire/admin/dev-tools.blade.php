@@ -39,6 +39,10 @@
                 <div class="text-sm text-gray-500 dark:text-gray-400">Enfants en attente</div>
                 <div class="text-2xl font-bold text-yellow-600">{{ $stats['pendingChildren'] ?? 0 }}</div>
             </div>
+            <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-4">
+                <div class="text-sm text-gray-500 dark:text-gray-400">Enfants imprimés</div>
+                <div class="text-2xl font-bold text-purple-600">{{ $stats['printedChildren'] ?? 0 }}</div>
+            </div>
         </div>
 
         {{-- Seed Families --}}
@@ -75,6 +79,20 @@
                 wire:confirm="Voulez-vous vraiment valider toutes les familles et enfants en attente ?">
                 <span wire:loading.remove wire:target="batchValidate">✓ Tout valider</span>
                 <span wire:loading wire:target="batchValidate">Validation...</span>
+            </button>
+        </div>
+
+        {{-- Batch Receive --}}
+        <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Réception en masse</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                Marque tous les cadeaux imprimés comme reçus pour la saison active.
+            </p>
+            <button wire:click="batchReceive" wire:loading.attr="disabled"
+                class="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm"
+                wire:confirm="Voulez-vous vraiment marquer tous les cadeaux imprimés comme reçus ?">
+                <span wire:loading.remove wire:target="batchReceive">📦 Tout marquer reçu</span>
+                <span wire:loading wire:target="batchReceive">Réception...</span>
             </button>
         </div>
     @endif
