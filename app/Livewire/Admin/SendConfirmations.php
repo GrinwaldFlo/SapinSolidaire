@@ -35,11 +35,12 @@ class SendConfirmations extends Component
         }
 
         $service = app(SlotAssignmentService::class);
+        $summary = $service->getSummary($this->activeSeason);
 
         $this->familyCount = $this->getReceivedFamiliesQuery()->count();
-        $this->totalCapacity = $service->getTotalCapacity($this->activeSeason);
-        $this->familiesNeeded = $service->getFamiliesNeedingSlots($this->activeSeason);
-        $this->hasEnoughSlots = $service->hasEnoughSlots($this->activeSeason);
+        $this->totalCapacity = $summary['total_capacity'];
+        $this->familiesNeeded = $summary['families_needed'];
+        $this->hasEnoughSlots = $summary['has_enough'];
     }
 
     protected function autoAssignSlots(): void
@@ -144,19 +145,25 @@ class SendConfirmations extends Component
 
         if ($this->activeSeason) {
             $families = $this->getReceivedFamiliesQuery()
-                ->with(['family', 'children' => function ($q) {
+                ->with(['family' => function ($q) {
+                    $q->select('id', 'first_name', 'last_name', 'email');
+                }])
+                ->withCount(['children as received_children_count' => function ($q) {
                     $q->where('status', Child::STATUS_RECEIVED);
                 }])
+                ->withMax(['children as last_confirmation_email' => function ($q) {
+                    $q->where('status', Child::STATUS_RECEIVED);
+                }], 'confirmation_email_sent_at')
                 ->get()
                 ->map(function (GiftRequest $request) {
                     return [
                         'family_name' => $request->family->full_name,
                         'family_email' => $request->family->email,
-                        'children_count' => $request->children->count(),
+                        'children_count' => $request->received_children_count,
                         'slot_date' => $request->slot_start_datetime?->format('d/m/Y'),
                         'slot_start' => $request->slot_start_datetime?->format('H:i'),
                         'slot_end' => $request->slot_end_datetime?->format('H:i'),
-                        'last_email' => $request->children->max('confirmation_email_sent_at'),
+                        'last_email' => $request->last_confirmation_email,
                     ];
                 });
         }

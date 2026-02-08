@@ -3,45 +3,76 @@
 namespace App\Services;
 
 use App\Models\GiftRequest;
-use App\Models\PickupSlot;
 use App\Models\Season;
-use Carbon\Carbon;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class SlotAssignmentService
 {
     /**
      * Assign pickup slots to families that don't have one yet.
+     * Iterates through sub-slots lazily using integer timestamps — no
+     * Carbon objects or arrays are built for the full slot grid.
      *
      * @return int Number of families assigned
      */
     public function assignUnassigned(Season $season): int
     {
-        $subSlots = $this->buildSubSlots($season);
+        $duration = $season->slot_duration_minutes ?? 0;
+        $limit = $season->family_limit_per_slot ?? 0;
 
-        if (empty($subSlots)) {
+        if ($duration <= 0 || $limit <= 0) {
             return 0;
         }
 
-        $unassigned = $this->getUnassignedRequests($season);
+        $windows = $season->pickupSlots()
+            ->orderBy('start_datetime')
+            ->get(['id', 'start_datetime', 'end_datetime']);
+
+        if ($windows->isEmpty()) {
+            return 0;
+        }
+
+        // Count map: how many families already occupy each sub-slot
+        $countMap = $this->getCountMap($season);
+
+        // Lazy cursor — one model in memory at a time
+        $cursor = $this->getUnassignedRequests($season)->getIterator();
+
+        if (! $cursor->valid()) {
+            return 0;
+        }
+
+        $durationSec = $duration * 60;
         $assigned = 0;
-        $limit = $season->family_limit_per_slot ?? 0;
 
-        foreach ($unassigned as $request) {
-            $index = $this->findAvailableSubSlotIndex($subSlots, $limit);
+        foreach ($windows as $window) {
+            $start = $window->start_datetime->getTimestamp();
+            $end = $window->end_datetime->getTimestamp();
 
-            if ($index === null) {
-                break;
+            for ($t = $start; ($t + $durationSec) <= $end; $t += $durationSec) {
+                $slotStart = date('Y-m-d H:i:s', $t);
+                $slotEnd = date('Y-m-d H:i:s', $t + $durationSec);
+                $key = $slotStart . '|' . $slotEnd;
+
+                $current = $countMap[$key] ?? 0;
+
+                // Fill this sub-slot up to the limit
+                while ($current < $limit && $cursor->valid()) {
+                    $request = $cursor->current();
+                    $request->update([
+                        'pickup_slot_id' => $window->id,
+                        'slot_start_datetime' => $slotStart,
+                        'slot_end_datetime' => $slotEnd,
+                    ]);
+                    $current++;
+                    $assigned++;
+                    $cursor->next();
+                }
+
+                if (! $cursor->valid()) {
+                    return $assigned;
+                }
             }
-
-            $request->update([
-                'pickup_slot_id' => $subSlots[$index]['pickup_slot_id'],
-                'slot_start_datetime' => $subSlots[$index]['start'],
-                'slot_end_datetime' => $subSlots[$index]['end'],
-            ]);
-
-            $subSlots[$index]['count']++;
-            $assigned++;
         }
 
         return $assigned;
@@ -54,7 +85,6 @@ class SlotAssignmentService
      */
     public function recalculateAll(Season $season): int
     {
-        // Clear all assignments
         GiftRequest::where('season_id', $season->id)
             ->where(function ($q) {
                 $q->whereNotNull('pickup_slot_id')
@@ -70,19 +100,46 @@ class SlotAssignmentService
     }
 
     /**
-     * Get the total slot capacity for a season.
+     * Get summary data for a season (capacity, needed, enough).
+     *
+     * @return array{total_capacity: int, families_needed: int, has_enough: bool}
+     */
+    public function getSummary(Season $season): array
+    {
+        $capacity = $this->getTotalCapacity($season);
+        $needed = $this->getFamiliesNeedingSlots($season);
+
+        return [
+            'total_capacity' => $capacity,
+            'families_needed' => $needed,
+            'has_enough' => $capacity >= $needed,
+        ];
+    }
+
+    /**
+     * Get the total slot capacity for a season computed mathematically.
      */
     public function getTotalCapacity(Season $season): int
     {
         $limit = $season->family_limit_per_slot ?? 0;
+        $duration = $season->slot_duration_minutes ?? 0;
 
-        if ($limit === 0) {
+        if ($limit === 0 || $duration === 0) {
             return 0;
         }
 
-        $subSlots = $this->buildSubSlots($season);
+        $totalSubSlots = 0;
 
-        return count($subSlots) * $limit;
+        $windows = $season->pickupSlots()
+            ->orderBy('start_datetime')
+            ->get(['id', 'start_datetime', 'end_datetime']);
+
+        foreach ($windows as $window) {
+            $windowSeconds = $window->end_datetime->getTimestamp() - $window->start_datetime->getTimestamp();
+            $totalSubSlots += (int) floor($windowSeconds / ($duration * 60));
+        }
+
+        return $totalSubSlots * $limit;
     }
 
     /**
@@ -98,102 +155,30 @@ class SlotAssignmentService
     }
 
     /**
-     * Check if there are enough slots for all families.
+     * Build a lookup map of existing slot assignments using a DB aggregate.
+     * Returns ["Y-m-d H:i:s|Y-m-d H:i:s" => count].
      */
-    public function hasEnoughSlots(Season $season): bool
+    protected function getCountMap(Season $season): array
     {
-        $needed = $this->getFamiliesNeedingSlots($season);
-        $capacity = $this->getTotalCapacity($season);
-
-        return $capacity >= $needed;
-    }
-
-    /**
-     * Build all sub-slots by subdividing each pickup window into
-     * chunks of slot_duration_minutes, with current assignment counts.
-     *
-     * @return array<int, array{pickup_slot_id: int, start: Carbon, end: Carbon, count: int}>
-     */
-    protected function buildSubSlots(Season $season): array
-    {
-        $duration = $season->slot_duration_minutes;
-
-        if (! $duration || $duration <= 0) {
-            return [];
-        }
-
-        $windows = $season->pickupSlots()
-            ->orderBy('start_datetime')
-            ->get();
-
-        if ($windows->isEmpty()) {
-            return [];
-        }
-
-        // Get all assigned requests to count per sub-slot
-        $assignedRequests = GiftRequest::where('season_id', $season->id)
+        return DB::table('gift_requests')
+            ->where('season_id', $season->id)
             ->whereNotNull('slot_start_datetime')
-            ->get(['slot_start_datetime', 'slot_end_datetime']);
-
-        $subSlots = [];
-
-        foreach ($windows as $window) {
-            $cursor = $window->start_datetime->copy();
-            $windowEnd = $window->end_datetime->copy();
-
-            while ($cursor->copy()->addMinutes($duration)->lte($windowEnd)) {
-                $slotStart = $cursor->copy();
-                $slotEnd = $cursor->copy()->addMinutes($duration);
-
-                // Count how many families are already assigned to this sub-slot
-                $count = $assignedRequests->filter(function ($req) use ($slotStart, $slotEnd) {
-                    return $req->slot_start_datetime->eq($slotStart)
-                        && $req->slot_end_datetime->eq($slotEnd);
-                })->count();
-
-                $subSlots[] = [
-                    'pickup_slot_id' => $window->id,
-                    'start' => $slotStart,
-                    'end' => $slotEnd,
-                    'count' => $count,
-                ];
-
-                $cursor->addMinutes($duration);
-            }
-        }
-
-        return $subSlots;
+            ->groupBy('slot_start_datetime', 'slot_end_datetime')
+            ->selectRaw('CONCAT(slot_start_datetime, "|", slot_end_datetime) as slot_key, COUNT(*) as cnt')
+            ->pluck('cnt', 'slot_key')
+            ->toArray();
     }
 
     /**
-     * Get unassigned gift requests with received children.
+     * Get unassigned gift requests with received children (lazy cursor).
      */
-    protected function getUnassignedRequests(Season $season): Collection
+    protected function getUnassignedRequests(Season $season): \Illuminate\Support\LazyCollection
     {
         return GiftRequest::where('season_id', $season->id)
             ->whereNull('slot_start_datetime')
             ->whereHas('children', function ($q) {
                 $q->where('status', 'received');
             })
-            ->with('family')
-            ->get();
-    }
-
-    /**
-     * Find the first available sub-slot index that is not full.
-     */
-    protected function findAvailableSubSlotIndex(array $subSlots, int $limit): ?int
-    {
-        if ($limit <= 0) {
-            return null;
-        }
-
-        foreach ($subSlots as $index => $slot) {
-            if ($slot['count'] < $limit) {
-                return $index;
-            }
-        }
-
-        return null;
+            ->cursor();
     }
 }
