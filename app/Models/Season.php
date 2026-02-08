@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Season extends Model
 {
@@ -20,6 +21,11 @@ class Season extends Model
         'modification_deadline',
         'pickup_start_date',
         'pickup_address',
+        'family_limit_per_slot',
+        'slot_duration_minutes',
+        'responsible_name',
+        'responsible_phone',
+        'responsible_email',
     ];
 
     /**
@@ -30,6 +36,8 @@ class Season extends Model
         'end_date' => 'date',
         'modification_deadline' => 'date',
         'pickup_start_date' => 'date',
+        'family_limit_per_slot' => 'integer',
+        'slot_duration_minutes' => 'integer',
     ];
 
     /**
@@ -38,6 +46,14 @@ class Season extends Model
     public function giftRequests(): HasMany
     {
         return $this->hasMany(GiftRequest::class);
+    }
+
+    /**
+     * Get pickup slots for this season.
+     */
+    public function pickupSlots(): HasMany
+    {
+        return $this->hasMany(PickupSlot::class);
     }
 
     /**

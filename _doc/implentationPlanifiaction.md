@@ -65,3 +65,4 @@ Dans la page `/admin/confirmations`
 - En tout temps, afficher la liste des familles avec le nombre d'enfant, la date de récéption, l'heure de début et de fin de créneau.
 - Ajouter un bouton pour recalculer tous le créneaux (avec confirmation).
 - Ajouter un bouton qui permet de prévisualiser l'email qui va être envoyé.
+- Mettre un avertissement s'il n'y a pas assez de créneaux

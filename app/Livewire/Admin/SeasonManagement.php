@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\PickupSlot;
 use App\Models\Season;
 use App\Services\SeasonService;
 use Livewire\Component;
@@ -20,6 +21,14 @@ class SeasonManagement extends Component
     public ?string $modificationDeadline = null;
     public ?string $pickupStartDate = null;
     public ?string $pickupAddress = null;
+    public ?int $familyLimitPerSlot = null;
+    public ?int $slotDurationMinutes = null;
+    public ?string $responsibleName = null;
+    public ?string $responsiblePhone = null;
+    public ?string $responsibleEmail = null;
+
+    // Pickup slot entries
+    public array $pickupEntries = [];
 
     protected function rules(): array
     {
@@ -30,6 +39,13 @@ class SeasonManagement extends Component
             'modificationDeadline' => ['nullable', 'date'],
             'pickupStartDate' => ['nullable', 'date'],
             'pickupAddress' => ['nullable', 'string'],
+            'familyLimitPerSlot' => ['nullable', 'integer', 'min:1'],
+            'slotDurationMinutes' => ['nullable', 'integer', 'min:5'],
+            'responsibleName' => ['nullable', 'string', 'max:255'],
+            'responsiblePhone' => ['nullable', 'string', 'max:20'],
+            'responsibleEmail' => ['nullable', 'email', 'max:255'],
+            'pickupEntries.*.start_datetime' => ['required', 'date'],
+            'pickupEntries.*.end_datetime' => ['required', 'date', 'after:pickupEntries.*.start_datetime'],
         ];
     }
 
@@ -60,6 +76,22 @@ class SeasonManagement extends Component
         $this->modificationDeadline = $season->modification_deadline?->format('Y-m-d');
         $this->pickupStartDate = $season->pickup_start_date?->format('Y-m-d');
         $this->pickupAddress = $season->pickup_address;
+        $this->familyLimitPerSlot = $season->family_limit_per_slot;
+        $this->slotDurationMinutes = $season->slot_duration_minutes;
+        $this->responsibleName = $season->responsible_name;
+        $this->responsiblePhone = $season->responsible_phone;
+        $this->responsibleEmail = $season->responsible_email;
+
+        $this->pickupEntries = $season->pickupSlots()
+            ->orderBy('start_datetime')
+            ->get()
+            ->map(fn (PickupSlot $slot) => [
+                'id' => $slot->id,
+                'start_datetime' => $slot->start_datetime->format('Y-m-d\TH:i'),
+                'end_datetime' => $slot->end_datetime->format('Y-m-d\TH:i'),
+            ])
+            ->toArray();
+
         $this->showForm = true;
         $this->editing = true;
     }
@@ -84,13 +116,21 @@ class SeasonManagement extends Component
             'modification_deadline' => $this->modificationDeadline ?: null,
             'pickup_start_date' => $this->pickupStartDate ?: null,
             'pickup_address' => $this->pickupAddress ?: null,
+            'family_limit_per_slot' => $this->familyLimitPerSlot ?: null,
+            'slot_duration_minutes' => $this->slotDurationMinutes ?: null,
+            'responsible_name' => $this->responsibleName ?: null,
+            'responsible_phone' => $this->responsiblePhone ?: null,
+            'responsible_email' => $this->responsibleEmail ?: null,
         ];
 
         if ($this->editing && $this->editingId) {
-            Season::findOrFail($this->editingId)->update($data);
+            $season = Season::findOrFail($this->editingId);
+            $season->update($data);
+            $this->syncPickupEntries($season);
             session()->flash('message', 'Saison mise à jour avec succès.');
         } else {
-            Season::create($data);
+            $season = Season::create($data);
+            $this->syncPickupEntries($season);
             session()->flash('message', 'Saison créée avec succès.');
         }
 
@@ -130,7 +170,61 @@ class SeasonManagement extends Component
         $this->modificationDeadline = null;
         $this->pickupStartDate = null;
         $this->pickupAddress = null;
+        $this->familyLimitPerSlot = null;
+        $this->slotDurationMinutes = null;
+        $this->responsibleName = null;
+        $this->responsiblePhone = null;
+        $this->responsibleEmail = null;
+        $this->pickupEntries = [];
         $this->resetErrorBag();
+    }
+
+    public function addPickupEntry(): void
+    {
+        $this->pickupEntries[] = [
+            'id' => null,
+            'start_datetime' => '',
+            'end_datetime' => '',
+        ];
+    }
+
+    public function removePickupEntry(int $index): void
+    {
+        unset($this->pickupEntries[$index]);
+        $this->pickupEntries = array_values($this->pickupEntries);
+    }
+
+    protected function syncPickupEntries(Season $season): void
+    {
+        $existingIds = $season->pickupSlots()->pluck('id')->toArray();
+        $keepIds = [];
+
+        foreach ($this->pickupEntries as $entry) {
+            if (! empty($entry['start_datetime']) && ! empty($entry['end_datetime'])) {
+                if (! empty($entry['id'])) {
+                    $slot = PickupSlot::find($entry['id']);
+                    if ($slot && $slot->season_id === $season->id) {
+                        $slot->update([
+                            'start_datetime' => $entry['start_datetime'],
+                            'end_datetime' => $entry['end_datetime'],
+                        ]);
+                        $keepIds[] = $slot->id;
+                    }
+                } else {
+                    $slot = $season->pickupSlots()->create([
+                        'start_datetime' => $entry['start_datetime'],
+                        'end_datetime' => $entry['end_datetime'],
+                    ]);
+                    $keepIds[] = $slot->id;
+                }
+            }
+        }
+
+        // Delete entries that were removed
+        $toDelete = array_diff($existingIds, $keepIds);
+        if (! empty($toDelete)) {
+            PickupSlot::whereIn('id', $toDelete)->delete();
+        }
     }
 
     public function render()

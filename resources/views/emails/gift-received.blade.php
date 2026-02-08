@@ -32,19 +32,9 @@
             border-radius: 5px;
             margin: 20px 0;
         }
-        .code {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #2d5a27;
-            background-color: #fff;
-            padding: 10px 20px;
-            border-radius: 5px;
-            display: inline-block;
-            margin: 10px 0;
-        }
-        .address-box {
-            background-color: #fff;
-            border: 1px solid #ddd;
+        .important {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
             padding: 15px;
             border-radius: 5px;
             margin: 20px 0;
@@ -55,6 +45,11 @@
             color: #666;
             font-size: 0.9em;
         }
+        .signature {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
     </style>
 </head>
 <body>
@@ -62,34 +57,37 @@
         <h1>🎄 {{ $siteName }}</h1>
     </div>
     <div class="content">
-        <p>Bonjour,</p>
-        
-        <p>Nous avons le plaisir de vous informer que le cadeau pour <strong>{{ $childName }}</strong> est arrivé !</p>
-        
+        <p>Bonjour {{ $familyName }},</p>
+
+        <p>Vous avez inscrit vos enfants au Sapin solidaire afin qu'ils reçoivent un cadeau de Noël.</p>
+
         <div class="info-box">
-            <strong>Détails :</strong><br>
-            <ul>
-                <li><strong>Prénom :</strong> {{ $childName }}</li>
-                <li><strong>Cadeau :</strong> {{ $gift }}</li>
-                <li><strong>Code de retrait :</strong> <span class="code">{{ $code }}</span></li>
-            </ul>
+            <strong>Les cadeaux sont prêts !</strong>
         </div>
-        
-        @if($pickupDate || $pickupAddress)
-        <p>Vous pouvez venir chercher le cadeau @if($pickupDate)à partir du <strong>{{ $pickupDate }}</strong>@endif à l'adresse suivante :</p>
-        
-        @if($pickupAddress)
-        <div class="address-box">
-            {!! nl2br(e($pickupAddress)) !!}
+
+        @if($slotDate && $slotStartTime && $slotEndTime)
+        <p>Merci de venir chercher vos cadeaux le <strong>{{ $slotDate }}</strong> à la Maison de Paroisse d'Yverdon, rue Pestalozzi 6, entre <strong>{{ $slotStartTime }}</strong> et <strong>{{ $slotEndTime }}</strong>.</p>
+        @endif
+
+        <div class="important">
+            <p>📋 N'oubliez pas de prendre avec vous votre pièce d'identité et celles de vos enfants.</p>
+            <p>🛍️ Pensez également à prendre un grand sac avec vous pour y glisser les cadeaux qui sont parfois volumineux.</p>
         </div>
-        @endif
-        @endif
-        
-        <p><strong>Merci de vous munir du code de retrait lors de votre venue.</strong></p>
-        
-        <p>À bientôt !</p>
-        
-        <p>Cordialement,<br>L'équipe {{ $siteName }}</p>
+
+        <p>Nous nous réjouissons de vous voir !</p>
+
+        <div class="signature">
+            <p>Au nom du comité de Sapin Solidaire</p>
+            @if($responsibleName)
+                <p><strong>{{ $responsibleName }}</strong></p>
+            @endif
+            @if($responsiblePhone)
+                <p>Téléphone : {{ $responsiblePhone }}</p>
+            @endif
+            @if($responsibleEmail)
+                <p>{{ $responsibleEmail }}</p>
+            @endif
+        </div>
     </div>
     <div class="footer">
         <p>Cet e-mail a été envoyé automatiquement. Merci de ne pas y répondre directement.</p>

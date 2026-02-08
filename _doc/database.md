@@ -93,6 +93,11 @@ Gift distribution seasons/campaigns.
 | `modification_deadline` | DATE | NULLABLE | Deadline for family modifications |
 | `pickup_start_date` | DATE | NULLABLE | Date from which gifts can be picked up |
 | `pickup_address` | TEXT | NULLABLE | Address for gift pickup |
+| `family_limit_per_slot` | INT UNSIGNED | NULLABLE | Maximum number of families per pickup slot |
+| `slot_duration_minutes` | INT UNSIGNED | NULLABLE | Duration of each pickup slot in minutes |
+| `responsible_name` | VARCHAR(255) | NULLABLE | Name of the responsible person |
+| `responsible_phone` | VARCHAR(20) | NULLABLE | Phone number of the responsible person |
+| `responsible_email` | VARCHAR(255) | NULLABLE | Email of the responsible person |
 | `created_at` | TIMESTAMP | NULLABLE | Creation timestamp |
 | `updated_at` | TIMESTAMP | NULLABLE | Update timestamp |
 
@@ -106,7 +111,29 @@ Gift distribution seasons/campaigns.
 
 ---
 
-### 5. `families`
+### 5. `pickup_slots`
+
+Pickup time slots for families to collect their gifts.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| `id` | BIGINT UNSIGNED | PK, AUTO_INCREMENT | Primary key |
+| `season_id` | BIGINT UNSIGNED | FK → seasons.id, NOT NULL | Reference to season |
+| `start_datetime` | DATETIME | NOT NULL | Start date/time of the slot |
+| `end_datetime` | DATETIME | NOT NULL | End date/time of the slot |
+| `created_at` | TIMESTAMP | NULLABLE | Creation timestamp |
+| `updated_at` | TIMESTAMP | NULLABLE | Update timestamp |
+
+**Indexes:**
+- PRIMARY (`id`)
+- INDEX (`season_id`)
+
+**Foreign Keys:**
+- `season_id` → `seasons.id` ON DELETE CASCADE
+
+---
+
+### 6. `families`
 
 Family information (persistent across seasons).
 
@@ -129,7 +156,7 @@ Family information (persistent across seasons).
 
 ---
 
-### 6. `gift_requests`
+### 7. `gift_requests`
 
 Family gift requests per season (one per family per season).
 
@@ -141,6 +168,9 @@ Family gift requests per season (one per family per season).
 | `status` | ENUM | NOT NULL, DEFAULT 'pending' | Request status |
 | `status_changed_at` | TIMESTAMP | NULLABLE | Last status change date |
 | `rejection_comment` | TEXT | NULLABLE | Reason for rejection |
+| `pickup_slot_id` | BIGINT UNSIGNED | FK → pickup_slots.id, NULLABLE | Assigned pickup window |
+| `slot_start_datetime` | DATETIME | NULLABLE | Computed sub-slot start time |
+| `slot_end_datetime` | DATETIME | NULLABLE | Computed sub-slot end time |
 | `created_at` | TIMESTAMP | NULLABLE | Creation timestamp |
 | `updated_at` | TIMESTAMP | NULLABLE | Update timestamp |
 
@@ -156,14 +186,16 @@ Family gift requests per season (one per family per season).
 - INDEX (`family_id`)
 - INDEX (`season_id`)
 - INDEX (`status`)
+- INDEX (`pickup_slot_id`)
 
 **Foreign Keys:**
 - `family_id` → `families.id` ON DELETE CASCADE
 - `season_id` → `seasons.id` ON DELETE CASCADE
+- `pickup_slot_id` → `pickup_slots.id` ON DELETE SET NULL
 
 ---
 
-### 7. `children`
+### 8. `children`
 
 Child gift requests linked to a family and season.
 
@@ -217,7 +249,7 @@ Child gift requests linked to a family and season.
 
 ---
 
-### 8. `email_tokens`
+### 9. `email_tokens`
 
 Temporary tokens for family email verification.
 
@@ -238,7 +270,7 @@ Temporary tokens for family email verification.
 
 ---
 
-### 9. `settings`
+### 10. `settings`
 
 Application configuration settings.
 
@@ -264,7 +296,7 @@ Application configuration settings.
 
 ---
 
-### 10. `jobs` (Laravel Queue)
+### 11. `jobs` (Laravel Queue)
 
 Standard Laravel jobs table for email queue.
 
@@ -284,7 +316,7 @@ Standard Laravel jobs table for email queue.
 
 ---
 
-### 11. `failed_jobs` (Laravel Queue)
+### 12. `failed_jobs` (Laravel Queue)
 
 Standard Laravel failed jobs table.
 
@@ -300,7 +332,7 @@ Standard Laravel failed jobs table.
 
 ---
 
-### 12. `job_batches` (Laravel Queue)
+### 13. `job_batches` (Laravel Queue)
 
 Standard Laravel job batches table for batch processing.
 
@@ -322,7 +354,7 @@ Standard Laravel job batches table for batch processing.
 
 ---
 
-### 13. `password_reset_tokens` (Laravel Auth)
+### 14. `password_reset_tokens` (Laravel Auth)
 
 Standard Laravel password reset tokens table.
 
@@ -337,7 +369,7 @@ Standard Laravel password reset tokens table.
 
 ---
 
-### 14. `sessions` (Laravel Session)
+### 15. `sessions` (Laravel Session)
 
 Standard Laravel sessions table for database session driver.
 
@@ -357,7 +389,7 @@ Standard Laravel sessions table for database session driver.
 
 ---
 
-### 15. `cache` (Laravel Cache)
+### 16. `cache` (Laravel Cache)
 
 Standard Laravel cache table for database cache driver.
 
@@ -372,7 +404,7 @@ Standard Laravel cache table for database cache driver.
 
 ---
 
-### 16. `cache_locks` (Laravel Cache)
+### 17. `cache_locks` (Laravel Cache)
 
 Standard Laravel cache locks table for atomic locks.
 
@@ -394,8 +426,10 @@ Standard Laravel cache locks table for atomic locks.
 | `users` | `role_user` | One-to-Many | User can have multiple roles |
 | `roles` | `role_user` | One-to-Many | Role can be assigned to multiple users |
 | `seasons` | `gift_requests` | One-to-Many | Season has many gift requests |
+| `seasons` | `pickup_slots` | One-to-Many | Season has many pickup slots |
 | `families` | `gift_requests` | One-to-Many | Family can request gifts in multiple seasons |
 | `gift_requests` | `children` | One-to-Many | Request contains multiple children |
+| `pickup_slots` | `gift_requests` | One-to-Many | Pickup slot can be assigned to multiple gift requests |
 
 ---
 

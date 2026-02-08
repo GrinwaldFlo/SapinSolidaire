@@ -157,6 +157,12 @@ L'interface permet de créer et modifier les saisons.
 - Date limite de modification (après laquelle les familles ne peuvent plus modifier leur demande)
 - Date depuis laquelle le cadeau peut être cherché
 - Adresse où venir chercher le cadeau
+- Limite de familles par créneau
+- Durée d'un créneau (en minutes)
+- Plages horaires de récupération (multiples entrées avec date/heure de début et fin)
+- Nom du responsable
+- Téléphone du responsable
+- E-mail du responsable
 
 **Règles**
 - Les dates des saisons ne doivent pas se chevaucher
@@ -262,22 +268,38 @@ L'interface affiche une liste complète de tous les enfants pour surveiller leur
 
 **Accessible par** : Organisateur
 
-Cette interface permet de notifier les enfants de la réception de leur cadeau.
+**Page** : `/admin/confirmations`
+
+Cette interface permet de notifier les familles de la réception de leurs cadeaux et de gérer les créneaux de récupération.
+
+**Nouveaux paramètres de saison**
+- Limite de familles par créneau
+- Durée d'un créneau (en minutes)
+- Plages horaires de récupération (multiples entrées avec date/heure de début et date/heure de fin)
+- Nom, téléphone et e-mail du responsable
 
 **Affichage**
-- Liste de tous les enfants avec le statut **Reçu**
+- Liste de toutes les familles ayant des enfants avec le statut **Reçu**
+- Nombre d'enfants par famille
+- Date de récupération et heure de début/fin du créneau assigné
 - Date d'envoi du dernier e-mail de confirmation (si applicable)
+- Avertissement si le nombre de créneaux est insuffisant pour toutes les familles
 
-**Action**
-- Bouton permettant d'envoyer un e-mail à tous les enfants avec le statut **Reçu**
+**Actions**
+- Attribution automatique d'un créneau aux familles qui n'en ont pas (à l'ouverture de la page)
+- Bouton pour recalculer tous les créneaux (avec confirmation)
+- Bouton pour prévisualiser l'e-mail qui sera envoyé
+- Bouton pour envoyer un e-mail à toutes les familles avec des enfants au statut **Reçu**
 - La date et l'heure d'envoi sont enregistrées en base de données
 
 **Contenu de l'email**
-L'email doit contenir les informations suivantes:
+L'email est envoyé par famille (et non par enfant) et contient les informations suivantes :
 
-- Prénom et nom de l'enfant
-- Cadeau qu'il va recevoir
-- Le code à 4 lettres
+- Nom de la famille
+- Date et heure du créneau assigné
+- Adresse de retrait
+- Rappel d'apporter une pièce d'identité et un grand sac
+- Coordonnées du responsable (nom, téléphone, e-mail)
 
 ### Gestion des familles
 
