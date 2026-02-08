@@ -14,6 +14,7 @@
             </flux:sidebar.header>
 
             <flux:sidebar.nav>
+                <x-environment-banner />
                 @can('access-admin')
                 <flux:sidebar.group heading="Gestion" class="grid">
                     <flux:sidebar.item icon="home" :href="route('admin.dashboard')" :current="request()->routeIs('admin.dashboard')" wire:navigate>
