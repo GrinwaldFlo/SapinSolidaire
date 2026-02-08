@@ -2,6 +2,7 @@
 
 use App\Livewire\Admin\ChildrenMonitoring;
 use App\Livewire\Admin\Dashboard;
+use App\Livewire\Admin\DevTools;
 use App\Livewire\Admin\FamilyManagement;
 use App\Livewire\Admin\GiftDelivery;
 use App\Livewire\Admin\GiftReception;
@@ -67,6 +68,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::get('/saisons', SeasonManagement::class)->name('admin.seasons');
         Route::get('/utilisateurs', UserManagement::class)->name('admin.users');
         Route::get('/parametres', SettingsManagement::class)->name('admin.settings');
+        Route::get('/dev-tools', DevTools::class)->name('admin.dev-tools');
     });
 });
 

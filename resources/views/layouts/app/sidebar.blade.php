@@ -36,7 +36,15 @@
                     <flux:sidebar.item icon="inbox" :href="route('admin.reception')" :current="request()->routeIs('admin.reception')" wire:navigate>
                         Réception
                     </flux:sidebar.item>
+                    @endcan
 
+                    @can('organize')
+                    <flux:sidebar.item icon="envelope" :href="route('admin.confirmations')" :current="request()->routeIs('admin.confirmations')" wire:navigate>
+                        Confirmations
+                    </flux:sidebar.item>
+                    @endcan
+
+                    @can('reception')
                     <flux:sidebar.item icon="gift" :href="route('admin.delivery')" :current="request()->routeIs('admin.delivery')" wire:navigate>
                         Remise
                     </flux:sidebar.item>
@@ -45,10 +53,6 @@
                     @can('organize')
                     <flux:sidebar.item icon="users" :href="route('admin.monitoring')" :current="request()->routeIs('admin.monitoring')" wire:navigate>
                         Suivi enfants
-                    </flux:sidebar.item>
-
-                    <flux:sidebar.item icon="envelope" :href="route('admin.confirmations')" :current="request()->routeIs('admin.confirmations')" wire:navigate>
-                        Confirmations
                     </flux:sidebar.item>
 
                     <flux:sidebar.item icon="home" :href="route('admin.families')" :current="request()->routeIs('admin.families')" wire:navigate>
@@ -71,6 +75,12 @@
                     <flux:sidebar.item icon="cog" :href="route('admin.settings')" :current="request()->routeIs('admin.settings')" wire:navigate>
                         Paramètres
                     </flux:sidebar.item>
+
+                    @if(!app()->isProduction())
+                    <flux:sidebar.item icon="wrench" :href="route('admin.dev-tools')" :current="request()->routeIs('admin.dev-tools')" wire:navigate>
+                        Dev Tools
+                    </flux:sidebar.item>
+                    @endif
                 </flux:sidebar.group>
                 @endcan
             </flux:sidebar.nav>
