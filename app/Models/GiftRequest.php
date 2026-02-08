@@ -25,6 +25,9 @@ class GiftRequest extends Model
         'status',
         'status_changed_at',
         'rejection_comment',
+        'pickup_slot_id',
+        'slot_start_datetime',
+        'slot_end_datetime',
     ];
 
     /**
@@ -32,6 +35,8 @@ class GiftRequest extends Model
      */
     protected $casts = [
         'status_changed_at' => 'datetime',
+        'slot_start_datetime' => 'datetime',
+        'slot_end_datetime' => 'datetime',
     ];
 
     /**
@@ -48,6 +53,14 @@ class GiftRequest extends Model
     public function season(): BelongsTo
     {
         return $this->belongsTo(Season::class);
+    }
+
+    /**
+     * Get the pickup slot for this request.
+     */
+    public function pickupSlot(): BelongsTo
+    {
+        return $this->belongsTo(PickupSlot::class);
     }
 
     /**

@@ -47,22 +47,83 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date limite de modification</label>
-                        <input type="date" wire:model="modificationDeadline" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date de retrait des cadeaux</label>
-                        <input type="date" wire:model="pickupStartDate" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white">
-                    </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date limite de modification</label>
+                    <input type="date" wire:model="modificationDeadline" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Adresse de retrait</label>
                     <textarea wire:model="pickupAddress" rows="3" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white"></textarea>
                 </div>
+
+                <hr class="my-4 border-gray-300 dark:border-zinc-600">
+                <h3 class="text-md font-semibold text-gray-900 dark:text-white">Planification des créneaux</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Limite de familles par créneau</label>
+                        <input type="number" wire:model="familyLimitPerSlot" min="1" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white">
+                        @error('familyLimitPerSlot') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Durée d'un créneau (minutes)</label>
+                        <input type="number" wire:model="slotDurationMinutes" min="5" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white">
+                        @error('slotDurationMinutes') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+
+                <hr class="my-4 border-gray-300 dark:border-zinc-600">
+                <h3 class="text-md font-semibold text-gray-900 dark:text-white">Responsable</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom du responsable</label>
+                        <input type="text" wire:model="responsibleName" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white">
+                        @error('responsibleName') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Téléphone</label>
+                        <input type="text" wire:model="responsiblePhone" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white">
+                        @error('responsiblePhone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">E-mail</label>
+                        <input type="email" wire:model="responsibleEmail" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white">
+                        @error('responsibleEmail') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+
+                <hr class="my-4 border-gray-300 dark:border-zinc-600">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-md font-semibold text-gray-900 dark:text-white">Plages horaires de récupération</h3>
+                    <button type="button" wire:click="addPickupEntry" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-sm">
+                        + Ajouter une plage
+                    </button>
+                </div>
+
+                @foreach($pickupEntries as $index => $entry)
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end bg-gray-50 dark:bg-zinc-700 p-3 rounded-lg">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Début</label>
+                            <input type="datetime-local" wire:model="pickupEntries.{{ $index }}.start_datetime" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white">
+                            @error("pickupEntries.{$index}.start_datetime") <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fin</label>
+                            <input type="datetime-local" wire:model="pickupEntries.{{ $index }}.end_datetime" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white">
+                            @error("pickupEntries.{$index}.end_datetime") <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
+                        <div>
+                            <button type="button" wire:click="removePickupEntry({{ $index }})" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm w-full">
+                                Supprimer
+                            </button>
+                        </div>
+                    </div>
+                @endforeach
 
                 <div class="flex gap-4">
                     <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
