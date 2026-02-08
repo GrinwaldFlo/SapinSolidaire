@@ -19,7 +19,6 @@ class Season extends Model
         'start_date',
         'end_date',
         'modification_deadline',
-        'pickup_start_date',
         'pickup_address',
         'family_limit_per_slot',
         'slot_duration_minutes',
@@ -35,7 +34,6 @@ class Season extends Model
         'start_date' => 'date',
         'end_date' => 'date',
         'modification_deadline' => 'date',
-        'pickup_start_date' => 'date',
         'family_limit_per_slot' => 'integer',
         'slot_duration_minutes' => 'integer',
     ];

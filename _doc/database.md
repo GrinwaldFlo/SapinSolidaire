@@ -91,7 +91,6 @@ Gift distribution seasons/campaigns.
 | `start_date` | DATE | NOT NULL | Start date for requests |
 | `end_date` | DATE | NOT NULL | End date for requests |
 | `modification_deadline` | DATE | NULLABLE | Deadline for family modifications |
-| `pickup_start_date` | DATE | NULLABLE | Date from which gifts can be picked up |
 | `pickup_address` | TEXT | NULLABLE | Address for gift pickup |
 | `family_limit_per_slot` | INT UNSIGNED | NULLABLE | Maximum number of families per pickup slot |
 | `slot_duration_minutes` | INT UNSIGNED | NULLABLE | Duration of each pickup slot in minutes |

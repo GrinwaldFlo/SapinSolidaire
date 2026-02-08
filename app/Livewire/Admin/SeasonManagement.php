@@ -19,7 +19,6 @@ class SeasonManagement extends Component
     public string $startDate = '';
     public string $endDate = '';
     public ?string $modificationDeadline = null;
-    public ?string $pickupStartDate = null;
     public ?string $pickupAddress = null;
     public ?int $familyLimitPerSlot = null;
     public ?int $slotDurationMinutes = null;
@@ -37,7 +36,6 @@ class SeasonManagement extends Component
             'startDate' => ['required', 'date'],
             'endDate' => ['required', 'date', 'after:startDate'],
             'modificationDeadline' => ['nullable', 'date'],
-            'pickupStartDate' => ['nullable', 'date'],
             'pickupAddress' => ['nullable', 'string'],
             'familyLimitPerSlot' => ['nullable', 'integer', 'min:1'],
             'slotDurationMinutes' => ['nullable', 'integer', 'min:5'],
@@ -74,7 +72,6 @@ class SeasonManagement extends Component
         $this->startDate = $season->start_date->format('Y-m-d');
         $this->endDate = $season->end_date->format('Y-m-d');
         $this->modificationDeadline = $season->modification_deadline?->format('Y-m-d');
-        $this->pickupStartDate = $season->pickup_start_date?->format('Y-m-d');
         $this->pickupAddress = $season->pickup_address;
         $this->familyLimitPerSlot = $season->family_limit_per_slot;
         $this->slotDurationMinutes = $season->slot_duration_minutes;
@@ -114,7 +111,6 @@ class SeasonManagement extends Component
             'start_date' => $this->startDate,
             'end_date' => $this->endDate,
             'modification_deadline' => $this->modificationDeadline ?: null,
-            'pickup_start_date' => $this->pickupStartDate ?: null,
             'pickup_address' => $this->pickupAddress ?: null,
             'family_limit_per_slot' => $this->familyLimitPerSlot ?: null,
             'slot_duration_minutes' => $this->slotDurationMinutes ?: null,
@@ -168,7 +164,6 @@ class SeasonManagement extends Component
         $this->startDate = '';
         $this->endDate = '';
         $this->modificationDeadline = null;
-        $this->pickupStartDate = null;
         $this->pickupAddress = null;
         $this->familyLimitPerSlot = null;
         $this->slotDurationMinutes = null;
