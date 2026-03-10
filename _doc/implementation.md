@@ -60,9 +60,8 @@ L'application disposera d'une interface de configuration accessible par les admi
 1. Le membre de la famille accède à la page d'accueil `/`
 2. Le système valide qu'une saison est actuellement active selon les dates définies
 3. L'utilisateur entre son adresse e-mail
-4. Un e-mail est envoyé contenant un lien sécurisé au format `/cadeau/XXX/EMAIL`
+4. Un e-mail est envoyé contenant un lien sécurisé au format `/cadeau/XXX`
    - `XXX` : token unique permettant de valider l'authenticité de l'adresse e-mail (valide 48 heures)
-   - `EMAIL` : l'adresse e-mail de la famille utilisée par la suite
 5. La famille clique sur le lien reçu et accède au formulaire de demande. Le token est validé
 6. **Vérification des conditions d'éligibilité** : Les conditions suivantes s'affichent une à une et doivent être acceptées
    - La famille ne peut pas demander des cadeaux plus de N années consécutives (N est configurable, défaut : 3)
