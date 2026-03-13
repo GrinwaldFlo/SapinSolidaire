@@ -20,7 +20,7 @@
                 @else
                     <ul class="divide-y divide-gray-200 dark:divide-zinc-700">
                         @foreach($children as $child)
-                            <li wire:click="selectChild({{ $child->id }})" class="p-4 hover:bg-gray-50 dark:hover:bg-zinc-700 cursor-pointer {{ $selectedChild?->id === $child->id ? 'bg-blue-50 dark:bg-blue-900/20' : '' }}">
+                            <li wire:click="selectChild('{{ $child->id }}')" class="p-4 hover:bg-gray-50 dark:hover:bg-zinc-700 cursor-pointer {{ $selectedChild?->id === $child->id ? 'bg-blue-50 dark:bg-blue-900/20' : '' }}">
                                 <div class="flex justify-between items-center">
                                     <div>
                                         <span class="font-medium text-gray-900 dark:text-white">{{ $child->first_name }}</span>
@@ -78,7 +78,7 @@
                         </div>
 
                         <div class="pt-6 border-t border-gray-200 dark:border-zinc-700">
-                            <button wire:click="markAsGiven({{ $selectedChild->id }})" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold">
+                            <button wire:click="markAsGiven('{{ $selectedChild->id }}')" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold">
                                 🎁 Cadeau remis
                             </button>
                         </div>

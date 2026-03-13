@@ -12,7 +12,7 @@ class UserManagement extends Component
     use WithPagination;
 
     public $roles;
-    public ?int $editingUserId = null;
+    public ?string $editingUserId = null;
     public array $selectedRoles = [];
 
     public function mount(): void
@@ -20,7 +20,7 @@ class UserManagement extends Component
         $this->roles = Role::all();
     }
 
-    public function editRoles(int $userId): void
+    public function editRoles(string $userId): void
     {
         $user = User::findOrFail($userId);
         $this->editingUserId = $userId;

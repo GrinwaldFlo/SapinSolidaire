@@ -12,7 +12,7 @@ class ChildrenMonitoring extends Component
     use WithPagination;
 
     public $seasons;
-    public ?int $selectedSeasonId = null;
+    public ?string $selectedSeasonId = null;
     public string $statusFilter = '';
 
     public function mount(): void

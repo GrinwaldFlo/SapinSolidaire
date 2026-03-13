@@ -18,12 +18,11 @@ return new class extends Migration
         });
 
         Schema::create('role_user', function (Blueprint $table) {
-            $table->uuid('id')->primary();
             $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
             $table->foreignUuid('role_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
 
-            $table->unique(['user_id', 'role_id']);
+            $table->primary(['user_id', 'role_id']);
         });
     }
 

@@ -19,7 +19,7 @@ class GiftDelivery extends Component
         $this->activeSeason = Season::getActive();
     }
 
-    public function selectChild(int $childId): void
+    public function selectChild(string $childId): void
     {
         $this->selectedChild = Child::with('giftRequest.family')->findOrFail($childId);
     }
@@ -29,7 +29,7 @@ class GiftDelivery extends Component
         $this->selectedChild = null;
     }
 
-    public function markAsGiven(int $childId): void
+    public function markAsGiven(string $childId): void
     {
         $child = Child::findOrFail($childId);
         $child->setStatus(Child::STATUS_GIVEN);

@@ -164,8 +164,8 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 text-right space-x-2">
-                            <button wire:click="edit({{ $season->id }})" class="text-blue-600 hover:text-blue-800">Modifier</button>
-                            <button wire:click="delete({{ $season->id }})" wire:confirm="Êtes-vous sûr de vouloir supprimer cette saison ?" class="text-red-600 hover:text-red-800">Supprimer</button>
+                            <button wire:click="edit('{{ $season->id }}')" class="text-blue-600 hover:text-blue-800">Modifier</button>
+                            <button wire:click="delete('{{ $season->id }}')" wire:confirm="Êtes-vous sûr de vouloir supprimer cette saison ?" class="text-red-600 hover:text-red-800">Supprimer</button>
                         </td>
                     </tr>
                 @empty

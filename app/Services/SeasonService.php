@@ -43,7 +43,7 @@ class SeasonService
     /**
      * Check if season dates overlap with existing seasons.
      */
-    public function hasOverlap(string $startDate, string $endDate, ?int $excludeId = null): bool
+    public function hasOverlap(string $startDate, string $endDate, ?string $excludeId = null): bool
     {
         $query = Season::where(function ($q) use ($startDate, $endDate) {
             $q->where(function ($q2) use ($startDate, $endDate) {
