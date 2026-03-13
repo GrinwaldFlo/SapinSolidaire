@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('children', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('gift_request_id')->constrained()->cascadeOnDelete();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('gift_request_id')->constrained()->cascadeOnDelete();
             $table->string('first_name');
             $table->smallInteger('birth_year')->unsigned();
             $table->smallInteger('height')->unsigned()->nullable();

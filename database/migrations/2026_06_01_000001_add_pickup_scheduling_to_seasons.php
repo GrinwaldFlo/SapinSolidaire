@@ -20,8 +20,8 @@ return new class extends Migration
         });
 
         Schema::create('pickup_slots', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('season_id')->constrained()->cascadeOnDelete();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('season_id')->constrained()->cascadeOnDelete();
             $table->dateTime('start_datetime');
             $table->dateTime('end_datetime');
             $table->timestamps();
@@ -30,7 +30,7 @@ return new class extends Migration
         });
 
         Schema::table('gift_requests', function (Blueprint $table) {
-            $table->foreignId('pickup_slot_id')->nullable()->after('rejection_comment')->constrained('pickup_slots')->nullOnDelete();
+            $table->foreignUuid('pickup_slot_id')->nullable()->after('rejection_comment')->constrained('pickup_slots')->nullOnDelete();
             $table->index('pickup_slot_id');
         });
     }

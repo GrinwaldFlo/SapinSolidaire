@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('gift_requests', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('family_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('season_id')->constrained()->cascadeOnDelete();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('family_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('season_id')->constrained()->cascadeOnDelete();
             $table->enum('status', ['pending', 'validated', 'rejected', 'rejected_final'])->default('pending');
             $table->timestamp('status_changed_at')->nullable();
             $table->text('rejection_comment')->nullable();
