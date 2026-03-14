@@ -45,6 +45,13 @@
                 @error('replyToEmail') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Préfixe code enfant</label>
+                <input type="text" wire:model="codePrefix" placeholder="Y" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white">
+                <p class="mt-1 text-sm text-gray-500">Préfixe de région utilisé dans le code enfant (ex: Y pour le format Y1234/5).</p>
+                @error('codePrefix') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
             <div class="pt-4">
                 <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg">
                     Enregistrer les paramètres

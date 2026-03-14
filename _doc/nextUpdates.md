@@ -1,6 +1,6 @@
 # Next updates
 
-## City managements
+## [Done] City managements
 
 In /admin/parametres, instead of having a list of "Codes postaux", I would like to list all City by names. 
 - It still can be comma separated

@@ -17,6 +17,7 @@ class Setting extends Model
     public const GIFT_SUGGESTIONS = 'gift_suggestions';
     public const INTRODUCTION_TEXT = 'introduction_text';
     public const REPLY_TO_EMAIL = 'reply_to_email';
+    public const CODE_PREFIX = 'code_prefix';
 
     /**
      * @var array<int, string>
@@ -131,6 +132,14 @@ class Setting extends Model
     }
 
     /**
+     * Get code prefix for children codes.
+     */
+    public static function getCodePrefix(): string
+    {
+        return self::getValue(self::CODE_PREFIX, '');
+    }
+
+    /**
      * Clear all settings cache.
      */
     public static function clearCache(): void
@@ -142,6 +151,7 @@ class Setting extends Model
             self::GIFT_SUGGESTIONS,
             self::INTRODUCTION_TEXT,
             self::REPLY_TO_EMAIL,
+            self::CODE_PREFIX,
         ];
 
         foreach ($keys as $key) {

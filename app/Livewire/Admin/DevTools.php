@@ -6,6 +6,8 @@ use App\Models\Child;
 use App\Models\Family;
 use App\Models\GiftRequest;
 use App\Models\Season;
+use App\Models\Setting;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Livewire\Component;
 
@@ -109,30 +111,38 @@ class DevTools extends Component
             return;
         }
 
-        $familiesValidated = GiftRequest::where('season_id', $this->activeSeason->id)
-            ->where('status', GiftRequest::STATUS_PENDING)
-            ->count();
+        DB::transaction(function () {
+            $pendingRequests = GiftRequest::where('season_id', $this->activeSeason->id)
+                ->where('status', GiftRequest::STATUS_PENDING)
+                ->get();
 
-        GiftRequest::where('season_id', $this->activeSeason->id)
-            ->where('status', GiftRequest::STATUS_PENDING)
-            ->update([
-                'status' => GiftRequest::STATUS_VALIDATED,
-                'status_changed_at' => now(),
-            ]);
+            $familiesValidated = $pendingRequests->count();
 
-        $childrenValidated = Child::whereHas('giftRequest', function ($q) {
-            $q->where('season_id', $this->activeSeason->id);
-        })->where('status', Child::STATUS_PENDING)->count();
+            foreach ($pendingRequests as $request) {
+                if ($request->family_number === null) {
+                    $request->family_number = $this->activeSeason->assignNextFamilyNumber();
+                }
+                $request->status = GiftRequest::STATUS_VALIDATED;
+                $request->status_changed_at = now();
+                $request->save();
+            }
 
-        Child::whereHas('giftRequest', function ($q) {
-            $q->where('season_id', $this->activeSeason->id);
-        })->where('status', Child::STATUS_PENDING)->update([
-            'status' => Child::STATUS_VALIDATED,
-            'status_changed_at' => now(),
-            'validated_at' => now(),
-        ]);
+            $pendingChildren = Child::whereHas('giftRequest', function ($q) {
+                $q->where('season_id', $this->activeSeason->id);
+            })->where('status', Child::STATUS_PENDING)->get();
 
-        $this->flash("{$familiesValidated} famille(s) et {$childrenValidated} enfant(s) validé(s).", 'success');
+            $childrenValidated = $pendingChildren->count();
+
+            foreach ($pendingChildren as $child) {
+                $child->assignChildNumberAndCode();
+                $child->status = Child::STATUS_VALIDATED;
+                $child->status_changed_at = now();
+                $child->validated_at = now();
+                $child->save();
+            }
+
+            $this->flash("{$familiesValidated} famille(s) et {$childrenValidated} enfant(s) validé(s).", 'success');
+        });
     }
 
     public function batchReceive(): void

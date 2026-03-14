@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
-use App\Services\CodeGeneratorService;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 
 class Child extends Model
 {
@@ -36,6 +36,7 @@ class Child extends Model
         'height',
         'gift',
         'shoe_size',
+        'child_number',
         'code',
         'status',
         'status_changed_at',
@@ -51,24 +52,11 @@ class Child extends Model
         'birth_year' => 'integer',
         'height' => 'integer',
         'anonymous' => 'boolean',
+        'child_number' => 'integer',
         'status_changed_at' => 'datetime',
         'validated_at' => 'datetime',
         'confirmation_email_sent_at' => 'datetime',
     ];
-
-    /**
-     * Boot the model.
-     */
-    protected static function boot(): void
-    {
-        parent::boot();
-
-        static::creating(function (Child $child) {
-            if (empty($child->code)) {
-                $child->code = app(CodeGeneratorService::class)->generate();
-            }
-        });
-    }
 
     /**
      * Get the gift request for this child.
@@ -175,5 +163,39 @@ class Child extends Model
             self::GENDER_UNSPECIFIED => 'Non précisé',
             default => 'Non précisé',
         };
+    }
+
+    /**
+     * Assign the next child number within the family and generate the code.
+     */
+    public function assignChildNumberAndCode(): void
+    {
+        DB::transaction(function () {
+            $giftRequest = $this->giftRequest()->lockForUpdate()->first();
+
+            if ($giftRequest->family_number === null) {
+                return;
+            }
+
+            $maxChildNumber = Child::where('gift_request_id', $giftRequest->id)
+                ->whereNotNull('child_number')
+                ->max('child_number');
+
+            $this->child_number = ($maxChildNumber ?? 0) + 1;
+            $this->code = self::generateCode(
+                Setting::getCodePrefix(),
+                $giftRequest->family_number,
+                $this->child_number
+            );
+            $this->save();
+        });
+    }
+
+    /**
+     * Generate a formatted code: prefix + family number + / + child number.
+     */
+    public static function generateCode(string $prefix, int $familyNumber, int $childNumber): string
+    {
+        return $prefix . $familyNumber . '/' . $childNumber;
     }
 }

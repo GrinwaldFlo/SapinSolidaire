@@ -97,7 +97,7 @@
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500 dark:text-gray-400">Code :</span>
-                                <span class="ml-2 text-gray-900 dark:text-white font-mono font-bold">{{ $child->code }}</span>
+                                <span class="ml-2 text-gray-900 dark:text-white font-mono font-bold">{{ $child->code ?? '—' }}</span>
                             </div>
                         </div>
 

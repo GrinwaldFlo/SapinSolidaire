@@ -23,6 +23,7 @@ class GiftRequest extends Model
     protected $fillable = [
         'family_id',
         'season_id',
+        'family_number',
         'status',
         'status_changed_at',
         'rejection_comment',
@@ -35,6 +36,7 @@ class GiftRequest extends Model
      * @var array<string, string>
      */
     protected $casts = [
+        'family_number' => 'integer',
         'status_changed_at' => 'datetime',
         'slot_start_datetime' => 'datetime',
         'slot_end_datetime' => 'datetime',

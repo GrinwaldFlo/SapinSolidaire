@@ -8,6 +8,7 @@ use App\Models\Child;
 use App\Models\EmailToken;
 use App\Models\GiftRequest;
 use App\Models\Season;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 
@@ -74,7 +75,16 @@ class Validation extends Component
             return;
         }
 
-        $this->currentRequest->setStatus(GiftRequest::STATUS_VALIDATED);
+        DB::transaction(function () {
+            if ($this->currentRequest->family_number === null) {
+                $familyNumber = $this->activeSeason->assignNextFamilyNumber();
+                $this->currentRequest->family_number = $familyNumber;
+                $this->currentRequest->save();
+            }
+
+            $this->currentRequest->setStatus(GiftRequest::STATUS_VALIDATED);
+        });
+
         $this->loadNextRequest();
         $this->loadCounts();
     }
@@ -82,7 +92,12 @@ class Validation extends Component
     public function validateChild(string $childId): void
     {
         $child = Child::findOrFail($childId);
-        $child->setStatus(Child::STATUS_VALIDATED);
+
+        DB::transaction(function () use ($child) {
+            $child->assignChildNumberAndCode();
+            $child->setStatus(Child::STATUS_VALIDATED);
+        });
+
         $this->loadNextRequest();
         $this->loadCounts();
     }
