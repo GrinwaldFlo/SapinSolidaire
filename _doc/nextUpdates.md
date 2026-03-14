@@ -17,6 +17,6 @@ Staff will need to validate this proof.
 
 ## Numbering with Y0001/1
 
-## When giving gifts, Familly name is the first step, improve this
+## When giving gifts, Family name is the first step, improve this
 
 ## Test with 700 children
