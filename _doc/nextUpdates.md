@@ -8,8 +8,8 @@ In /admin/parametres, instead of having a list of "Codes postaux", I would like 
 
 ## Proof of habitation
 
-When family register, the will need to take a picture as a proof where they live.
-Staff need to validate
+When a family registers, they will need to take a picture as proof of where they live.
+Staff will need to validate this proof.
 
 ## Import data from previous years
 
@@ -17,6 +17,6 @@ Staff need to validate
 
 ## Numbering with Y0001/1
 
-## When giving gifts, Familly name is the first step, improve this
+## When giving gifts, Family name is the first step, improve this
 
 ## Test with 700 children
