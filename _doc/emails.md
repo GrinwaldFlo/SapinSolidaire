@@ -44,7 +44,7 @@ L'équipe Sapin Solidaire
 ```
 
 **Variables** :
-- Lien : `/cadeau/{token}/{email}`
+- Lien : `/cadeau/{token}`
 
 **Notes** :
 - Le token expire après 48 heures
@@ -82,7 +82,7 @@ L'équipe Sapin Solidaire
 
 **Variables** :
 - `{commentaire_du_validateur}` : Le motif de refus saisi par le validateur
-- Lien : `/cadeau/{nouveau_token}/{email}`
+- Lien : `/cadeau/{nouveau_token}`
 
 **Notes** :
 - Un nouveau token est généré pour permettre l'accès au formulaire
