@@ -12,7 +12,7 @@ class Setting extends Model
     use HasFactory, HasUuids;
 
     public const SITE_NAME = 'site_name';
-    public const ALLOWED_POSTAL_CODES = 'allowed_postal_codes';
+    public const ALLOWED_CITIES = 'allowed_cities';
     public const MAX_CONSECUTIVE_YEARS = 'max_consecutive_years';
     public const GIFT_SUGGESTIONS = 'gift_suggestions';
     public const INTRODUCTION_TEXT = 'introduction_text';
@@ -60,31 +60,36 @@ class Setting extends Model
     }
 
     /**
-     * Get allowed postal codes as array.
+     * Get allowed cities as array.
      */
-    public static function getAllowedPostalCodes(): array
+    public static function getAllowedCities(): array
     {
-        $value = self::getValue(self::ALLOWED_POSTAL_CODES, '');
+        $value = self::getValue(self::ALLOWED_CITIES, '');
 
         if (empty($value)) {
             return [];
         }
 
-        return array_map('trim', explode(',', $value));
+        return array_values(
+            array_filter(
+                array_map('trim', explode(',', $value)),
+                static fn (string $city): bool => $city !== ''
+            )
+        );
     }
 
     /**
-     * Check if a postal code is allowed.
+     * Check if a city is allowed.
      */
-    public static function isPostalCodeAllowed(string $postalCode): bool
+    public static function isCityAllowed(string $city): bool
     {
-        $allowed = self::getAllowedPostalCodes();
+        $allowed = self::getAllowedCities();
 
         if (empty($allowed)) {
             return true; // If no restrictions, allow all
         }
 
-        return in_array($postalCode, $allowed);
+        return in_array($city, $allowed);
     }
 
     /**
@@ -132,7 +137,7 @@ class Setting extends Model
     {
         $keys = [
             self::SITE_NAME,
-            self::ALLOWED_POSTAL_CODES,
+            self::ALLOWED_CITIES,
             self::MAX_CONSECUTIVE_YEARS,
             self::GIFT_SUGGESTIONS,
             self::INTRODUCTION_TEXT,

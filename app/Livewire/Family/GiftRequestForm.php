@@ -26,7 +26,9 @@ class GiftRequestForm extends Component
     public int $step = 1; // 1: eligibility, 2: form
     public bool $tokenValid = false;
     public bool $consecutiveYearsAccepted = false;
-    public bool $postalCodeAccepted = false;
+    public bool $cityAccepted = false;
+    public bool $cityConfirmed = false;
+    public bool $showCityConfirmation = false;
     public bool $isModifying = false;
     public bool $canModify = true;
     public bool $submitted = false;
@@ -50,7 +52,8 @@ class GiftRequestForm extends Component
 
     // Settings
     public int $maxConsecutiveYears = 3;
-    public array $allowedPostalCodes = [];
+    public array $allowedCities = [];
+    public string $selectedCity = '';
     public array $giftSuggestions = [];
 
     public function mount(string $token): void
@@ -84,7 +87,7 @@ class GiftRequestForm extends Component
 
             // Load settings
             $this->maxConsecutiveYears = Setting::getMaxConsecutiveYears();
-            $this->allowedPostalCodes = Setting::getAllowedPostalCodes();
+            $this->allowedCities = Setting::getAllowedCities();
             $this->giftSuggestions = Setting::getGiftSuggestions();
 
             // Check if family exists
@@ -112,7 +115,8 @@ class GiftRequestForm extends Component
                     // Skip eligibility if already accepted
                     $this->step = 2;
                     $this->consecutiveYearsAccepted = true;
-                    $this->postalCodeAccepted = true;
+                    $this->cityAccepted = true;
+                    $this->cityConfirmed = true;
                 }
             }
 
@@ -156,18 +160,58 @@ class GiftRequestForm extends Component
     {
         $this->consecutiveYearsAccepted = true;
 
-        if ($this->consecutiveYearsAccepted && $this->postalCodeAccepted) {
+        if ($this->consecutiveYearsAccepted && $this->cityAccepted) {
             $this->step = 2;
         }
     }
 
-    public function acceptPostalCode(): void
+    public function acceptCity(): void
     {
-        $this->postalCodeAccepted = true;
+        if (!empty($this->allowedCities) && empty($this->selectedCity)) {
+            $this->addError('selectedCity', 'Veuillez sélectionner une commune.');
+            return;
+        }
 
-        if ($this->consecutiveYearsAccepted && $this->postalCodeAccepted) {
+        $this->cityAccepted = true;
+
+        if (!empty($this->selectedCity)) {
+            $this->city = $this->selectedCity;
+            $this->cityConfirmed = true;
+        }
+
+        if ($this->consecutiveYearsAccepted && $this->cityAccepted) {
             $this->step = 2;
         }
+    }
+
+    public function requestCityChange(): void
+    {
+        $this->cityConfirmed = false;
+        $this->showCityConfirmation = true;
+    }
+
+    public function confirmCity(): void
+    {
+        if (empty($this->city)) {
+            $this->addError('city', 'Veuillez sélectionner une commune.');
+            $this->showCityConfirmation = false;
+            return;
+        }
+
+        if (!empty($this->allowedCities) && !in_array($this->city, $this->allowedCities)) {
+            $this->addError('city', 'Cette commune n\'est pas éligible.');
+            $this->showCityConfirmation = false;
+            return;
+        }
+
+        $this->cityConfirmed = true;
+        $this->showCityConfirmation = false;
+        $this->resetErrorBag('city');
+    }
+
+    public function cancelCityChange(): void
+    {
+        $this->showCityConfirmation = false;
     }
 
     public function addChild(): void
@@ -245,11 +289,19 @@ class GiftRequestForm extends Component
             return;
         }
 
-        // Validate postal code
-        if (! empty($this->allowedPostalCodes) && ! in_array($this->postalCode, $this->allowedPostalCodes)) {
-            $this->addError('postalCode', 'Ce code postal n\'est pas éligible.');
+        // Validate city
+        if (! empty($this->allowedCities)) {
+            if (! in_array($this->city, $this->allowedCities)) {
+                $this->addError('city', 'Cette commune n\'est pas éligible.');
 
-            return;
+                return;
+            }
+
+            if (! $this->cityConfirmed) {
+                $this->addError('city', 'Veuillez confirmer votre commune de résidence.');
+
+                return;
+            }
         }
 
         // Validate children
