@@ -14,7 +14,7 @@ Staff members who manage the application. Based on Laravel's default user table 
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| `id` | BIGINT UNSIGNED | PK, AUTO_INCREMENT | Primary key |
+| `id` | CHAR(36) | PK | Primary key (UUID) |
 | `name` | VARCHAR(255) | NOT NULL | Full name |
 | `email` | VARCHAR(255) | NOT NULL, UNIQUE | Email address |
 | `email_verified_at` | TIMESTAMP | NULLABLE | Email verification date |
@@ -38,7 +38,7 @@ Available roles for staff members.
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| `id` | BIGINT UNSIGNED | PK, AUTO_INCREMENT | Primary key |
+| `id` | CHAR(36) | PK | Primary key (UUID) |
 | `name` | VARCHAR(50) | NOT NULL, UNIQUE | Role name |
 | `created_at` | TIMESTAMP | NULLABLE | Creation timestamp |
 | `updated_at` | TIMESTAMP | NULLABLE | Update timestamp |
@@ -62,17 +62,13 @@ Pivot table for many-to-many relationship between users and roles.
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| `id` | BIGINT UNSIGNED | PK, AUTO_INCREMENT | Primary key |
-| `user_id` | BIGINT UNSIGNED | FK → users.id, NOT NULL | Reference to user |
-| `role_id` | BIGINT UNSIGNED | FK → roles.id, NOT NULL | Reference to role |
+| `user_id` | CHAR(36) | PK, FK → users.id, NOT NULL | Reference to user |
+| `role_id` | CHAR(36) | PK, FK → roles.id, NOT NULL | Reference to role |
 | `created_at` | TIMESTAMP | NULLABLE | Creation timestamp |
 | `updated_at` | TIMESTAMP | NULLABLE | Update timestamp |
 
 **Indexes:**
-- PRIMARY (`id`)
-- UNIQUE (`user_id`, `role_id`)
-- INDEX (`user_id`)
-- INDEX (`role_id`)
+- PRIMARY (`user_id`, `role_id`)
 
 **Foreign Keys:**
 - `user_id` → `users.id` ON DELETE CASCADE
@@ -86,7 +82,7 @@ Gift distribution seasons/campaigns.
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| `id` | BIGINT UNSIGNED | PK, AUTO_INCREMENT | Primary key |
+| `id` | CHAR(36) | PK | Primary key (UUID) |
 | `name` | VARCHAR(255) | NOT NULL | Season name (e.g., "Noël 2024") |
 | `start_date` | DATE | NOT NULL | Start date for requests |
 | `end_date` | DATE | NOT NULL | End date for requests |
@@ -116,8 +112,8 @@ Pickup time slots for families to collect their gifts.
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| `id` | BIGINT UNSIGNED | PK, AUTO_INCREMENT | Primary key |
-| `season_id` | BIGINT UNSIGNED | FK → seasons.id, NOT NULL | Reference to season |
+| `id` | CHAR(36) | PK | Primary key (UUID) |
+| `season_id` | CHAR(36) | FK → seasons.id, NOT NULL | Reference to season |
 | `start_datetime` | DATETIME | NOT NULL | Start date/time of the slot |
 | `end_datetime` | DATETIME | NOT NULL | End date/time of the slot |
 | `created_at` | TIMESTAMP | NULLABLE | Creation timestamp |
@@ -138,7 +134,7 @@ Family information (persistent across seasons).
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| `id` | BIGINT UNSIGNED | PK, AUTO_INCREMENT | Primary key |
+| `id` | CHAR(36) | PK | Primary key (UUID) |
 | `email` | VARCHAR(255) | NOT NULL, UNIQUE | Family email (identifier) |
 | `first_name` | VARCHAR(255) | NULLABLE | Parent first name |
 | `last_name` | VARCHAR(255) | NULLABLE | Parent last name |
@@ -161,13 +157,13 @@ Family gift requests per season (one per family per season).
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| `id` | BIGINT UNSIGNED | PK, AUTO_INCREMENT | Primary key |
-| `family_id` | BIGINT UNSIGNED | FK → families.id, NOT NULL | Reference to family |
-| `season_id` | BIGINT UNSIGNED | FK → seasons.id, NOT NULL | Reference to season |
+| `id` | CHAR(36) | PK | Primary key (UUID) |
+| `family_id` | CHAR(36) | FK → families.id, NOT NULL | Reference to family |
+| `season_id` | CHAR(36) | FK → seasons.id, NOT NULL | Reference to season |
 | `status` | ENUM | NOT NULL, DEFAULT 'pending' | Request status |
 | `status_changed_at` | TIMESTAMP | NULLABLE | Last status change date |
 | `rejection_comment` | TEXT | NULLABLE | Reason for rejection |
-| `pickup_slot_id` | BIGINT UNSIGNED | FK → pickup_slots.id, NULLABLE | Assigned pickup window |
+| `pickup_slot_id` | CHAR(36) | FK → pickup_slots.id, NULLABLE | Assigned pickup window |
 | `slot_start_datetime` | DATETIME | NULLABLE | Computed sub-slot start time |
 | `slot_end_datetime` | DATETIME | NULLABLE | Computed sub-slot end time |
 | `created_at` | TIMESTAMP | NULLABLE | Creation timestamp |
@@ -200,8 +196,8 @@ Child gift requests linked to a family and season.
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| `id` | BIGINT UNSIGNED | PK, AUTO_INCREMENT | Primary key |
-| `gift_request_id` | BIGINT UNSIGNED | FK → gift_requests.id, NOT NULL | Reference to gift request |
+| `id` | CHAR(36) | PK | Primary key (UUID) |
+| `gift_request_id` | CHAR(36) | FK → gift_requests.id, NOT NULL | Reference to gift request |
 | `first_name` | VARCHAR(255) | NOT NULL | Child's first name |
 | `gender` | ENUM | NOT NULL, DEFAULT 'unspecified' | Child's gender |
 | `anonymous` | BOOLEAN | NOT NULL, DEFAULT FALSE | Hide first name on labels |
@@ -254,7 +250,7 @@ Temporary tokens for family email verification.
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| `id` | BIGINT UNSIGNED | PK, AUTO_INCREMENT | Primary key |
+| `id` | CHAR(36) | PK | Primary key (UUID) |
 | `email` | VARCHAR(255) | NOT NULL | Family email |
 | `token` | VARCHAR(64) | NOT NULL, UNIQUE | Unique verification token |
 | `expires_at` | TIMESTAMP | NOT NULL | Token expiration (48h) |
@@ -275,7 +271,7 @@ Application configuration settings.
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| `id` | BIGINT UNSIGNED | PK, AUTO_INCREMENT | Primary key |
+| `id` | CHAR(36) | PK | Primary key (UUID) |
 | `key` | VARCHAR(100) | NOT NULL, UNIQUE | Setting key |
 | `value` | TEXT | NULLABLE | Setting value |
 | `created_at` | TIMESTAMP | NULLABLE | Creation timestamp |
@@ -375,7 +371,7 @@ Standard Laravel sessions table for database session driver.
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
 | `id` | VARCHAR(255) | PK | Session ID |
-| `user_id` | BIGINT UNSIGNED | NULLABLE, INDEX | Reference to user |
+| `user_id` | CHAR(36) | NULLABLE, INDEX | Reference to user (UUID) |
 | `ip_address` | VARCHAR(45) | NULLABLE | Client IP address |
 | `user_agent` | TEXT | NULLABLE | Browser user agent |
 | `payload` | LONGTEXT | NOT NULL | Session data |
@@ -476,6 +472,7 @@ MAIL_RATE_LIMIT_SECONDS=5
 
 - All timestamps use the database server timezone
 - Soft deletes are NOT used; data is retained for statistics
+- All primary keys in application tables use UUID (`CHAR(36)`); Laravel queue tables (`jobs`, `failed_jobs`) retain `BIGINT UNSIGNED AUTO_INCREMENT`
 - The `code` field in `children` table uses 4 uppercase letters (26^4 = 456,976 combinations)
 - Phone validation uses `libphonenumber` library (giggsey/libphonenumber-for-php) for Swiss phone number validation and E.164 formatting
 - Address validation uses Swiss Post Address Database API (requires API key in `.env`)

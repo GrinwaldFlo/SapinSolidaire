@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
 class Setting extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
 
     public const SITE_NAME = 'site_name';
     public const ALLOWED_POSTAL_CODES = 'allowed_postal_codes';

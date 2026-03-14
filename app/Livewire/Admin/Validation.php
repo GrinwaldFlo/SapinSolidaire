@@ -21,7 +21,7 @@ class Validation extends Component
     // Rejection modal
     public bool $showRejectionModal = false;
     public string $rejectionType = ''; // 'family', 'child'
-    public ?int $rejectionTargetId = null;
+    public ?string $rejectionTargetId = null;
     public bool $isFinalRejection = false;
     public string $rejectionComment = '';
 
@@ -79,7 +79,7 @@ class Validation extends Component
         $this->loadCounts();
     }
 
-    public function validateChild(int $childId): void
+    public function validateChild(string $childId): void
     {
         $child = Child::findOrFail($childId);
         $child->setStatus(Child::STATUS_VALIDATED);
@@ -87,7 +87,7 @@ class Validation extends Component
         $this->loadCounts();
     }
 
-    public function openRejectionModal(string $type, int $id, bool $isFinal = false): void
+    public function openRejectionModal(string $type, string $id, bool $isFinal = false): void
     {
         $this->rejectionType = $type;
         $this->rejectionTargetId = $id;

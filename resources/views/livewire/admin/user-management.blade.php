@@ -49,7 +49,7 @@
                                 <button wire:click="saveRoles" class="text-green-600 hover:text-green-800 mr-2">Enregistrer</button>
                                 <button wire:click="cancelEdit" class="text-gray-600 hover:text-gray-800">Annuler</button>
                             @else
-                                <button wire:click="editRoles({{ $user->id }})" class="text-blue-600 hover:text-blue-800">Modifier les rôles</button>
+                                <button wire:click="editRoles('{{ $user->id }}')" class="text-blue-600 hover:text-blue-800">Modifier les rôles</button>
                             @endif
                         </td>
                     </tr>

@@ -12,7 +12,7 @@ class SeasonManagement extends Component
     public $seasons;
     public bool $showForm = false;
     public bool $editing = false;
-    public ?int $editingId = null;
+    public ?string $editingId = null;
 
     // Form fields
     public string $name = '';
@@ -64,7 +64,7 @@ class SeasonManagement extends Component
         $this->editing = false;
     }
 
-    public function edit(int $id): void
+    public function edit(string $id): void
     {
         $season = Season::findOrFail($id);
         $this->editingId = $id;
@@ -134,7 +134,7 @@ class SeasonManagement extends Component
         $this->loadSeasons();
     }
 
-    public function delete(int $id): void
+    public function delete(string $id): void
     {
         $season = Season::findOrFail($id);
 

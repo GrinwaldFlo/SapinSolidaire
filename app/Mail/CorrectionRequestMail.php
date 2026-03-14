@@ -44,7 +44,7 @@ class CorrectionRequestMail extends Mailable implements ShouldQueue
         return new Content(
             view: 'emails.correction-request',
             with: [
-                'accessUrl' => url("/cadeau/{$this->token}/{$this->email}"),
+                'accessUrl' => url("/cadeau/{$this->token}"),
                 'comment' => $this->comment,
                 'siteName' => Setting::getSiteName(),
             ],

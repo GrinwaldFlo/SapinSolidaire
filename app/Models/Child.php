@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Services\CodeGeneratorService;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Child extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
 
     public const STATUS_PENDING = 'pending';
     public const STATUS_VALIDATED = 'validated';

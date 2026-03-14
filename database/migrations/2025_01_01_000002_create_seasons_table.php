@@ -12,12 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('seasons', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('name');
             $table->date('start_date');
             $table->date('end_date');
             $table->date('modification_deadline')->nullable();
-            $table->date('pickup_start_date')->nullable();
             $table->text('pickup_address')->nullable();
             $table->timestamps();
 
