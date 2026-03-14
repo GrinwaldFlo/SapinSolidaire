@@ -70,7 +70,12 @@ class Setting extends Model
             return [];
         }
 
-        return array_map('trim', explode(',', $value));
+        return array_values(
+            array_filter(
+                array_map('trim', explode(',', $value)),
+                static fn (string $city): bool => $city !== ''
+            )
+        );
     }
 
     /**
