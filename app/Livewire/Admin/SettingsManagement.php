@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\Child;
 use App\Models\Setting;
 use Livewire\Component;
 
@@ -44,8 +45,15 @@ class SettingsManagement extends Component
         Setting::setValue(Setting::GIFT_SUGGESTIONS, $this->giftSuggestions);
         Setting::setValue(Setting::INTRODUCTION_TEXT, $this->introductionText);
         Setting::setValue(Setting::REPLY_TO_EMAIL, $this->replyToEmail);
+        $oldPrefix = Setting::getCodePrefix();
+        $oldPadding = Setting::getCodeFamilyPadding();
+
         Setting::setValue(Setting::CODE_PREFIX, $this->codePrefix);
         Setting::setValue(Setting::CODE_FAMILY_PADDING, $this->codeFamilyPadding);
+
+        if ($oldPrefix !== $this->codePrefix || $oldPadding !== $this->codeFamilyPadding) {
+            Child::regenerateAllCodes($this->codePrefix, $this->codeFamilyPadding);
+        }
 
         session()->flash('message', 'Paramètres enregistrés avec succès.');
     }

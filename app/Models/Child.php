@@ -199,4 +199,27 @@ class Child extends Model
     {
         return $prefix . str_pad((string) $familyNumber, $padding, '0', STR_PAD_LEFT) . '/' . $childNumber;
     }
+
+    /**
+     * Regenerate codes for all children that already have a code assigned.
+     */
+    public static function regenerateAllCodes(string $prefix, int $padding): void
+    {
+        Child::whereNotNull('code')
+            ->whereNotNull('child_number')
+            ->with('giftRequest')
+            ->chunkById(100, function ($children) use ($prefix, $padding) {
+                foreach ($children as $child) {
+                    if ($child->giftRequest && $child->giftRequest->family_number !== null) {
+                        $child->code = self::generateCode(
+                            $prefix,
+                            $child->giftRequest->family_number,
+                            $child->child_number,
+                            $padding
+                        );
+                        $child->save();
+                    }
+                }
+            });
+    }
 }
