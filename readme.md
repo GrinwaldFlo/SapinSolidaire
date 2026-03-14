@@ -29,3 +29,4 @@ Instead of `composer run dev`, you can run these in separate terminals:
 
 echo 'export PATH=/opt/php84/bin:$PATH' >> ~/.profile
 source ~/.profile
+

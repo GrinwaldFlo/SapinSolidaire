@@ -27,6 +27,8 @@ class GiftRequestForm extends Component
     public bool $tokenValid = false;
     public bool $consecutiveYearsAccepted = false;
     public bool $cityAccepted = false;
+    public bool $cityConfirmed = false;
+    public bool $showCityConfirmation = false;
     public bool $isModifying = false;
     public bool $canModify = true;
     public bool $submitted = false;
@@ -114,6 +116,7 @@ class GiftRequestForm extends Component
                     $this->step = 2;
                     $this->consecutiveYearsAccepted = true;
                     $this->cityAccepted = true;
+                    $this->cityConfirmed = true;
                 }
             }
 
@@ -173,11 +176,42 @@ class GiftRequestForm extends Component
 
         if (!empty($this->selectedCity)) {
             $this->city = $this->selectedCity;
+            $this->cityConfirmed = true;
         }
 
         if ($this->consecutiveYearsAccepted && $this->cityAccepted) {
             $this->step = 2;
         }
+    }
+
+    public function requestCityChange(): void
+    {
+        $this->cityConfirmed = false;
+        $this->showCityConfirmation = true;
+    }
+
+    public function confirmCity(): void
+    {
+        if (empty($this->city)) {
+            $this->addError('city', 'Veuillez sélectionner une commune.');
+            $this->showCityConfirmation = false;
+            return;
+        }
+
+        if (!empty($this->allowedCities) && !in_array($this->city, $this->allowedCities)) {
+            $this->addError('city', 'Cette commune n\'est pas éligible.');
+            $this->showCityConfirmation = false;
+            return;
+        }
+
+        $this->cityConfirmed = true;
+        $this->showCityConfirmation = false;
+        $this->resetErrorBag('city');
+    }
+
+    public function cancelCityChange(): void
+    {
+        $this->showCityConfirmation = false;
     }
 
     public function addChild(): void
@@ -256,10 +290,18 @@ class GiftRequestForm extends Component
         }
 
         // Validate city
-        if (! empty($this->allowedCities) && ! in_array($this->city, $this->allowedCities)) {
-            $this->addError('city', 'Cette commune n\'est pas éligible.');
+        if (! empty($this->allowedCities)) {
+            if (! in_array($this->city, $this->allowedCities)) {
+                $this->addError('city', 'Cette commune n\'est pas éligible.');
 
-            return;
+                return;
+            }
+
+            if (! $this->cityConfirmed) {
+                $this->addError('city', 'Veuillez confirmer votre commune de résidence.');
+
+                return;
+            }
         }
 
         // Validate children

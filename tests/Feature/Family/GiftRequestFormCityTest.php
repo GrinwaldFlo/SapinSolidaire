@@ -35,7 +35,7 @@ test('acceptCity without selection shows error when cities are configured', func
         ->assertSet('step', 1);
 });
 
-test('acceptCity with valid selection sets city and advances', function () {
+test('acceptCity with valid selection sets city and marks it confirmed', function () {
     Setting::setValue(Setting::ALLOWED_CITIES, 'Lausanne, Morges');
 
     Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
@@ -45,6 +45,7 @@ test('acceptCity with valid selection sets city and advances', function () {
         ->assertHasNoErrors()
         ->assertSet('cityAccepted', true)
         ->assertSet('city', 'Lausanne')
+        ->assertSet('cityConfirmed', true)
         ->assertSet('step', 2);
 });
 
@@ -155,4 +156,146 @@ test('submit allows any city when no cities are configured', function () {
         ->set('children.0.gift', 'Livre')
         ->call('submit')
         ->assertHasNoErrors('city');
+});
+
+// --- City confirmation modal tests ---
+
+test('requestCityChange shows the confirmation modal', function () {
+    Setting::setValue(Setting::ALLOWED_CITIES, 'Lausanne, Morges');
+
+    Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
+        ->call('acceptConsecutiveYears')
+        ->set('selectedCity', 'Lausanne')
+        ->call('acceptCity')
+        ->set('city', 'Morges')
+        ->call('requestCityChange')
+        ->assertSet('showCityConfirmation', true);
+});
+
+test('confirmCity confirms the new city and hides modal', function () {
+    Setting::setValue(Setting::ALLOWED_CITIES, 'Lausanne, Morges');
+
+    Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
+        ->call('acceptConsecutiveYears')
+        ->set('selectedCity', 'Lausanne')
+        ->call('acceptCity')
+        ->set('city', 'Morges')
+        ->call('requestCityChange')
+        ->call('confirmCity')
+        ->assertSet('cityConfirmed', true)
+        ->assertSet('showCityConfirmation', false)
+        ->assertSet('city', 'Morges');
+});
+
+test('cancelCityChange hides the confirmation modal', function () {
+    Setting::setValue(Setting::ALLOWED_CITIES, 'Lausanne, Morges');
+
+    Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
+        ->call('acceptConsecutiveYears')
+        ->set('selectedCity', 'Lausanne')
+        ->call('acceptCity')
+        ->set('city', 'Morges')
+        ->call('requestCityChange')
+        ->call('cancelCityChange')
+        ->assertSet('showCityConfirmation', false);
+});
+
+test('confirmCity rejects non-allowed city', function () {
+    Setting::setValue(Setting::ALLOWED_CITIES, 'Lausanne, Morges');
+
+    Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
+        ->call('acceptConsecutiveYears')
+        ->set('selectedCity', 'Lausanne')
+        ->call('acceptCity')
+        ->set('city', 'Genève')
+        ->call('requestCityChange')
+        ->call('confirmCity')
+        ->assertHasErrors('city');
+});
+
+test('confirmCity rejects empty city', function () {
+    Setting::setValue(Setting::ALLOWED_CITIES, 'Lausanne, Morges');
+
+    Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
+        ->call('acceptConsecutiveYears')
+        ->set('selectedCity', 'Lausanne')
+        ->call('acceptCity')
+        ->set('city', '')
+        ->call('requestCityChange')
+        ->call('confirmCity')
+        ->assertHasErrors('city');
+});
+
+test('submit rejects unconfirmed city change', function () {
+    Setting::setValue(Setting::ALLOWED_CITIES, 'Lausanne, Morges');
+
+    Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
+        ->call('acceptConsecutiveYears')
+        ->set('selectedCity', 'Lausanne')
+        ->call('acceptCity')
+        ->set('city', 'Morges')
+        ->set('cityConfirmed', false)
+        ->set('firstName', 'Jean')
+        ->set('lastName', 'Dupont')
+        ->set('address', 'Rue de Test 1')
+        ->set('postalCode', '1000')
+        ->set('phone', '+41791234567')
+        ->set('children.0.first_name', 'Petit')
+        ->set('children.0.birth_year', '2018')
+        ->set('children.0.gift', 'Livre')
+        ->call('submit')
+        ->assertHasErrors('city');
+});
+
+test('submit accepts city after confirmation via modal', function () {
+    Setting::setValue(Setting::ALLOWED_CITIES, 'Lausanne, Morges');
+
+    Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
+        ->call('acceptConsecutiveYears')
+        ->set('selectedCity', 'Lausanne')
+        ->call('acceptCity')
+        ->set('city', 'Morges')
+        ->call('requestCityChange')
+        ->call('confirmCity')
+        ->set('firstName', 'Jean')
+        ->set('lastName', 'Dupont')
+        ->set('address', 'Rue de Test 1')
+        ->set('postalCode', '1000')
+        ->set('phone', '+41791234567')
+        ->set('children.0.first_name', 'Petit')
+        ->set('children.0.birth_year', '2018')
+        ->set('children.0.gift', 'Livre')
+        ->call('submit')
+        ->assertHasNoErrors('city');
+});
+
+// --- Submit button disabled state ---
+
+test('submit button is disabled when city is not confirmed and cities are configured', function () {
+    Setting::setValue(Setting::ALLOWED_CITIES, 'Lausanne, Morges');
+
+    Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
+        ->call('acceptConsecutiveYears')
+        ->set('selectedCity', 'Lausanne')
+        ->call('acceptCity')
+        ->set('cityConfirmed', false)
+        ->assertSeeHtml('disabled')
+        ->assertSee('Veuillez sélectionner et confirmer votre commune de résidence');
+});
+
+test('submit button is enabled after city is confirmed', function () {
+    Setting::setValue(Setting::ALLOWED_CITIES, 'Lausanne, Morges');
+
+    Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
+        ->call('acceptConsecutiveYears')
+        ->set('selectedCity', 'Lausanne')
+        ->call('acceptCity')
+        ->assertDontSee('Veuillez sélectionner et confirmer votre commune de résidence');
+});
+
+test('submit button is enabled when no cities are configured', function () {
+    Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
+        ->call('acceptConsecutiveYears')
+        ->call('acceptCity')
+        ->assertDontSee('Veuillez sélectionner et confirmer votre commune de résidence');
 });

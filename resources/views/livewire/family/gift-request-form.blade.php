@@ -172,8 +172,23 @@
 
                         <div>
                             <label for="city" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ville *</label>
-                            @if(!empty($allowedCities) && !empty($city))
-                                <input type="text" id="city" wire:model="city" readonly class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-gray-100 dark:bg-zinc-600 dark:text-white cursor-not-allowed">
+                            @if(!empty($allowedCities))
+                                <div class="flex items-center gap-2">
+                                    <select
+                                        id="city"
+                                        wire:model="city"
+                                        wire:change="requestCityChange"
+                                        class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white"
+                                    >
+                                        <option value="">-- Sélectionnez votre commune --</option>
+                                        @foreach($allowedCities as $allowedCity)
+                                            <option value="{{ $allowedCity }}">{{ $allowedCity }}</option>
+                                        @endforeach
+                                    </select>
+                                    @if($cityConfirmed)
+                                        <span class="text-green-600 dark:text-green-400 text-lg" title="Commune confirmée">✓</span>
+                                    @endif
+                                </div>
                             @else
                                 <input type="text" id="city" wire:model="city" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white">
                             @endif
@@ -275,17 +290,60 @@
 
                 {{-- Submit --}}
                 <div class="pt-4">
+                    @php
+                        $submitDisabled = !empty($allowedCities) && !$cityConfirmed;
+                    @endphp
                     <button
                         type="submit"
-                        class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center gap-2"
+                        class="w-full font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center gap-2 {{ $submitDisabled ? 'bg-gray-400 dark:bg-gray-600 text-white cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 text-white' }}"
                         wire:loading.attr="disabled"
                         wire:loading.class="opacity-50 cursor-not-allowed"
+                        {{ $submitDisabled ? 'disabled' : '' }}
                     >
                         <span wire:loading.remove>{{ $isModifying ? 'Enregistrer les modifications' : 'Envoyer ma demande' }}</span>
                         <span wire:loading>Enregistrement...</span>
                     </button>
+                    @if($submitDisabled)
+                        <p class="mt-2 text-sm text-center text-gray-500 dark:text-gray-400">
+                            Veuillez sélectionner et confirmer votre commune de résidence pour pouvoir envoyer votre demande.
+                        </p>
+                    @endif
                 </div>
             </form>
+        </div>
+    @endif
+
+    {{-- City confirmation modal --}}
+    @if($showCityConfirmation)
+        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-2xl max-w-md w-full p-6">
+                <div class="text-center mb-4">
+                    <span class="text-4xl mb-2 block">📍</span>
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-white">Confirmation de résidence</h3>
+                </div>
+                <p class="text-gray-600 dark:text-gray-300 text-center mb-6">
+                    Confirmez-vous habiter dans la commune de
+                    <strong class="text-gray-800 dark:text-white">{{ $city }}</strong> ?
+                    <br><br>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                        Il est obligatoire de résider dans une commune éligible pour pouvoir faire une demande de cadeau.
+                    </span>
+                </p>
+                <div class="flex gap-3">
+                    <button
+                        wire:click="cancelCityChange"
+                        class="flex-1 px-4 py-2 border border-gray-300 dark:border-zinc-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-700 transition duration-200"
+                    >
+                        Annuler
+                    </button>
+                    <button
+                        wire:click="confirmCity"
+                        class="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition duration-200"
+                    >
+                        Je confirme
+                    </button>
+                </div>
+            </div>
         </div>
     @endif
 </div>
