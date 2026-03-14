@@ -33,15 +33,15 @@ beforeEach(function () {
     ]);
 });
 
-test('generateCode formats code as prefix + family number + slash + child number', function () {
-    expect(Child::generateCode('Y', 1, 1))->toBe('Y1/1');
-    expect(Child::generateCode('Y', 42, 3))->toBe('Y42/3');
-    expect(Child::generateCode('AB', 100, 5))->toBe('AB100/5');
+test('generateCode formats code as prefix + padded family number + slash + child number', function () {
+    expect(Child::generateCode('Y', 1, 1))->toBe('Y0001/1');
+    expect(Child::generateCode('Y', 42, 3))->toBe('Y0042/3');
+    expect(Child::generateCode('AB', 100, 5))->toBe('AB0100/5');
 });
 
 test('generateCode works with empty prefix', function () {
-    expect(Child::generateCode('', 1, 1))->toBe('1/1');
-    expect(Child::generateCode('', 99, 7))->toBe('99/7');
+    expect(Child::generateCode('', 1, 1))->toBe('0001/1');
+    expect(Child::generateCode('', 99, 7))->toBe('0099/7');
 });
 
 test('child is created without code when no auto-generation', function () {
@@ -75,7 +75,7 @@ test('assignChildNumberAndCode assigns child number 1 for first child', function
     $child->assignChildNumberAndCode();
 
     expect($child->child_number)->toBe(1);
-    expect($child->code)->toBe('Y5/1');
+    expect($child->code)->toBe('Y0005/1');
 });
 
 test('assignChildNumberAndCode increments child number for subsequent children', function () {
@@ -114,13 +114,13 @@ test('assignChildNumberAndCode increments child number for subsequent children',
     $child3->assignChildNumberAndCode();
 
     expect($child1->child_number)->toBe(1);
-    expect($child1->code)->toBe('Y3/1');
+    expect($child1->code)->toBe('Y0003/1');
 
     expect($child2->child_number)->toBe(2);
-    expect($child2->code)->toBe('Y3/2');
+    expect($child2->code)->toBe('Y0003/2');
 
     expect($child3->child_number)->toBe(3);
-    expect($child3->code)->toBe('Y3/3');
+    expect($child3->code)->toBe('Y0003/3');
 });
 
 test('assignChildNumberAndCode does nothing when family has no family_number', function () {
@@ -157,7 +157,7 @@ test('assignChildNumberAndCode uses setting code prefix', function () {
 
     $child->assignChildNumberAndCode();
 
-    expect($child->code)->toBe('Z1/1');
+    expect($child->code)->toBe('Z0001/1');
 });
 
 test('assignChildNumberAndCode works with empty prefix', function () {
@@ -176,7 +176,7 @@ test('assignChildNumberAndCode works with empty prefix', function () {
 
     $child->assignChildNumberAndCode();
 
-    expect($child->code)->toBe('7/1');
+    expect($child->code)->toBe('0007/1');
 });
 
 test('child numbers are scoped per gift request', function () {
@@ -224,8 +224,34 @@ test('child numbers are scoped per gift request', function () {
     $child2->assignChildNumberAndCode();
 
     expect($child1->child_number)->toBe(1);
-    expect($child1->code)->toBe('Y1/1');
+    expect($child1->code)->toBe('Y0001/1');
 
     expect($child2->child_number)->toBe(1);
-    expect($child2->code)->toBe('Y2/1');
+    expect($child2->code)->toBe('Y0002/1');
+});
+
+test('generateCode respects custom padding', function () {
+    expect(Child::generateCode('Y', 1, 1, 2))->toBe('Y01/1');
+    expect(Child::generateCode('Y', 1, 1, 6))->toBe('Y000001/1');
+    expect(Child::generateCode('Y', 12345, 3, 3))->toBe('Y12345/3');
+});
+
+test('assignChildNumberAndCode uses setting padding', function () {
+    Setting::setValue(Setting::CODE_PREFIX, 'Y');
+    Setting::setValue(Setting::CODE_FAMILY_PADDING, 6);
+
+    $this->giftRequest->update(['family_number' => 5]);
+
+    $child = Child::create([
+        'gift_request_id' => $this->giftRequest->id,
+        'first_name' => 'Alice',
+        'gender' => Child::GENDER_GIRL,
+        'birth_year' => 2018,
+        'gift' => 'Poupée',
+        'status' => Child::STATUS_PENDING,
+    ]);
+
+    $child->assignChildNumberAndCode();
+
+    expect($child->code)->toBe('Y000005/1');
 });

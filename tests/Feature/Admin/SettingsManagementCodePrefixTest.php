@@ -67,3 +67,52 @@ test('codePrefix rejects values longer than 10 characters', function () {
         ->call('save')
         ->assertHasErrors(['codePrefix']);
 });
+
+test('settings page loads codeFamilyPadding value', function () {
+    Setting::setValue(Setting::CODE_FAMILY_PADDING, 6);
+
+    $this->actingAs($this->admin);
+
+    Livewire::test(SettingsManagement::class)
+        ->assertSet('codeFamilyPadding', 6);
+});
+
+test('settings page loads default codeFamilyPadding when not set', function () {
+    $this->actingAs($this->admin);
+
+    Livewire::test(SettingsManagement::class)
+        ->assertSet('codeFamilyPadding', 4);
+});
+
+test('admin can save codeFamilyPadding setting', function () {
+    $this->actingAs($this->admin);
+
+    Livewire::test(SettingsManagement::class)
+        ->set('siteName', 'Test Site')
+        ->set('codeFamilyPadding', 6)
+        ->call('save')
+        ->assertHasNoErrors();
+
+    Setting::clearCache();
+    expect(Setting::getCodeFamilyPadding())->toBe(6);
+});
+
+test('codeFamilyPadding rejects value of 0', function () {
+    $this->actingAs($this->admin);
+
+    Livewire::test(SettingsManagement::class)
+        ->set('siteName', 'Test Site')
+        ->set('codeFamilyPadding', 0)
+        ->call('save')
+        ->assertHasErrors(['codeFamilyPadding']);
+});
+
+test('codeFamilyPadding rejects value greater than 10', function () {
+    $this->actingAs($this->admin);
+
+    Livewire::test(SettingsManagement::class)
+        ->set('siteName', 'Test Site')
+        ->set('codeFamilyPadding', 11)
+        ->call('save')
+        ->assertHasErrors(['codeFamilyPadding']);
+});

@@ -185,17 +185,18 @@ class Child extends Model
             $this->code = self::generateCode(
                 Setting::getCodePrefix(),
                 $giftRequest->family_number,
-                $this->child_number
+                $this->child_number,
+                Setting::getCodeFamilyPadding()
             );
             $this->save();
         });
     }
 
     /**
-     * Generate a formatted code: prefix + family number + / + child number.
+     * Generate a formatted code: prefix + padded family number + / + child number.
      */
-    public static function generateCode(string $prefix, int $familyNumber, int $childNumber): string
+    public static function generateCode(string $prefix, int $familyNumber, int $childNumber, int $padding = 4): string
     {
-        return $prefix . $familyNumber . '/' . $childNumber;
+        return $prefix . str_pad((string) $familyNumber, $padding, '0', STR_PAD_LEFT) . '/' . $childNumber;
     }
 }

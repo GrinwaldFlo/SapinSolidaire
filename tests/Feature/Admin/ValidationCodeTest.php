@@ -129,7 +129,7 @@ test('validateChild assigns child number and code', function () {
 
     $child->refresh();
     expect($child->child_number)->toBe(1);
-    expect($child->code)->toBe('Y3/1');
+    expect($child->code)->toBe('Y0003/1');
     expect($child->status)->toBe(Child::STATUS_VALIDATED);
 });
 
@@ -169,10 +169,10 @@ test('validateChild assigns sequential child numbers within same family', functi
     $child2->refresh();
 
     expect($child1->child_number)->toBe(1);
-    expect($child1->code)->toBe('Y1/1');
+    expect($child1->code)->toBe('Y0001/1');
 
     expect($child2->child_number)->toBe(2);
-    expect($child2->code)->toBe('Y1/2');
+    expect($child2->code)->toBe('Y0001/2');
 });
 
 test('full validation flow produces correct codes', function () {
@@ -238,12 +238,12 @@ test('full validation flow produces correct codes', function () {
     $child2->refresh();
     $child3->refresh();
 
-    // Family 1 (family_number=1): children Y1/1, Y1/2
-    expect($child1->code)->toBe('Y1/1');
-    expect($child2->code)->toBe('Y1/2');
+    // Family 1 (family_number=1): children Y0001/1, Y0001/2
+    expect($child1->code)->toBe('Y0001/1');
+    expect($child2->code)->toBe('Y0001/2');
 
-    // Family 2 (family_number=2): child Y2/1
-    expect($child3->code)->toBe('Y2/1');
+    // Family 2 (family_number=2): child Y0002/1
+    expect($child3->code)->toBe('Y0002/1');
 
     // Season counter advanced to 3
     $this->season->refresh();

@@ -14,6 +14,7 @@ class SettingsManagement extends Component
     public string $introductionText = '';
     public string $replyToEmail = '';
     public string $codePrefix = '';
+    public int $codeFamilyPadding = 4;
 
     public function mount(): void
     {
@@ -24,6 +25,7 @@ class SettingsManagement extends Component
         $this->introductionText = Setting::getIntroductionText();
         $this->replyToEmail = Setting::getReplyToEmail() ?? '';
         $this->codePrefix = Setting::getCodePrefix();
+        $this->codeFamilyPadding = Setting::getCodeFamilyPadding();
     }
 
     public function save(): void
@@ -33,6 +35,7 @@ class SettingsManagement extends Component
             'maxConsecutiveYears' => ['required', 'integer', 'min:1', 'max:10'],
             'replyToEmail' => ['nullable', 'email'],
             'codePrefix' => ['nullable', 'string', 'max:10'],
+            'codeFamilyPadding' => ['required', 'integer', 'min:1', 'max:10'],
         ]);
 
         Setting::setValue(Setting::SITE_NAME, $this->siteName);
@@ -42,6 +45,7 @@ class SettingsManagement extends Component
         Setting::setValue(Setting::INTRODUCTION_TEXT, $this->introductionText);
         Setting::setValue(Setting::REPLY_TO_EMAIL, $this->replyToEmail);
         Setting::setValue(Setting::CODE_PREFIX, $this->codePrefix);
+        Setting::setValue(Setting::CODE_FAMILY_PADDING, $this->codeFamilyPadding);
 
         session()->flash('message', 'Paramètres enregistrés avec succès.');
     }

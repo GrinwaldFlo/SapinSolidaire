@@ -19,6 +19,7 @@ class SettingSeeder extends Seeder
             Setting::INTRODUCTION_TEXT => "Bienvenue sur Sapin Solidaire.\n\nCette plateforme vous permet de faire une demande de cadeau pour vos enfants.",
             Setting::REPLY_TO_EMAIL => '',
             Setting::CODE_PREFIX => 'Y',
+            Setting::CODE_FAMILY_PADDING => '4',
         ];
 
         foreach ($settings as $key => $value) {
