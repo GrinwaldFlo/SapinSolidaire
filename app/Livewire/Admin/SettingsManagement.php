@@ -8,7 +8,7 @@ use Livewire\Component;
 class SettingsManagement extends Component
 {
     public string $siteName = '';
-    public string $allowedPostalCodes = '';
+    public string $allowedCities = '';
     public int $maxConsecutiveYears = 3;
     public string $giftSuggestions = '';
     public string $introductionText = '';
@@ -17,7 +17,7 @@ class SettingsManagement extends Component
     public function mount(): void
     {
         $this->siteName = Setting::getSiteName();
-        $this->allowedPostalCodes = Setting::getValue(Setting::ALLOWED_POSTAL_CODES, '');
+        $this->allowedCities = Setting::getValue(Setting::ALLOWED_CITIES, '');
         $this->maxConsecutiveYears = Setting::getMaxConsecutiveYears();
         $this->giftSuggestions = Setting::getValue(Setting::GIFT_SUGGESTIONS, '');
         $this->introductionText = Setting::getIntroductionText();
@@ -33,7 +33,7 @@ class SettingsManagement extends Component
         ]);
 
         Setting::setValue(Setting::SITE_NAME, $this->siteName);
-        Setting::setValue(Setting::ALLOWED_POSTAL_CODES, $this->allowedPostalCodes);
+        Setting::setValue(Setting::ALLOWED_CITIES, $this->allowedCities);
         Setting::setValue(Setting::MAX_CONSECUTIVE_YEARS, $this->maxConsecutiveYears);
         Setting::setValue(Setting::GIFT_SUGGESTIONS, $this->giftSuggestions);
         Setting::setValue(Setting::INTRODUCTION_TEXT, $this->introductionText);

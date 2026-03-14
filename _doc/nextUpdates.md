@@ -6,3 +6,17 @@ In /admin/parametres, instead of having a list of "Codes postaux", I would like 
 - It still can be comma separated
 - Spelling of cities has to be checked using Post API
 
+## Proof of habitation
+
+When family register, the will need to take a picture as a proof where they live.
+Staff need to validate
+
+## Import data from previous years
+
+## Improve banning system
+
+## Numbering with Y0001/1
+
+## When giving gifts, Familly name is the first step, improve this
+
+## Test with 700 children

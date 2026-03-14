@@ -76,25 +76,36 @@
                     </div>
                 @endif
 
-                @if($consecutiveYearsAccepted && !$postalCodeAccepted)
+                @if($consecutiveYearsAccepted && !$cityAccepted)
                     <div class="border border-gray-200 dark:border-zinc-600 rounded-lg p-6">
                         <h3 class="font-semibold text-gray-800 dark:text-white mb-2">Zone géographique</h3>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4">
-                            Je confirme habiter dans une des communes suivantes :
-                            @if(!empty($allowedPostalCodes))
-                                <span class="font-medium">{{ implode(', ', $allowedPostalCodes) }}</span>
-                            @else
+                        @if(!empty($allowedCities))
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Je confirme habiter dans la commune :
+                            </p>
+                            <select
+                                wire:model="selectedCity"
+                                class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white mb-4"
+                            >
+                                <option value="">-- Sélectionnez votre commune --</option>
+                                @foreach($allowedCities as $allowedCity)
+                                    <option value="{{ $allowedCity }}">{{ $allowedCity }}</option>
+                                @endforeach
+                            </select>
+                            @error('selectedCity') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                        @else
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 <span class="italic">Toutes les communes sont acceptées</span>
-                            @endif
-                        </p>
+                            </p>
+                        @endif
                         <button
-                            wire:click="acceptPostalCode"
+                            wire:click="acceptCity"
                             class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
                         >
                             Je confirme
                         </button>
                     </div>
-                @elseif($postalCodeAccepted)
+                @elseif($cityAccepted)
                     <div class="border border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20 rounded-lg p-6">
                         <div class="flex items-center gap-2 text-green-600 dark:text-green-400">
                             <span>✓</span>
@@ -161,7 +172,11 @@
 
                         <div>
                             <label for="city" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ville *</label>
-                            <input type="text" id="city" wire:model="city" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white">
+                            @if(!empty($allowedCities) && !empty($city))
+                                <input type="text" id="city" wire:model="city" readonly class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-gray-100 dark:bg-zinc-600 dark:text-white cursor-not-allowed">
+                            @else
+                                <input type="text" id="city" wire:model="city" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white">
+                            @endif
                             @error('city') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
                         </div>
                     </div>
