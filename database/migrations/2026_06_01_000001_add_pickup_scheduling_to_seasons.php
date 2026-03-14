@@ -31,7 +31,6 @@ return new class extends Migration
 
         Schema::table('gift_requests', function (Blueprint $table) {
             $table->foreignUuid('pickup_slot_id')->nullable()->after('rejection_comment')->constrained('pickup_slots')->nullOnDelete();
-            $table->index('pickup_slot_id');
         });
     }
 
