@@ -25,8 +25,6 @@ return new class extends Migration
             $table->dateTime('start_datetime');
             $table->dateTime('end_datetime');
             $table->timestamps();
-
-            $table->index('season_id');
         });
 
         Schema::table('gift_requests', function (Blueprint $table) {

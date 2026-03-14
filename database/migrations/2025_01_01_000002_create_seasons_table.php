@@ -17,7 +17,6 @@ return new class extends Migration
             $table->date('start_date');
             $table->date('end_date');
             $table->date('modification_deadline')->nullable();
-            $table->date('pickup_start_date')->nullable();
             $table->text('pickup_address')->nullable();
             $table->timestamps();
 
