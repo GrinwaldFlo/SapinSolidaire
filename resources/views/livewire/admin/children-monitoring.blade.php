@@ -22,6 +22,11 @@
                     @endforeach
                 </select>
             </div>
+
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Recherche</label>
+                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Code, prénom, nom, cadeau…" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white" />
+            </div>
         </div>
     </div>
 
@@ -30,13 +35,34 @@
             <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
                 <thead class="bg-gray-50 dark:bg-zinc-700">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Code</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Prénom</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Genre</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Âge</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Cadeau</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Famille</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Statut</th>
+                        <th wire:click="sort('code')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase cursor-pointer hover:text-gray-700 dark:hover:text-white">
+                            Code
+                            @if($sortBy === 'code') <span>{{ $sortDirection === 'asc' ? '▲' : '▼' }}</span> @endif
+                        </th>
+                        <th wire:click="sort('first_name')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase cursor-pointer hover:text-gray-700 dark:hover:text-white">
+                            Prénom
+                            @if($sortBy === 'first_name') <span>{{ $sortDirection === 'asc' ? '▲' : '▼' }}</span> @endif
+                        </th>
+                        <th wire:click="sort('gender')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase cursor-pointer hover:text-gray-700 dark:hover:text-white">
+                            Genre
+                            @if($sortBy === 'gender') <span>{{ $sortDirection === 'asc' ? '▲' : '▼' }}</span> @endif
+                        </th>
+                        <th wire:click="sort('birth_year')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase cursor-pointer hover:text-gray-700 dark:hover:text-white">
+                            Âge
+                            @if($sortBy === 'birth_year') <span>{{ $sortDirection === 'asc' ? '▲' : '▼' }}</span> @endif
+                        </th>
+                        <th wire:click="sort('gift')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase cursor-pointer hover:text-gray-700 dark:hover:text-white">
+                            Cadeau
+                            @if($sortBy === 'gift') <span>{{ $sortDirection === 'asc' ? '▲' : '▼' }}</span> @endif
+                        </th>
+                        <th wire:click="sort('family_name')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase cursor-pointer hover:text-gray-700 dark:hover:text-white">
+                            Famille
+                            @if($sortBy === 'family_name') <span>{{ $sortDirection === 'asc' ? '▲' : '▼' }}</span> @endif
+                        </th>
+                        <th wire:click="sort('status')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase cursor-pointer hover:text-gray-700 dark:hover:text-white">
+                            Statut
+                            @if($sortBy === 'status') <span>{{ $sortDirection === 'asc' ? '▲' : '▼' }}</span> @endif
+                        </th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
