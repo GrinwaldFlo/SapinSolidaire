@@ -28,7 +28,7 @@
 
         <!-- Footer -->
         <footer class="bg-green-800 text-white py-4 px-6 text-center text-sm">
-            <p>&copy; {{ date('Y') }} {{ \App\Models\Setting::getSiteName() }}</p>
+            <p>&copy; {{ date('Y') }} {{ \App\Models\Setting::getSiteName() }} · <a href="https://github.com/GrinwaldFlo/SapinSolidaire" target="_blank" rel="noopener noreferrer" class="underline hover:text-green-200">GitHub</a></p>
         </footer>
     </div>
 

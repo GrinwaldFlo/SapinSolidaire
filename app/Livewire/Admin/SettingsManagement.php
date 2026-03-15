@@ -45,7 +45,9 @@ class SettingsManagement extends Component
         ]);
 
         Setting::setValue(Setting::SITE_NAME, $this->siteName);
-        Setting::setValue(Setting::ALLOWED_CITIES, $this->allowedCities);
+        $cities = array_filter(array_map('trim', explode(',', $this->allowedCities)), fn ($c) => $c !== '');
+        sort($cities, SORT_STRING | SORT_FLAG_CASE);
+        Setting::setValue(Setting::ALLOWED_CITIES, implode(', ', $cities));
         Setting::setValue(Setting::MAX_CONSECUTIVE_YEARS, $this->maxConsecutiveYears);
         Setting::setValue(Setting::GIFT_SUGGESTIONS, $this->giftSuggestions);
         Setting::setValue(Setting::INTRODUCTION_TEXT, $this->introductionText);
