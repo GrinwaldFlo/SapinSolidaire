@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Role;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,6 +24,10 @@ class CheckRole
             if ($request->user()->hasRole($role)) {
                 return $next($request);
             }
+        }
+
+        if ($request->user()->hasRole(Role::VISITOR) && ! $request->user()->hasAnyRole([Role::ADMIN, Role::VALIDATOR, Role::ORGANIZER, Role::RECEPTION])) {
+            return redirect()->route('dashboard');
         }
 
         abort(403, 'Accès non autorisé.');
