@@ -47,5 +47,39 @@
                 </button>
             </div>
         </div>
+
+        @if($generatedPdfs->count() > 0)
+        <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                📋 Historique des PDF générés
+            </h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs text-gray-500 dark:text-gray-400 uppercase border-b dark:border-zinc-700">
+                        <tr>
+                            <th class="px-4 py-3">Date</th>
+                            <th class="px-4 py-3">Enfants</th>
+                            <th class="px-4 py-3">Généré par</th>
+                            <th class="px-4 py-3 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y dark:divide-zinc-700">
+                        @foreach($generatedPdfs as $pdf)
+                        <tr class="hover:bg-gray-50 dark:hover:bg-zinc-700/50">
+                            <td class="px-4 py-3 text-gray-900 dark:text-white">{{ $pdf->created_at->format('d/m/Y H:i') }}</td>
+                            <td class="px-4 py-3 text-gray-900 dark:text-white">{{ $pdf->children_count }}</td>
+                            <td class="px-4 py-3 text-gray-900 dark:text-white">{{ $pdf->user->name ?? '—' }}</td>
+                            <td class="px-4 py-3 text-right">
+                                <a href="{{ route('admin.labels.download', $pdf) }}" class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 font-medium">
+                                    📥 Télécharger
+                                </a>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
     @endif
 </div>

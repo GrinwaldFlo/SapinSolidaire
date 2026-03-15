@@ -3,9 +3,12 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Child;
+use App\Models\GeneratedPdf;
 use App\Models\Season;
 use App\Models\Setting;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 
 class LabelGeneration extends Component
@@ -64,11 +67,26 @@ class LabelGeneration extends Component
         $pdf->setOption('margin-left', 10);
         $pdf->setOption('margin-right', 10);
 
+        // Save PDF to disk and record history
+        $filename = 'cartes-'.now()->format('Y-m-d-His').'.pdf';
+        $path = 'generated-pdfs/'.$this->activeSeason->id.'/'.$filename;
+
+        Storage::disk('local')->put($path, $pdf->output());
+
+        GeneratedPdf::create([
+            'season_id' => $this->activeSeason->id,
+            'user_id' => Auth::id(),
+            'filename' => $filename,
+            'path' => $path,
+            'children_count' => $children->count(),
+            'style' => $pdfStyle,
+        ]);
+
         $this->loadCount();
 
         return response()->streamDownload(
-            fn () => print ($pdf->output()),
-            'cartes-'.now()->format('Y-m-d-His').'.pdf'
+            fn () => print (Storage::disk('local')->get($path)),
+            $filename
         );
     }
 
@@ -92,6 +110,15 @@ class LabelGeneration extends Component
 
     public function render()
     {
-        return view('livewire.admin.label-generation');
+        $generatedPdfs = $this->activeSeason
+            ? GeneratedPdf::with('user')
+                ->where('season_id', $this->activeSeason->id)
+                ->orderByDesc('created_at')
+                ->get()
+            : collect();
+
+        return view('livewire.admin.label-generation', [
+            'generatedPdfs' => $generatedPdfs,
+        ]);
     }
 }

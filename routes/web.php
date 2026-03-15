@@ -14,6 +14,7 @@ use App\Livewire\Admin\UserManagement;
 use App\Livewire\Admin\Validation;
 use App\Livewire\Family\GiftRequestForm;
 use App\Livewire\Family\Home;
+use App\Models\GeneratedPdf;
 use App\Models\GiftRequest;
 use App\Models\Role;
 use Illuminate\Support\Facades\Route;
@@ -75,6 +76,17 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     })
         ->middleware('any.role:'.Role::VALIDATOR.','.Role::ADMIN)
         ->name('admin.proof-of-habitation');
+
+    // Download generated PDF - Organizer or Admin
+    Route::get('/cartes/telecharger/{generatedPdf}', function (GeneratedPdf $generatedPdf) {
+        if (!Storage::disk('local')->exists($generatedPdf->path)) {
+            abort(404);
+        }
+
+        return Storage::disk('local')->download($generatedPdf->path, $generatedPdf->filename);
+    })
+        ->middleware('any.role:'.Role::ORGANIZER.','.Role::ADMIN)
+        ->name('admin.labels.download');
 
     // Admin only routes
     Route::middleware('role:'.Role::ADMIN)->group(function () {
