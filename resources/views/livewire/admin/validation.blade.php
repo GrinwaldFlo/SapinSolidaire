@@ -1,4 +1,4 @@
-<div class="space-y-6">
+<div class="space-y-6" x-data="{ showImageModal: false, imageUrl: '', imageAlt: '' }">
     <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Validation des demandes</h1>
         <div class="text-sm text-gray-600 dark:text-gray-400">
@@ -51,9 +51,9 @@
                     <div class="mb-4">
                         <span class="text-sm text-gray-500 dark:text-gray-400">Justificatif de domicile :</span>
                         <div class="mt-2">
-                            <a href="{{ route('admin.proof-of-habitation', $currentRequest) }}" target="_blank" class="inline-block">
+                            <button type="button" @click="imageUrl = '{{ route('admin.proof-of-habitation', $currentRequest) }}'; imageAlt = 'Justificatif de domicile'; showImageModal = true" class="inline-block cursor-pointer">
                                 <img src="{{ route('admin.proof-of-habitation', $currentRequest) }}" alt="Justificatif de domicile" class="max-w-sm max-h-64 rounded-lg border border-gray-200 dark:border-zinc-700 hover:opacity-90 transition">
-                            </a>
+                            </button>
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Cliquez sur l'image pour l'agrandir</p>
                         </div>
                     </div>
@@ -137,6 +137,16 @@
             </div>
         </div>
     @endif
+
+    {{-- Image Preview Modal --}}
+    <div x-show="showImageModal" x-transition.opacity class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4" @click.self="showImageModal = false" @keydown.escape.window="showImageModal = false" x-cloak>
+        <div class="relative max-w-full max-h-full flex items-center justify-center">
+            <button type="button" @click="showImageModal = false" class="absolute -top-3 -right-3 bg-white dark:bg-zinc-700 text-gray-800 dark:text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg hover:bg-gray-100 dark:hover:bg-zinc-600 z-10">
+                ✕
+            </button>
+            <img :src="imageUrl" :alt="imageAlt" @click="showImageModal = false" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl cursor-pointer">
+        </div>
+    </div>
 
     {{-- Rejection Modal --}}
     @if($showRejectionModal)

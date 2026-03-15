@@ -17,7 +17,7 @@
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Communes autorisées</label>
-                <input type="text" wire:model="allowedCities" placeholder="Lausanne, Morges, Renens" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white">
+                <textarea wire:model="allowedCities" rows="3" placeholder="Lausanne, Morges, Renens" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white"></textarea>
                 <p class="mt-1 text-sm text-gray-500">Séparez les communes par des virgules. Laissez vide pour autoriser toutes les communes.</p>
             </div>
 
