@@ -20,6 +20,10 @@ class Setting extends Model
     public const CODE_PREFIX = 'code_prefix';
     public const CODE_FAMILY_PADDING = 'code_family_padding';
     public const PROOF_OF_HABITATION_ENABLED = 'proof_of_habitation_enabled';
+    public const PDF_STYLE = 'pdf_style';
+
+    public const PDF_STYLE_LABEL = 'label';
+    public const PDF_STYLE_GRID = 'grid';
 
     /**
      * @var array<int, string>
@@ -158,6 +162,14 @@ class Setting extends Model
     }
 
     /**
+     * Get PDF style (label or grid).
+     */
+    public static function getPdfStyle(): string
+    {
+        return self::getValue(self::PDF_STYLE, self::PDF_STYLE_LABEL);
+    }
+
+    /**
      * Clear all settings cache.
      */
     public static function clearCache(): void
@@ -172,6 +184,7 @@ class Setting extends Model
             self::CODE_PREFIX,
             self::CODE_FAMILY_PADDING,
             self::PROOF_OF_HABITATION_ENABLED,
+            self::PDF_STYLE,
         ];
 
         foreach ($keys as $key) {

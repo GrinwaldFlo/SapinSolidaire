@@ -29,7 +29,7 @@
 
                     @can('organize')
                     <flux:sidebar.item icon="tag" :href="route('admin.labels')" :current="request()->routeIs('admin.labels')" wire:navigate>
-                        Étiquettes
+                        Cartes
                     </flux:sidebar.item>
                     @endcan
 

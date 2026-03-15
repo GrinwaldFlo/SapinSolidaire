@@ -36,7 +36,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         ->name('admin.validation');
 
     // Label generation - Organizer or Admin
-    Route::get('/etiquettes', LabelGeneration::class)
+    Route::get('/cartes', LabelGeneration::class)
         ->middleware('any.role:'.Role::ORGANIZER.','.Role::ADMIN)
         ->name('admin.labels');
 

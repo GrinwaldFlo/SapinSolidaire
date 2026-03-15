@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\Child;
 use App\Models\Season;
+use App\Models\Setting;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Livewire\Component;
 
@@ -50,7 +51,10 @@ class LabelGeneration extends Component
         }
 
         // Generate PDF
-        $pdf = Pdf::loadView('pdf.labels', [
+        $pdfStyle = Setting::getPdfStyle();
+        $view = $pdfStyle === Setting::PDF_STYLE_GRID ? 'pdf.grid' : 'pdf.labels';
+
+        $pdf = Pdf::loadView($view, [
             'children' => $children,
         ]);
 
@@ -64,7 +68,7 @@ class LabelGeneration extends Component
 
         return response()->streamDownload(
             fn () => print ($pdf->output()),
-            'etiquettes-'.now()->format('Y-m-d-His').'.pdf'
+            'cartes-'.now()->format('Y-m-d-His').'.pdf'
         );
     }
 
@@ -83,7 +87,7 @@ class LabelGeneration extends Component
 
         $this->loadCount();
 
-        session()->flash('message', 'Étiquettes réinitialisées avec succès.');
+        session()->flash('message', 'Cartes réinitialisées avec succès.');
     }
 
     public function render()
