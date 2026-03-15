@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\Family;
-use App\Models\GiftRequest;
 use App\Models\Season;
 
 beforeEach(function () {
