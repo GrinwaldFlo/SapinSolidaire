@@ -148,8 +148,8 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
-                @forelse($seasons as $season)
-                    <tr>
+                @forelse($this->seasons as $season)
+                    <tr wire:key="season-{{ $season->id }}">
                         <td class="px-6 py-4 text-gray-900 dark:text-white">{{ $season->name }}</td>
                         <td class="px-6 py-4 text-gray-600 dark:text-gray-300">
                             {{ $season->start_date->format('d/m/Y') }} - {{ $season->end_date->format('d/m/Y') }}

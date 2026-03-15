@@ -5,11 +5,11 @@ namespace App\Livewire\Admin;
 use App\Models\PickupSlot;
 use App\Models\Season;
 use App\Services\SeasonService;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class SeasonManagement extends Component
 {
-    public $seasons;
     public bool $showForm = false;
     public bool $editing = false;
     public ?string $editingId = null;
@@ -47,14 +47,10 @@ class SeasonManagement extends Component
         ];
     }
 
-    public function mount(): void
+    #[Computed]
+    public function seasons()
     {
-        $this->loadSeasons();
-    }
-
-    protected function loadSeasons(): void
-    {
-        $this->seasons = Season::orderByDesc('start_date')->get();
+        return Season::orderByDesc('start_date')->get();
     }
 
     public function create(): void
@@ -131,7 +127,7 @@ class SeasonManagement extends Component
         }
 
         $this->resetForm();
-        $this->loadSeasons();
+        unset($this->seasons);
     }
 
     public function delete(string $id): void
@@ -147,7 +143,7 @@ class SeasonManagement extends Component
 
         $season->delete();
         session()->flash('message', 'Saison supprimée avec succès.');
-        $this->loadSeasons();
+        unset($this->seasons);
     }
 
     public function cancel(): void
