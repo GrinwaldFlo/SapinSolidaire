@@ -17,8 +17,9 @@
                 </p>
 
                 @if($validatedCount > 0)
-                    <button wire:click="generatePdf" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold">
-                        📄 Générer le PDF des cartes
+                    <button wire:click="generatePdf" wire:loading.attr="disabled" wire:target="generatePdf" class="bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold">
+                        <span wire:loading.remove wire:target="generatePdf">📄 Générer le PDF des cartes</span>
+                        <span wire:loading wire:target="generatePdf">⏳ Génération en cours…</span>
                     </button>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">
                         Le statut des enfants passera de "Validé" à "Imprimé" après la génération.
@@ -41,9 +42,12 @@
                 </p>
                 <button
                     wire:click="resetPrintedLabels"
+                    wire:loading.attr="disabled"
+                    wire:target="resetPrintedLabels"
                     onclick="confirm('Êtes-vous sûr de vouloir réinitialiser toutes les cartes imprimées vers le statut « Validé » ? Cette action peut annuler du travail déjà effectué.') || event.stopImmediatePropagation()"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold">
-                    🔄 Réinitialiser
+                    class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold">
+                    <span wire:loading.remove wire:target="resetPrintedLabels">🔄 Réinitialiser</span>
+                    <span wire:loading wire:target="resetPrintedLabels">⏳ Réinitialisation en cours…</span>
                 </button>
             </div>
         </div>
