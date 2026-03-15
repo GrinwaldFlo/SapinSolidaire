@@ -119,14 +119,14 @@
                             </span>
 
                             @if($child->status === 'pending')
-                                <div class="flex gap-2">
-                                    <button wire:click="validateChild('{{ $child->id }}')" class="text-green-600 hover:text-green-800 text-sm">
+                                <div class="flex flex-wrap gap-2">
+                                    <button wire:click="validateChild('{{ $child->id }}')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm">
                                         ✓ Valider
                                     </button>
-                                    <button wire:click="openRejectionModal('child', '{{ $child->id }}', false)" class="text-yellow-600 hover:text-yellow-800 text-sm">
+                                    <button wire:click="openRejectionModal('child', '{{ $child->id }}', false)" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm">
                                         Demander correction
                                     </button>
-                                    <button wire:click="openRejectionModal('child', '{{ $child->id }}', true)" class="text-red-600 hover:text-red-800 text-sm">
+                                    <button wire:click="openRejectionModal('child', '{{ $child->id }}', true)" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm">
                                         Refuser
                                     </button>
                                 </div>
