@@ -11,6 +11,14 @@ class ChildrenMonitoring extends Component
 {
     use WithPagination;
 
+    private const SORTABLE_COLUMNS = [
+        'first_name',
+        'code',
+        'gift',
+        'status',
+        'family_name',
+    ];
+
     public $seasons;
     public ?string $selectedSeasonId = null;
     public string $statusFilter = '';
@@ -42,6 +50,10 @@ class ChildrenMonitoring extends Component
 
     public function sort(string $column): void
     {
+        if (! in_array($column, self::SORTABLE_COLUMNS, true)) {
+            return;
+        }
+
         if ($this->sortBy === $column) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
