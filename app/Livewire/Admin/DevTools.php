@@ -6,7 +6,6 @@ use App\Models\Child;
 use App\Models\Family;
 use App\Models\GiftRequest;
 use App\Models\Season;
-use App\Models\Setting;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Livewire\Component;
