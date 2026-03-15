@@ -12,6 +12,7 @@ use App\Services\AddressValidationService;
 use App\Services\PhoneValidationService;
 use App\Services\SeasonService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -349,8 +350,16 @@ class GiftRequestForm extends Component
             return;
         }
 
+        // Store proof of habitation file before the transaction
+        $proofPath = $this->giftRequest?->proof_of_habitation_path;
+        $oldProofPath = null;
+        if ($this->proofOfHabitation) {
+            $oldProofPath = $proofPath;
+            $proofPath = $this->proofOfHabitation->store('proof-of-habitation', 'local');
+        }
+
         // Save data
-        DB::transaction(function () use ($formattedPhone) {
+        DB::transaction(function () use ($formattedPhone, $proofPath) {
             // Create or update family
             $this->family = Family::updateOrCreate(
                 ['email' => $this->email],
@@ -366,11 +375,6 @@ class GiftRequestForm extends Component
 
             // Create or update gift request
             $wasModifying = $this->isModifying;
-
-            $proofPath = $this->giftRequest?->proof_of_habitation_path;
-            if ($this->proofOfHabitation) {
-                $proofPath = $this->proofOfHabitation->store('proof-of-habitation', 'local');
-            }
 
             $this->giftRequest = GiftRequest::updateOrCreate(
                 [
@@ -435,6 +439,11 @@ class GiftRequestForm extends Component
                 ->whereIn('status', [Child::STATUS_PENDING, Child::STATUS_REJECTED, Child::STATUS_VALIDATED])
                 ->delete();
         });
+
+        // Delete the old proof file after successful transaction
+        if ($oldProofPath && $oldProofPath !== $proofPath) {
+            Storage::disk('local')->delete($oldProofPath);
+        }
 
         $this->submitted = true;
     }

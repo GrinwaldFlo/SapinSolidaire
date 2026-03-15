@@ -169,3 +169,53 @@ test('submit does not require new upload when proof already exists', function ()
         ->call('submit')
         ->assertHasNoErrors('proofOfHabitation');
 });
+
+test('re-uploading proof deletes the old file', function () {
+    Setting::setValue(Setting::PROOF_OF_HABITATION_ENABLED, '1');
+
+    // Create family with existing request that has a proof
+    $family = Family::create([
+        'email' => 'test@example.com',
+        'first_name' => 'Jean',
+        'last_name' => 'Dupont',
+        'address' => 'Rue de Test 1',
+        'postal_code' => '1000',
+        'city' => 'Lausanne',
+        'phone' => '+41791234567',
+    ]);
+
+    $giftRequest = GiftRequest::create([
+        'family_id' => $family->id,
+        'season_id' => $this->season->id,
+        'status' => GiftRequest::STATUS_PENDING,
+        'status_changed_at' => now(),
+        'proof_of_habitation_path' => 'proof-of-habitation/old-proof.jpg',
+    ]);
+
+    // Store a fake file at the existing path
+    Storage::disk('local')->put('proof-of-habitation/old-proof.jpg', 'old-image');
+
+    $newFile = UploadedFile::fake()->create('new-proof.jpg', 100, 'image/jpeg');
+
+    Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
+        ->set('proofOfHabitation', $newFile)
+        ->set('firstName', 'Jean')
+        ->set('lastName', 'Dupont')
+        ->set('address', 'Rue de Test 1')
+        ->set('postalCode', '1000')
+        ->set('city', 'Lausanne')
+        ->set('phone', '+41791234567')
+        ->set('children.0.first_name', 'Petit')
+        ->set('children.0.birth_year', '2018')
+        ->set('children.0.gift', 'Livre')
+        ->call('submit')
+        ->assertSet('submitted', true);
+
+    // Old file should be deleted
+    Storage::disk('local')->assertMissing('proof-of-habitation/old-proof.jpg');
+
+    // New file should exist
+    $giftRequest->refresh();
+    expect($giftRequest->proof_of_habitation_path)->not->toBe('proof-of-habitation/old-proof.jpg');
+    Storage::disk('local')->assertExists($giftRequest->proof_of_habitation_path);
+});
