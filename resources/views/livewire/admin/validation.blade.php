@@ -47,6 +47,18 @@
                     @endif
                 </div>
 
+                @if($currentRequest->proof_of_habitation_path)
+                    <div class="mb-4">
+                        <span class="text-sm text-gray-500 dark:text-gray-400">Justificatif de domicile :</span>
+                        <div class="mt-2">
+                            <a href="{{ route('admin.proof-of-habitation', $currentRequest) }}" target="_blank" class="inline-block">
+                                <img src="{{ route('admin.proof-of-habitation', $currentRequest) }}" alt="Justificatif de domicile" class="max-w-sm max-h-64 rounded-lg border border-gray-200 dark:border-zinc-700 hover:opacity-90 transition">
+                            </a>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Cliquez sur l'image pour l'agrandir</p>
+                        </div>
+                    </div>
+                @endif
+
                 @if($currentRequest->status === 'pending')
                     <div class="flex flex-wrap gap-2">
                         <button wire:click="validateFamily" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm">

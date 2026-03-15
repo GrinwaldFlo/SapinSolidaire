@@ -15,7 +15,7 @@ Staff will need to validate this proof.
 
 ## Improve banning system
 
-## Numbering with Y0001/1
+## [Done] Numbering with Y0001/1
 
 ## When giving gifts, Family name is the first step, improve this
 

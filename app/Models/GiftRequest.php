@@ -27,6 +27,7 @@ class GiftRequest extends Model
         'status',
         'status_changed_at',
         'rejection_comment',
+        'proof_of_habitation_path',
         'pickup_slot_id',
         'slot_start_datetime',
         'slot_end_datetime',

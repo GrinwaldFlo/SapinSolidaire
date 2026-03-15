@@ -16,6 +16,7 @@ class SettingsManagement extends Component
     public string $replyToEmail = '';
     public string $codePrefix = '';
     public int $codeFamilyPadding = 4;
+    public bool $proofOfHabitationEnabled = false;
 
     public function mount(): void
     {
@@ -27,6 +28,7 @@ class SettingsManagement extends Component
         $this->replyToEmail = Setting::getReplyToEmail() ?? '';
         $this->codePrefix = Setting::getCodePrefix();
         $this->codeFamilyPadding = Setting::getCodeFamilyPadding();
+        $this->proofOfHabitationEnabled = Setting::isProofOfHabitationEnabled();
     }
 
     public function save(): void
@@ -54,6 +56,8 @@ class SettingsManagement extends Component
         if ($oldPrefix !== $this->codePrefix || $oldPadding !== $this->codeFamilyPadding) {
             Child::regenerateAllCodes($this->codePrefix, $this->codeFamilyPadding);
         }
+
+        Setting::setValue(Setting::PROOF_OF_HABITATION_ENABLED, $this->proofOfHabitationEnabled ? '1' : '0');
 
         session()->flash('message', 'Paramètres enregistrés avec succès.');
     }

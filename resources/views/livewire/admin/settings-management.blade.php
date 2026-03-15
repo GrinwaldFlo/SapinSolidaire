@@ -59,6 +59,14 @@
                 @error('codeFamilyPadding') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
+            <div>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" wire:model="proofOfHabitationEnabled" class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 dark:border-zinc-600 dark:bg-zinc-700">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Activer le justificatif de domicile</span>
+                </label>
+                <p class="mt-1 text-sm text-gray-500">Si activé, les familles devront télécharger une photo de justificatif de domicile (facture de téléphone, courrier, etc.) lors de leur inscription.</p>
+            </div>
+
             <div class="pt-4">
                 <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg">
                     Enregistrer les paramètres
