@@ -6,7 +6,7 @@ In /admin/parametres, instead of having a list of "Codes postaux", I would like 
 - It still can be comma separated
 - Spelling of cities has to be checked using Post API
 
-## Proof of habitation
+## [Done] Proof of habitation
 
 When a family registers, they will need to take a picture as proof of where they live.
 Staff will need to validate this proof.
