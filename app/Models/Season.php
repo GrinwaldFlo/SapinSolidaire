@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Support\Facades\DB;
 
 class Season extends Model
 {
@@ -80,7 +81,7 @@ class Season extends Model
      */
     public function canModify(): bool
     {
-        if (! $this->modification_deadline) {
+        if (!$this->modification_deadline) {
             return true;
         }
 
@@ -114,14 +115,16 @@ class Season extends Model
      */
     public function assignNextFamilyNumber(): int
     {
-        $updated = self::where('id', $this->id)
-            ->lockForUpdate()
-            ->first();
+        return DB::transaction(function () {
+            $updated = self::where('id', $this->id)
+                ->lockForUpdate()
+                ->first();
 
-        $number = $updated->next_family_number;
+            $number = $updated->next_family_number;
 
-        $updated->increment('next_family_number');
+            $updated->increment('next_family_number');
 
-        return $number;
+            return $number;
+        });
     }
 }
