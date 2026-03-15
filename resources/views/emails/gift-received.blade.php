@@ -57,7 +57,7 @@
         <h1>🎄 {{ $siteName }}</h1>
     </div>
     <div class="content">
-        <p>Bonjour {{ $familyName }},</p>
+        <p>Chère famille {{ $familyName }},</p>
 
         <p>Vous avez inscrit vos enfants au Sapin solidaire afin qu'ils reçoivent un cadeau de Noël.</p>
 
@@ -66,7 +66,14 @@
         </div>
 
         @if($slotDate && $slotStartTime && $slotEndTime)
-        <p>Merci de venir chercher vos cadeaux le <strong>{{ $slotDate }}</strong> à la Maison de Paroisse d'Yverdon, rue Pestalozzi 6, entre <strong>{{ $slotStartTime }}</strong> et <strong>{{ $slotEndTime }}</strong>.</p>
+        <p>Merci de venir chercher vos cadeaux le <strong>{{ $slotDate }}</strong> :</p>
+        <p style="text-align: center;">🕐 <strong>{{ $slotStartTime }}</strong> - <strong>{{ $slotEndTime }}</strong></p>
+        <p style="text-align: center;">📍 <strong><a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($pickupAddress) }}" target="_blank">{{ $pickupAddress }}</a></strong></p>
+        @if($googleCalendarUrl)
+        <p style="text-align: center; margin-top: 15px;">
+            📅 <a href="{{ $googleCalendarUrl }}" target="_blank">Ajouter à mon agenda Google</a>
+        </p>
+        @endif
         @endif
 
         <div class="important">
@@ -90,7 +97,7 @@
         </div>
     </div>
     <div class="footer">
-        <p>Cet e-mail a été envoyé automatiquement. Merci de ne pas y répondre directement.</p>
+        <p>Cet e-mail a été envoyé automatiquement. Vous pouvez y répondre directement si vous avez des questions.</p>
     </div>
 </body>
 </html>
