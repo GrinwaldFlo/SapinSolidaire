@@ -12,12 +12,16 @@ use App\Services\AddressValidationService;
 use App\Services\PhoneValidationService;
 use App\Services\SeasonService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 #[Layout('layouts.family')]
 class GiftRequestForm extends Component
 {
+    use WithFileUploads;
+
     // Token and email
     public string $token;
     public string $email = '';
@@ -40,6 +44,11 @@ class GiftRequestForm extends Component
     public string $postalCode = '';
     public string $city = '';
     public string $phone = '';
+
+    // Proof of habitation
+    public $proofOfHabitation = null;
+    public bool $proofOfHabitationEnabled = false;
+    public ?string $existingProofPath = null;
 
     // Children
     public array $children = [];
@@ -89,6 +98,7 @@ class GiftRequestForm extends Component
             $this->maxConsecutiveYears = Setting::getMaxConsecutiveYears();
             $this->allowedCities = Setting::getAllowedCities();
             $this->giftSuggestions = Setting::getGiftSuggestions();
+            $this->proofOfHabitationEnabled = Setting::isProofOfHabitationEnabled();
 
             // Check if family exists
             $this->family = Family::where('email', $this->email)->first();
@@ -108,6 +118,7 @@ class GiftRequestForm extends Component
                 if ($this->giftRequest) {
                     $this->isModifying = true;
                     $this->canModify = $this->season->canModify();
+                    $this->existingProofPath = $this->giftRequest->proof_of_habitation_path;
 
                     // Load children for this request
                     $this->loadChildrenFromRequest();
@@ -304,6 +315,20 @@ class GiftRequestForm extends Component
             }
         }
 
+        // Validate proof of habitation
+        if ($this->proofOfHabitationEnabled && !$this->existingProofPath && !$this->proofOfHabitation) {
+            $this->addError('proofOfHabitation', 'Le justificatif de domicile est obligatoire.');
+        }
+
+        if ($this->proofOfHabitation) {
+            $this->validate([
+                'proofOfHabitation' => ['image', 'max:10240'],
+            ], [
+                'proofOfHabitation.image' => 'Le fichier doit être une image (jpg, png, etc.).',
+                'proofOfHabitation.max' => 'L\'image ne doit pas dépasser 10 Mo.',
+            ]);
+        }
+
         // Validate children
         foreach ($this->children as $index => $child) {
             if (empty($child['first_name'])) {
@@ -325,8 +350,16 @@ class GiftRequestForm extends Component
             return;
         }
 
+        // Store proof of habitation file before the transaction
+        $proofPath = $this->giftRequest?->proof_of_habitation_path;
+        $oldProofPath = null;
+        if ($this->proofOfHabitation) {
+            $oldProofPath = $proofPath;
+            $proofPath = $this->proofOfHabitation->store('proof-of-habitation', 'local');
+        }
+
         // Save data
-        DB::transaction(function () use ($formattedPhone) {
+        DB::transaction(function () use ($formattedPhone, $proofPath) {
             // Create or update family
             $this->family = Family::updateOrCreate(
                 ['email' => $this->email],
@@ -351,6 +384,7 @@ class GiftRequestForm extends Component
                 [
                     'status' => GiftRequest::STATUS_PENDING,
                     'status_changed_at' => now(),
+                    'proof_of_habitation_path' => $proofPath,
                 ]
             );
 
@@ -405,6 +439,11 @@ class GiftRequestForm extends Component
                 ->whereIn('status', [Child::STATUS_PENDING, Child::STATUS_REJECTED, Child::STATUS_VALIDATED])
                 ->delete();
         });
+
+        // Delete the old proof file after successful transaction
+        if ($oldProofPath && $oldProofPath !== $proofPath) {
+            Storage::disk('local')->delete($oldProofPath);
+        }
 
         $this->submitted = true;
     }

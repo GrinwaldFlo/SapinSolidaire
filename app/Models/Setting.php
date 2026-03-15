@@ -19,6 +19,7 @@ class Setting extends Model
     public const REPLY_TO_EMAIL = 'reply_to_email';
     public const CODE_PREFIX = 'code_prefix';
     public const CODE_FAMILY_PADDING = 'code_family_padding';
+    public const PROOF_OF_HABITATION_ENABLED = 'proof_of_habitation_enabled';
 
     /**
      * @var array<int, string>
@@ -149,6 +150,14 @@ class Setting extends Model
     }
 
     /**
+     * Check if proof of habitation is enabled.
+     */
+    public static function isProofOfHabitationEnabled(): bool
+    {
+        return (bool) self::getValue(self::PROOF_OF_HABITATION_ENABLED, false);
+    }
+
+    /**
      * Clear all settings cache.
      */
     public static function clearCache(): void
@@ -162,6 +171,7 @@ class Setting extends Model
             self::REPLY_TO_EMAIL,
             self::CODE_PREFIX,
             self::CODE_FAMILY_PADDING,
+            self::PROOF_OF_HABITATION_ENABLED,
         ];
 
         foreach ($keys as $key) {

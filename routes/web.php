@@ -14,8 +14,10 @@ use App\Livewire\Admin\UserManagement;
 use App\Livewire\Admin\Validation;
 use App\Livewire\Family\GiftRequestForm;
 use App\Livewire\Family\Home;
+use App\Models\GiftRequest;
 use App\Models\Role;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 // Family routes (public)
 Route::get('/', Home::class)->name('home');
@@ -62,6 +64,17 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('/familles', FamilyManagement::class)
         ->middleware('any.role:'.Role::ORGANIZER.','.Role::ADMIN)
         ->name('admin.families');
+
+    // Proof of habitation image - Validator or Admin
+    Route::get('/justificatif/{giftRequest}', function (GiftRequest $giftRequest) {
+        if (!$giftRequest->proof_of_habitation_path || !Storage::disk('local')->exists($giftRequest->proof_of_habitation_path)) {
+            abort(404);
+        }
+
+        return Storage::disk('local')->response($giftRequest->proof_of_habitation_path);
+    })
+        ->middleware('any.role:'.Role::VALIDATOR.','.Role::ADMIN)
+        ->name('admin.proof-of-habitation');
 
     // Admin only routes
     Route::middleware('role:'.Role::ADMIN)->group(function () {

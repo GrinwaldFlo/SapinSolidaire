@@ -203,27 +203,79 @@
                     </div>
                 </div>
 
+                @if($proofOfHabitationEnabled)
+                    {{-- Proof of habitation --}}
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white border-b border-gray-200 dark:border-zinc-600 pb-2">
+                            Justificatif de domicile
+                        </h3>
+
+                        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+                            <p class="text-sm text-blue-800 dark:text-blue-200">
+                                📷 Veuillez prendre en photo un courrier récent indiquant votre adresse (facture de téléphone, facture d'électricité, courrier officiel, etc.).
+                            </p>
+                            <p class="text-xs text-blue-600 dark:text-blue-300 mt-2">
+                                ℹ️ Ce justificatif sera supprimé en fin de saison et ne sera utilisé que pour vérifier votre adresse.
+                            </p>
+                        </div>
+
+                        @if($existingProofPath)
+                            <div class="flex items-center gap-2 text-green-600 dark:text-green-400 text-sm">
+                                <span>✓</span>
+                                <span>Un justificatif a déjà été envoyé. Vous pouvez en envoyer un nouveau pour le remplacer.</span>
+                            </div>
+                        @endif
+
+                        <div>
+                            <label for="proofOfHabitation" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Photo du justificatif {{ $existingProofPath ? '' : '*' }}
+                            </label>
+                            <input
+                                type="file"
+                                id="proofOfHabitation"
+                                wire:model="proofOfHabitation"
+                                accept="image/*"
+                                capture="environment"
+                                class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                            >
+                            <div wire:loading wire:target="proofOfHabitation" class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                Téléchargement en cours...
+                            </div>
+                            @error('proofOfHabitation') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                        </div>
+
+                        @if($proofOfHabitation)
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">Aperçu :</p>
+                                <img src="{{ $proofOfHabitation->temporaryUrl() }}" alt="Aperçu du justificatif" class="max-w-xs max-h-48 rounded-lg border border-gray-200 dark:border-zinc-600">
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
                 {{-- Children --}}
                 <div class="space-y-4">
-                    <div class="flex items-center justify-between border-b border-gray-200 dark:border-zinc-600 pb-2">
+                    <div class="border-b border-gray-200 dark:border-zinc-600 pb-2">
                         <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
                             Enfants ({{ count($children) }})
                         </h3>
-                        <button type="button" wire:click="addChild" class="text-green-600 hover:text-green-700 font-medium text-sm flex items-center gap-1">
-                            <span>+</span> Ajouter un enfant
-                        </button>
                     </div>
 
                     @foreach($children as $index => $child)
                         <div class="border border-gray-200 dark:border-zinc-600 rounded-lg p-4 {{ !($child['can_modify'] ?? true) ? 'bg-gray-50 dark:bg-zinc-700/50' : '' }}">
                             <div class="flex items-center justify-between mb-4">
-                                <h4 class="font-medium text-gray-800 dark:text-white">Enfant {{ $index + 1 }}</h4>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="font-medium text-gray-800 dark:text-white">Enfant {{ $index + 1 }}</h4>
+                                    @if(($child['can_modify'] ?? true) && count($children) > 1)
+                                        <button type="button" wire:click="removeChild({{ $index }})" wire:confirm="Êtes-vous sûr de vouloir supprimer cet enfant ?" class="text-red-400 hover:text-red-600 transition duration-200" title="Supprimer cet enfant">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                            </svg>
+                                        </button>
+                                    @endif
+                                </div>
                                 @if(!($child['can_modify'] ?? true))
                                     <span class="text-sm text-orange-600 dark:text-orange-400">Non modifiable ({{ $child['status'] ?? '' }})</span>
-                                @elseif(count($children) > 1)
-                                    <button type="button" wire:click="removeChild({{ $index }})" class="text-red-600 hover:text-red-700 text-sm">
-                                        Supprimer
-                                    </button>
                                 @endif
                             </div>
 
@@ -280,6 +332,10 @@
                             </div>
                         </div>
                     @endforeach
+
+                    <button type="button" wire:click="addChild" class="w-full py-3 border-2 border-dashed border-gray-300 dark:border-zinc-600 rounded-lg text-green-600 hover:text-green-700 hover:border-green-300 dark:hover:border-green-700 font-medium text-sm flex items-center justify-center gap-1 transition duration-200">
+                        <span>+</span> Ajouter un enfant
+                    </button>
                 </div>
 
                 <datalist id="gift-suggestions">
