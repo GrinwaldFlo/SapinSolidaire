@@ -67,6 +67,15 @@
                 <p class="mt-1 text-sm text-gray-500">Si activé, les familles devront télécharger une photo de justificatif de domicile (facture de téléphone, courrier, etc.) lors de leur inscription.</p>
             </div>
 
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Style des cartes PDF</label>
+                <select wire:model="pdfStyle" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white">
+                    <option value="label">Étiquettes (cartes individuelles)</option>
+                    <option value="grid">Grille (tableau récapitulatif)</option>
+                </select>
+                <p class="mt-1 text-sm text-gray-500">Choisissez le format de génération du PDF dans la page Cartes.</p>
+            </div>
+
             <div class="pt-4">
                 <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg">
                     Enregistrer les paramètres

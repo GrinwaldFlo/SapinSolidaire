@@ -59,4 +59,9 @@
             </div>
         </div>
     @endif
+
+    <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-4 text-sm text-gray-600 dark:text-gray-400 text-center">
+        Un bug à signaler ou une fonctionnalité à proposer ?
+        <a href="https://github.com/GrinwaldFlo/SapinSolidaire/issues" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300">Ouvrir un ticket sur GitHub</a>
+    </div>
 </div>

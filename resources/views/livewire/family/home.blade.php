@@ -1,4 +1,44 @@
 <div>
+    @if(!$emailSent)
+        {{-- Snowfall overlay --}}
+        <div class="snowfall pointer-events-none fixed inset-0 z-50 overflow-hidden" aria-hidden="true">
+            @for ($i = 0; $i < 40; $i++)
+                <div class="snowflake"
+                     style="
+                        left: {{ rand(0, 100) }}%;
+                        animation-delay: {{ rand(0, 80) / 10 }}s;
+                        animation-duration: {{ rand(100, 240) / 10 }}s;
+                        opacity: {{ rand(4, 10) / 10 }};
+                        font-size: {{ rand(10, 24) }}px;
+                     "
+                >&#10052;</div>
+            @endfor
+        </div>
+
+        <style>
+            .snowflake {
+                position: fixed;
+                top: -30px;
+                color: white;
+                text-shadow: 0 0 3px rgba(255,255,255,0.7);
+                animation-name: snowfall, snowsway;
+                animation-timing-function: linear, ease-in-out;
+                animation-iteration-count: infinite, infinite;
+            }
+
+            @keyframes snowfall {
+                0%   { top: -5%; }
+                100% { top: 105%; }
+            }
+
+            @keyframes snowsway {
+                0%, 100% { transform: translateX(0); }
+                25%      { transform: translateX(15px); }
+                75%      { transform: translateX(-15px); }
+            }
+        </style>
+    @endif
+
     @if($seasonStatus === 'active')
         <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-8">
             @if(!$emailSent)
