@@ -3,55 +3,109 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Child;
+use App\Models\Family;
+use App\Models\GiftRequest;
 use App\Models\Season;
+use Illuminate\Support\Collection;
 use Livewire\Component;
-use Livewire\WithPagination;
 
 class GiftDelivery extends Component
 {
-    use WithPagination;
-
     public ?Season $activeSeason = null;
-    public ?Child $selectedChild = null;
+    public string $searchName = '';
+    public ?string $selectedFamilyId = null;
+    public bool $showMobileDetail = false;
 
     public function mount(): void
     {
         $this->activeSeason = Season::getActive();
     }
 
-    public function selectChild(string $childId): void
+    public function updatedSearchName(): void
     {
-        $this->selectedChild = Child::with('giftRequest.family')->findOrFail($childId);
+        $this->selectedFamilyId = null;
+        $this->showMobileDetail = false;
     }
 
-    public function clearSelection(): void
+    public function selectFamily(string $familyId): void
     {
-        $this->selectedChild = null;
+        $this->selectedFamilyId = $familyId;
+        $this->showMobileDetail = true;
+    }
+
+    public function closeMobileDetail(): void
+    {
+        $this->showMobileDetail = false;
+    }
+
+    public function clearFilter(): void
+    {
+        $this->searchName = '';
+        $this->selectedFamilyId = null;
+        $this->showMobileDetail = false;
     }
 
     public function markAsGiven(string $childId): void
     {
         $child = Child::findOrFail($childId);
         $child->setStatus(Child::STATUS_GIVEN);
-        $this->selectedChild = null;
+    }
+
+    public function markAllAsGiven(string $familyId): void
+    {
+        if (!$this->activeSeason) {
+            return;
+        }
+
+        $children = Child::whereHas('giftRequest', function ($q) use ($familyId) {
+            $q->where('season_id', $this->activeSeason->id)
+              ->where('family_id', $familyId);
+        })
+            ->where('status', Child::STATUS_RECEIVED)
+            ->get();
+
+        foreach ($children as $child) {
+            $child->setStatus(Child::STATUS_GIVEN);
+        }
     }
 
     public function render()
     {
-        $children = collect();
+        $families = collect();
+        $selectedFamily = null;
+        $selectedChildren = collect();
 
-        if ($this->activeSeason) {
-            $children = Child::with('giftRequest.family')
-                ->whereHas('giftRequest', function ($q) {
+        if ($this->activeSeason && $this->searchName !== '') {
+            $families = Family::where('last_name', 'like', '%' . $this->searchName . '%')
+                ->whereHas('giftRequests', function ($q) {
                     $q->where('season_id', $this->activeSeason->id);
                 })
-                ->where('status', Child::STATUS_RECEIVED)
-                ->orderBy('first_name')
-                ->paginate(20);
+                ->whereHas('giftRequests.children', function ($q) {
+                    $q->where('status', Child::STATUS_RECEIVED);
+                })
+                ->orderBy('last_name')
+                ->get();
+        }
+
+        if ($this->selectedFamilyId) {
+            $selectedFamily = Family::find($this->selectedFamilyId);
+
+            if ($selectedFamily && $this->activeSeason) {
+                $selectedChildren = Child::with('giftRequest')
+                    ->whereHas('giftRequest', function ($q) {
+                        $q->where('season_id', $this->activeSeason->id)
+                          ->where('family_id', $this->selectedFamilyId);
+                    })
+                    ->where('status', Child::STATUS_RECEIVED)
+                    ->orderBy('child_number')
+                    ->get();
+            }
         }
 
         return view('livewire.admin.gift-delivery', [
-            'children' => $children,
+            'families' => $families,
+            'selectedFamily' => $selectedFamily,
+            'selectedChildren' => $selectedChildren,
         ]);
     }
 }
