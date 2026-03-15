@@ -14,11 +14,12 @@ class SettingSeeder extends Seeder
     {
         $settings = [
             Setting::SITE_NAME => 'Sapin Solidaire',
-            Setting::ALLOWED_POSTAL_CODES => '',
             Setting::MAX_CONSECUTIVE_YEARS => '3',
             Setting::GIFT_SUGGESTIONS => "Jouet\nVêtement\nLivre\nJeu de société\nMatériel scolaire\nChaussures",
             Setting::INTRODUCTION_TEXT => "Bienvenue sur Sapin Solidaire.\n\nCette plateforme vous permet de faire une demande de cadeau pour vos enfants.",
             Setting::REPLY_TO_EMAIL => '',
+            Setting::CODE_PREFIX => 'Y',
+            Setting::CODE_FAMILY_PADDING => '4',
         ];
 
         foreach ($settings as $key => $value) {

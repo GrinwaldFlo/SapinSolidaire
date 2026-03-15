@@ -17,6 +17,8 @@ class Setting extends Model
     public const GIFT_SUGGESTIONS = 'gift_suggestions';
     public const INTRODUCTION_TEXT = 'introduction_text';
     public const REPLY_TO_EMAIL = 'reply_to_email';
+    public const CODE_PREFIX = 'code_prefix';
+    public const CODE_FAMILY_PADDING = 'code_family_padding';
 
     /**
      * @var array<int, string>
@@ -131,6 +133,22 @@ class Setting extends Model
     }
 
     /**
+     * Get code prefix for children codes.
+     */
+    public static function getCodePrefix(): string
+    {
+        return self::getValue(self::CODE_PREFIX, '');
+    }
+
+    /**
+     * Get code family number padding.
+     */
+    public static function getCodeFamilyPadding(): int
+    {
+        return (int) self::getValue(self::CODE_FAMILY_PADDING, 4);
+    }
+
+    /**
      * Clear all settings cache.
      */
     public static function clearCache(): void
@@ -142,6 +160,8 @@ class Setting extends Model
             self::GIFT_SUGGESTIONS,
             self::INTRODUCTION_TEXT,
             self::REPLY_TO_EMAIL,
+            self::CODE_PREFIX,
+            self::CODE_FAMILY_PADDING,
         ];
 
         foreach ($keys as $key) {

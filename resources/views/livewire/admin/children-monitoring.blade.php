@@ -42,7 +42,7 @@
                 <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
                     @forelse($children as $child)
                         <tr>
-                            <td class="px-6 py-4 font-mono font-bold text-gray-900 dark:text-white">{{ $child->code }}</td>
+                            <td class="px-6 py-4 font-mono font-bold text-gray-900 dark:text-white">{{ $child->code ?? '—' }}</td>
                             <td class="px-6 py-4 text-gray-900 dark:text-white">
                                 {{ $child->first_name }}
                                 @if($child->anonymous)

@@ -8,11 +8,15 @@ use App\Models\Child;
 use App\Models\EmailToken;
 use App\Models\GiftRequest;
 use App\Models\Season;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 
 class Validation extends Component
 {
+    private const LOCK_TTL_SECONDS = 300;
+
     public ?Season $activeSeason = null;
     public ?GiftRequest $currentRequest = null;
     public int $pendingFamiliesCount = 0;
@@ -40,9 +44,11 @@ class Validation extends Component
             return;
         }
 
-        // Find next family with pending status or with pending children
-        $this->currentRequest = GiftRequest::with(['family', 'children'])
-            ->where('season_id', $this->activeSeason->id)
+        $adminId = (string) auth()->id();
+        $this->releaseReservation($adminId);
+
+        // Get IDs of pending requests in queue order
+        $candidateIds = GiftRequest::where('season_id', $this->activeSeason->id)
             ->where(function ($query) {
                 $query->where('status', GiftRequest::STATUS_PENDING)
                     ->orWhereHas('children', function ($q) {
@@ -50,7 +56,31 @@ class Validation extends Component
                     });
             })
             ->orderBy('created_at')
-            ->first();
+            ->pluck('id');
+
+        $this->currentRequest = null;
+
+        foreach ($candidateIds as $candidateId) {
+            $lockKey = "validation_lock:{$candidateId}";
+
+            // Try to atomically acquire the lock, or reuse our own
+            if (Cache::add($lockKey, $adminId, self::LOCK_TTL_SECONDS)
+                || Cache::get($lockKey) === $adminId) {
+                Cache::put("validation_admin:{$adminId}", $candidateId, self::LOCK_TTL_SECONDS);
+                $this->currentRequest = GiftRequest::with(['family', 'children'])->find($candidateId);
+                break;
+            }
+        }
+    }
+
+    protected function releaseReservation(string $adminId): void
+    {
+        $previousRequestId = Cache::get("validation_admin:{$adminId}");
+
+        if ($previousRequestId) {
+            Cache::forget("validation_lock:{$previousRequestId}");
+            Cache::forget("validation_admin:{$adminId}");
+        }
     }
 
     protected function loadCounts(): void
@@ -74,15 +104,39 @@ class Validation extends Component
             return;
         }
 
-        $this->currentRequest->setStatus(GiftRequest::STATUS_VALIDATED);
+        DB::transaction(function () {
+            $request = GiftRequest::lockForUpdate()->find($this->currentRequest->id);
+
+            if (! $request || $request->status !== GiftRequest::STATUS_PENDING) {
+                return;
+            }
+
+            if ($request->family_number === null) {
+                $request->family_number = $this->activeSeason->assignNextFamilyNumber();
+                $request->save();
+            }
+
+            $request->setStatus(GiftRequest::STATUS_VALIDATED);
+            $this->currentRequest = $request;
+        });
+
         $this->loadNextRequest();
         $this->loadCounts();
     }
 
     public function validateChild(string $childId): void
     {
-        $child = Child::findOrFail($childId);
-        $child->setStatus(Child::STATUS_VALIDATED);
+        DB::transaction(function () use ($childId) {
+            $child = Child::lockForUpdate()->find($childId);
+
+            if (! $child || $child->status !== Child::STATUS_PENDING) {
+                return;
+            }
+
+            $child->assignChildNumberAndCode();
+            $child->setStatus(Child::STATUS_VALIDATED);
+        });
+
         $this->loadNextRequest();
         $this->loadCounts();
     }
