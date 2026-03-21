@@ -7,9 +7,26 @@
  */
 
 // ============================================================
-// SECURITY: Change this token or set DIAG_TOKEN env variable
+// SECURITY: Require DIAG_TOKEN env variable
 // ============================================================
-$expectedToken = getenv('DIAG_TOKEN') ?: 'sapin-diag-2024';
+$expectedToken = getenv('DIAG_TOKEN');
+
+if ($expectedToken === false || $expectedToken === '') {
+    $envFile = __DIR__ . '/../.env';
+    if (is_readable($envFile)) {
+        $envContent = file_get_contents($envFile);
+        if ($envContent !== false && preg_match('/^DIAG_TOKEN=(.*)$/m', $envContent, $m)) {
+            $expectedToken = trim($m[1] ?? '');
+            $expectedToken = trim($expectedToken, "\"'");
+        }
+    }
+}
+
+if ($expectedToken === false || $expectedToken === '') {
+    http_response_code(500);
+    echo 'Configuration error: DIAG_TOKEN is not set. Add DIAG_TOKEN to your environment (or .env) and retry.';
+    exit;
+}
 
 if (!isset($_GET['token']) || !hash_equals($expectedToken, $_GET['token'])) {
     http_response_code(403);
