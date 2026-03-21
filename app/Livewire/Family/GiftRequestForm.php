@@ -232,7 +232,7 @@ class GiftRequestForm extends Component
         $this->children[] = [
             'id' => null,
             'first_name' => '',
-            'gender' => 'unspecified',
+            'gender' => '',
             'anonymous' => false,
             'birth_year' => '',
             'height' => '',
@@ -345,6 +345,9 @@ class GiftRequestForm extends Component
             if (empty($child['first_name'])) {
                 $this->addError("children.{$index}.first_name", 'Le prénom est obligatoire.');
             }
+            if (empty($child['gender'])) {
+                $this->addError("children.{$index}.gender", 'Le genre est obligatoire.');
+            }
             if (empty($child['birth_year']) || ! is_numeric($child['birth_year'])) {
                 $this->addError("children.{$index}.birth_year", 'L\'année de naissance est obligatoire.');
             }
@@ -416,7 +419,7 @@ class GiftRequestForm extends Component
                     // Update existing child
                     $childRecord->update([
                         'first_name' => $childData['first_name'],
-                        'gender' => $childData['gender'] ?? 'unspecified',
+                        'gender' => $childData['gender'] ?? '',
                         'anonymous' => $childData['anonymous'] ?? false,
                         'birth_year' => $childData['birth_year'],
                         'height' => $childData['height'] ?: null,
@@ -431,7 +434,7 @@ class GiftRequestForm extends Component
                     $newChild = Child::create([
                         'gift_request_id' => $this->giftRequest->id,
                         'first_name' => $childData['first_name'],
-                        'gender' => $childData['gender'] ?? 'unspecified',
+                        'gender' => $childData['gender'] ?? '',
                         'anonymous' => $childData['anonymous'] ?? false,
                         'birth_year' => $childData['birth_year'],
                         'height' => $childData['height'] ?: null,

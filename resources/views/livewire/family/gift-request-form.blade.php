@@ -297,10 +297,12 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Genre *</label>
                                     <select wire:model="children.{{ $index }}.gender" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white" {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
-                                        <option value="unspecified">Non précisé</option>
+                                        <option value=""></option>
                                         <option value="boy">Garçon</option>
                                         <option value="girl">Fille</option>
+                                        <option value="unspecified">Non précisé</option>
                                     </select>
+                                    @error("children.{$index}.gender") <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
                                 </div>
 
                                 <div class="md:col-span-2">
