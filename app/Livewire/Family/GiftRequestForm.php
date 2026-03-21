@@ -294,19 +294,21 @@ class GiftRequestForm extends Component
         // Format phone to E.164
         $formattedPhone = $phoneService->formatE164($this->phone);
 
-        $fullAddress = trim(implode(' ', array_filter([
-            $this->streetName,
-            $this->houseNo,
-        ])));
-
         // Validate address (optional API)
         $addressService = app(AddressValidationService::class);
         $addressResult = $addressService->validate($this->streetName, $this->houseNo, $this->postalCode, $this->city);
 
-        if (! $addressResult['valid']) {
-            $this->addError('streetName', $addressResult['message']);
-
+        if (! $addressResult['Valide']) {
+            $this->addError('streetName', $addressResult['Message']);
             return;
+        }
+
+        if (! empty($addressResult['FormatedAddress'])) {
+            $formatted = $addressResult['FormatedAddress'];
+            $this->streetName = $formatted['StreetName'] ?? $this->streetName;
+            $this->houseNo    = $formatted['HouseNo']    ?? $this->houseNo;
+            $this->postalCode = $formatted['ZipCode']    ?? $this->postalCode;
+            $this->city       = $formatted['TownName']   ?? $this->city;
         }
 
         // Validate city
