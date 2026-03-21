@@ -50,7 +50,8 @@ test('submit requires proof of habitation when feature is enabled', function () 
         ->call('acceptCity')
         ->set('firstName', 'Jean')
         ->set('lastName', 'Dupont')
-        ->set('address', 'Rue de Test 1')
+        ->set('streetName', 'Rue de Test')
+        ->set('houseNo', '1')
         ->set('postalCode', '1000')
         ->set('city', 'Lausanne')
         ->set('phone', '+41791234567')
@@ -69,7 +70,8 @@ test('submit does not require proof of habitation when feature is disabled', fun
         ->call('acceptCity')
         ->set('firstName', 'Jean')
         ->set('lastName', 'Dupont')
-        ->set('address', 'Rue de Test 1')
+        ->set('streetName', 'Rue de Test')
+        ->set('houseNo', '1')
         ->set('postalCode', '1000')
         ->set('city', 'Lausanne')
         ->set('phone', '+41791234567')
@@ -90,7 +92,8 @@ test('submit succeeds with proof of habitation when feature is enabled', functio
         ->call('acceptCity')
         ->set('firstName', 'Jean')
         ->set('lastName', 'Dupont')
-        ->set('address', 'Rue de Test 1')
+        ->set('streetName', 'Rue de Test')
+        ->set('houseNo', '1')
         ->set('postalCode', '1000')
         ->set('city', 'Lausanne')
         ->set('phone', '+41791234567')
@@ -113,7 +116,8 @@ test('proof of habitation file is stored on submit', function () {
         ->call('acceptCity')
         ->set('firstName', 'Jean')
         ->set('lastName', 'Dupont')
-        ->set('address', 'Rue de Test 1')
+        ->set('streetName', 'Rue de Test')
+        ->set('houseNo', '1')
         ->set('postalCode', '1000')
         ->set('city', 'Lausanne')
         ->set('phone', '+41791234567')
@@ -138,7 +142,8 @@ test('submit does not require new upload when proof already exists', function ()
         'email' => 'test@example.com',
         'first_name' => 'Jean',
         'last_name' => 'Dupont',
-        'address' => 'Rue de Test 1',
+        'street_name' => 'Rue de Test',
+        'house_no' => '1',
         'postal_code' => '1000',
         'city' => 'Lausanne',
         'phone' => '+41791234567',
@@ -159,7 +164,8 @@ test('submit does not require new upload when proof already exists', function ()
         ->assertSet('existingProofPath', 'proof-of-habitation/existing.jpg')
         ->set('firstName', 'Jean')
         ->set('lastName', 'Dupont')
-        ->set('address', 'Rue de Test 1')
+        ->set('streetName', 'Rue de Test')
+        ->set('houseNo', '1')
         ->set('postalCode', '1000')
         ->set('city', 'Lausanne')
         ->set('phone', '+41791234567')
@@ -178,7 +184,8 @@ test('re-uploading proof deletes the old file', function () {
         'email' => 'test@example.com',
         'first_name' => 'Jean',
         'last_name' => 'Dupont',
-        'address' => 'Rue de Test 1',
+        'street_name' => 'Rue de Test',
+        'house_no' => '1',
         'postal_code' => '1000',
         'city' => 'Lausanne',
         'phone' => '+41791234567',
@@ -201,7 +208,8 @@ test('re-uploading proof deletes the old file', function () {
         ->set('proofOfHabitation', $newFile)
         ->set('firstName', 'Jean')
         ->set('lastName', 'Dupont')
-        ->set('address', 'Rue de Test 1')
+        ->set('streetName', 'Rue de Test')
+        ->set('houseNo', '1')
         ->set('postalCode', '1000')
         ->set('city', 'Lausanne')
         ->set('phone', '+41791234567')

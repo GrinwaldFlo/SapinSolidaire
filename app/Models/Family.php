@@ -18,7 +18,8 @@ class Family extends Model
         'email',
         'first_name',
         'last_name',
-        'address',
+        'street_name',
+        'house_no',
         'postal_code',
         'city',
         'phone',
@@ -83,6 +84,11 @@ class Family extends Model
      */
     public function getFullAddressAttribute(): string
     {
-        return trim("{$this->address}, {$this->postal_code} {$this->city}");
+        $streetLine = trim(implode(' ', array_filter([
+            $this->street_name,
+            $this->house_no,
+        ])));
+
+        return trim("{$streetLine}, {$this->postal_code} {$this->city}", ' ,');
     }
 }

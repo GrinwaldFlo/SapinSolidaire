@@ -40,7 +40,8 @@ class GiftRequestForm extends Component
     // Family data
     public string $firstName = '';
     public string $lastName = '';
-    public string $address = '';
+    public string $streetName = '';
+    public string $houseNo = '';
     public string $postalCode = '';
     public string $city = '';
     public string $phone = '';
@@ -107,7 +108,8 @@ class GiftRequestForm extends Component
                 // Load family data
                 $this->firstName = $this->family->first_name ?? '';
                 $this->lastName = $this->family->last_name ?? '';
-                $this->address = $this->family->address ?? '';
+                $this->streetName = $this->family->street_name ?? '';
+                $this->houseNo = $this->family->house_no ?? '';
                 $this->postalCode = $this->family->postal_code ?? '';
                 $this->city = $this->family->city ?? '';
                 $this->phone = $this->family->phone ?? '';
@@ -262,7 +264,8 @@ class GiftRequestForm extends Component
         $rules = [
             'firstName' => ['required', 'string', 'max:255'],
             'lastName' => ['required', 'string', 'max:255'],
-            'address' => ['required', 'string', 'max:255'],
+            'streetName' => ['required', 'string', 'max:255'],
+            'houseNo' => ['required', 'string', 'max:20'],
             'postalCode' => ['required', 'string', 'max:10'],
             'city' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:20'],
@@ -271,7 +274,8 @@ class GiftRequestForm extends Component
         $messages = [
             'firstName.required' => 'Le prénom est obligatoire.',
             'lastName.required' => 'Le nom est obligatoire.',
-            'address.required' => 'L\'adresse est obligatoire.',
+            'streetName.required' => 'Le nom de rue est obligatoire.',
+            'houseNo.required' => 'Le numéro de rue est obligatoire.',
             'postalCode.required' => 'Le code postal est obligatoire.',
             'city.required' => 'La ville est obligatoire.',
             'phone.required' => 'Le numéro de téléphone est obligatoire.',
@@ -290,12 +294,17 @@ class GiftRequestForm extends Component
         // Format phone to E.164
         $formattedPhone = $phoneService->formatE164($this->phone);
 
+        $fullAddress = trim(implode(' ', array_filter([
+            $this->streetName,
+            $this->houseNo,
+        ])));
+
         // Validate address (optional API)
         $addressService = app(AddressValidationService::class);
-        $addressResult = $addressService->validate($this->address, $this->postalCode, $this->city);
+        $addressResult = $addressService->validate($this->streetName, $this->houseNo, $this->postalCode, $this->city);
 
         if (! $addressResult['valid']) {
-            $this->addError('address', $addressResult['message']);
+            $this->addError('streetName', $addressResult['message']);
 
             return;
         }
@@ -366,7 +375,8 @@ class GiftRequestForm extends Component
                 [
                     'first_name' => $this->firstName,
                     'last_name' => $this->lastName,
-                    'address' => $this->address,
+                    'street_name' => $this->streetName,
+                    'house_no' => $this->houseNo,
                     'postal_code' => $this->postalCode,
                     'city' => $this->city,
                     'phone' => $formattedPhone,
