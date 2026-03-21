@@ -19,6 +19,7 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Communes autorisées</label>
                 <textarea wire:model="allowedCities" rows="3" placeholder="Lausanne, Morges, Renens" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white"></textarea>
                 <p class="mt-1 text-sm text-gray-500">Séparez les communes par des virgules. Laissez vide pour autoriser toutes les communes.</p>
+                @error('allowedCities') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
@@ -80,6 +81,7 @@
                 <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg">
                     Enregistrer les paramètres
                 </button>
+                @error('allowedCities') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
         </form>
     </div>

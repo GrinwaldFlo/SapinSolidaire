@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\Child;
 use App\Models\Setting;
+use App\Services\AddressValidationService;
 use Livewire\Component;
 
 class SettingsManagement extends Component
@@ -33,7 +34,7 @@ class SettingsManagement extends Component
         $this->pdfStyle = Setting::getPdfStyle();
     }
 
-    public function save(): void
+    public function save(AddressValidationService $addressValidationService): void
     {
         $this->validate([
             'siteName' => ['required', 'string', 'max:255'],
@@ -44,9 +45,23 @@ class SettingsManagement extends Component
             'pdfStyle' => ['required', 'in:label,grid'],
         ]);
 
-        Setting::setValue(Setting::SITE_NAME, $this->siteName);
         $cities = array_filter(array_map('trim', explode(',', $this->allowedCities)), fn ($c) => $c !== '');
         sort($cities, SORT_STRING | SORT_FLAG_CASE);
+
+        $invalidCities = [];
+        foreach ($cities as $city) {
+            $result = $addressValidationService->validateTown($city);
+            if (! $result['Valide']) {
+                $invalidCities[] = "{$city}";
+            }
+        }
+
+        if (! empty($invalidCities)) {
+            $this->addError('allowedCities', 'Ville(s) invalide(s) : ' . implode(', ', $invalidCities));
+            return;
+        }
+
+        Setting::setValue(Setting::SITE_NAME, $this->siteName);
         Setting::setValue(Setting::ALLOWED_CITIES, implode(', ', $cities));
         Setting::setValue(Setting::MAX_CONSECUTIVE_YEARS, $this->maxConsecutiveYears);
         Setting::setValue(Setting::GIFT_SUGGESTIONS, $this->giftSuggestions);

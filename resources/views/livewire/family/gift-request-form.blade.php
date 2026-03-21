@@ -372,6 +372,19 @@
                             Veuillez sélectionner et confirmer votre commune de résidence pour pouvoir envoyer votre demande.
                         </p>
                     @endif
+
+                    @if($errors->any())
+                        <div class="mt-4 rounded-lg border border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20 p-4">
+                            <p class="text-sm font-semibold text-red-700 dark:text-red-300 mb-2">
+                                Veuillez corriger les erreurs suivantes :
+                            </p>
+                            <ul class="list-disc list-inside text-sm text-red-700 dark:text-red-300 space-y-1">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                 </div>
             </form>
         </div>

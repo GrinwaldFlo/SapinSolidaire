@@ -33,6 +33,7 @@ class AddressValidationService
             return ['Valide' => false, 'Message' => "Merci de remplir tous les champs de l'adresse", 'FormatedAddress' => []];
 
         $verification = $this->buildingverification4($streetname, $houseNo, $zipcode, $townname);
+        Log::debug('Swiss Post buildingverification4 result', ['verification' => $verification]);
         if (empty($verification))
             return ['Valide' => true, 'Message' => '', 'FormatedAddress' => []];
 
@@ -49,12 +50,39 @@ class AddressValidationService
     }
 
     /**
+     * Validate a Swiss address.
+     *
+     * @return array{Valide: bool, Message: string, FormatedAddress: array}
+     */
+    public function validateTown(string $townname): array
+    {
+        $townname = trim($townname);
+
+        if (empty($townname))
+            return ['Valide' => false, 'Message' => "Merci de remplir la ville", 'FormatedAddress' => []];
+
+        $verification = $this->buildingverification4('', '', '', $townname);
+        Log::debug('Swiss Post buildingverification4 result', ['verification' => $verification]);
+        if (empty($verification))
+            return ['Valide' => false, 'Message' => 'Erreur de réception', 'FormatedAddress' => []];
+
+        if ($verification["PSTAT"] == 1 || $verification["PSTAT"] == 2)
+            return ['Valide' => true, 'Message' => '', 'FormatedAddress' => $verification];
+
+        if ($verification["PSTAT"] >= 6 || $verification["PSTAT"] == 4)
+            return ['Valide' => false, 'Message' => "Ville $townname invalide", 'FormatedAddress' => $verification];
+
+        return ['Valide' => true, 'Message' => '', 'FormatedAddress' => $verification];
+    }
+
+    /**
      * Raw Swiss Post building verification call.
      */
     public function buildingverification4(string $streetname, string $houseNo, string $zipcode, string $townname): array
     {
         try {
             $response = Http::withBasicAuth($this->apiUser, $this->apiPassword)
+                ->withoutVerifying()
                 ->timeout(10)
                 ->get($this->apiUrl.'buildingverification4', [
                     'streetname' => $streetname,
