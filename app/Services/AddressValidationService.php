@@ -7,12 +7,14 @@ use Illuminate\Support\Facades\Log;
 
 class AddressValidationService
 {
-    protected ?string $apiKey;
-    protected string $apiUrl = 'https://webservices.post.ch:17017/IN_SYNSYN_EXT/v1/';
+    protected ?string $apiUser;
+    protected ?string $apiPassword;
+    protected string $apiUrl = 'https://webservices.post.ch:17023/IN_SYNSYN_EXT/REST/v1/';
 
     public function __construct()
     {
-        $this->apiKey = config('services.swisspost.api_key');
+        $this->apiUser = config('services.swisspost.api_user');
+        $this->apiPassword = config('services.swisspost.api_psw');
     }
 
     /**
@@ -20,7 +22,7 @@ class AddressValidationService
      *
      * @return array{valid: bool, message: ?string, suggestions: array}
      */
-    public function validate(string $street, string $postalCode, string $city): array
+    public function validate(string $streetname, string $houseNo, string $postalCode, string $city): array
     {
         // If no API key configured, accept address without validation
         if (empty($this->apiKey)) {
@@ -32,38 +34,38 @@ class AddressValidationService
         }
 
         try {
-            $response = Http::withBasicAuth($this->apiKey, '')
-                ->timeout(10)
-                ->post($this->apiUrl.'addresses/validate', [
-                    'street' => $street,
-                    'zip' => $postalCode,
-                    'city' => $city,
-                    'country' => 'CH',
-                ]);
+            //$response = Http::withBasicAuth($this->apiUser, $this->apiPassword)
+            //    ->timeout(10)
+            //    ->post($this->apiUrl.'addresses/validate', [
+            //        'street' => $street,
+            //        'zip' => $postalCode,
+            //        'city' => $city,
+            //        'country' => 'CH',
+            //    ]);
 
-            if ($response->failed()) {
-                // API error, accept address
-                Log::warning('Swiss Post API error', [
-                    'status' => $response->status(),
-                    'body' => $response->body(),
-                ]);
+            //if ($response->failed()) {
+            //    // API error, accept address
+            //    Log::warning('Swiss Post API error', [
+            //        'status' => $response->status(),
+            //        'body' => $response->body(),
+            //    ]);
 
-                return [
-                    'valid' => true,
-                    'message' => null,
-                    'suggestions' => [],
-                ];
-            }
+            //    return [
+            //        'valid' => true,
+            //        'message' => null,
+            //        'suggestions' => [],
+            //    ];
+            //}
 
-            $data = $response->json();
+            //$data = $response->json();
 
-            if (isset($data['valid']) && $data['valid']) {
-                return [
-                    'valid' => true,
-                    'message' => null,
-                    'suggestions' => [],
-                ];
-            }
+            //if (isset($data['valid']) && $data['valid']) {
+            //    return [
+            //        'valid' => true,
+            //        'message' => null,
+            //        'suggestions' => [],
+            //    ];
+            //}
 
             return [
                 'valid' => false,
