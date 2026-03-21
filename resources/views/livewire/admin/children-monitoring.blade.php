@@ -2,7 +2,7 @@
     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Suivi des enfants</h1>
 
     <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-4">
-        <div class="flex flex-wrap gap-4">
+        <div class="flex flex-wrap gap-4 items-end">
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Saison</label>
                 <select wire:model.live="selectedSeasonId" class="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white">
@@ -27,6 +27,20 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Recherche</label>
                 <input wire:model.live.debounce.300ms="search" type="text" placeholder="Code, prénom, nom, cadeau…" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white" />
             </div>
+
+            @if($selectedSeasonId)
+                <div class="ml-auto">
+                    <button
+                        wire:click="exportPdf"
+                        wire:loading.attr="disabled"
+                        wire:target="exportPdf"
+                        class="flex items-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-semibold text-sm"
+                    >
+                        <span wire:loading.remove wire:target="exportPdf">📄 Exporter PDF</span>
+                        <span wire:loading wire:target="exportPdf">⏳ Export en cours…</span>
+                    </button>
+                </div>
+            @endif
         </div>
     </div>
 

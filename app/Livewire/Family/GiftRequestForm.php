@@ -308,7 +308,7 @@ class GiftRequestForm extends Component
             $this->streetName = $formatted['StreetName'] ?? $this->streetName;
             $this->houseNo    = $formatted['HouseNo']    ?? $this->houseNo;
             $this->postalCode = $formatted['ZipCode']    ?? $this->postalCode;
-            $this->city       = $formatted['TownName']   ?? $this->city;
+            //$this->city       = $formatted['TownName']   ?? $this->city;
         }
 
         // Validate city

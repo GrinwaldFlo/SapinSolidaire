@@ -46,6 +46,9 @@ class AddressValidationService
         if ($zipcode != $verification["ZipCode"])
             return ['Valide' => false, 'Message' => 'Code postal éroné', 'FormatedAddress' => $verification];
 
+        if (!str_contains($verification["TownName"], $townname))
+            return ['Valide' => false, 'Message' => 'Ville éronée', 'FormatedAddress' => $verification];
+
         return ['Valide' => true, 'Message' => '', 'FormatedAddress' => $verification];
     }
 
@@ -58,6 +61,7 @@ class AddressValidationService
     {
         $townname = trim($townname);
 
+
         if (empty($townname))
             return ['Valide' => false, 'Message' => "Merci de remplir la ville", 'FormatedAddress' => []];
 
@@ -66,8 +70,17 @@ class AddressValidationService
         if (empty($verification))
             return ['Valide' => false, 'Message' => 'Erreur de réception', 'FormatedAddress' => []];
 
+
+        //TODO Fix needed
+        return ['Valide' => true, 'Message' => "", 'FormatedAddress' => $verification];
+
+
+
         if ($verification["PSTAT"] == 1 || $verification["PSTAT"] == 2)
             return ['Valide' => true, 'Message' => '', 'FormatedAddress' => $verification];
+
+        if ($verification["PSTAT"] == 6)
+            return ['Valide' => true, 'Message' => "", 'FormatedAddress' => $verification];
 
         if ($verification["PSTAT"] >= 6 || $verification["PSTAT"] == 4)
             return ['Valide' => false, 'Message' => "Ville $townname invalide", 'FormatedAddress' => $verification];
