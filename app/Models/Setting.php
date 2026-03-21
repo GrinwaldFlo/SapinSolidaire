@@ -21,6 +21,7 @@ class Setting extends Model
     public const CODE_FAMILY_PADDING = 'code_family_padding';
     public const PROOF_OF_HABITATION_ENABLED = 'proof_of_habitation_enabled';
     public const PDF_STYLE = 'pdf_style';
+    public const MAX_CHILD_AGE = 'max_child_age';
 
     public const PDF_STYLE_LABEL = 'label';
     public const PDF_STYLE_GRID = 'grid';
@@ -170,6 +171,14 @@ class Setting extends Model
     }
 
     /**
+     * Get max child age (inclusive, evaluated on 31.12 of current year).
+     */
+    public static function getMaxChildAge(): int
+    {
+        return (int) self::getValue(self::MAX_CHILD_AGE, 12);
+    }
+
+    /**
      * Clear all settings cache.
      */
     public static function clearCache(): void
@@ -185,6 +194,7 @@ class Setting extends Model
             self::CODE_FAMILY_PADDING,
             self::PROOF_OF_HABITATION_ENABLED,
             self::PDF_STYLE,
+            self::MAX_CHILD_AGE,
         ];
 
         foreach ($keys as $key) {

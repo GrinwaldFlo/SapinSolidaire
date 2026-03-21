@@ -62,6 +62,7 @@ class GiftRequestForm extends Component
 
     // Settings
     public int $maxConsecutiveYears = 3;
+    public int $maxChildAge = 12;
     public array $allowedCities = [];
     public string $selectedCity = '';
     public array $giftSuggestions = [];
@@ -97,6 +98,7 @@ class GiftRequestForm extends Component
 
             // Load settings
             $this->maxConsecutiveYears = Setting::getMaxConsecutiveYears();
+            $this->maxChildAge = Setting::getMaxChildAge();
             $this->allowedCities = Setting::getAllowedCities();
             $this->giftSuggestions = Setting::getGiftSuggestions();
             $this->proofOfHabitationEnabled = Setting::isProofOfHabitationEnabled();
@@ -348,8 +350,14 @@ class GiftRequestForm extends Component
             if (empty($child['gender'])) {
                 $this->addError("children.{$index}.gender", 'Le genre est obligatoire.');
             }
+            $currentYear = (int) date('Y');
+            $minBirthYear = $currentYear - $this->maxChildAge;
             if (empty($child['birth_year']) || ! is_numeric($child['birth_year'])) {
                 $this->addError("children.{$index}.birth_year", 'L\'année de naissance est obligatoire.');
+            } elseif ((int) $child['birth_year'] < $minBirthYear) {
+                $this->addError("children.{$index}.birth_year", "L'enfant doit avoir au maximum {$this->maxChildAge} ans au 31.12.{$currentYear} (année de naissance minimum : {$minBirthYear}).");
+            } elseif ((int) $child['birth_year'] > $currentYear) {
+                $this->addError("children.{$index}.birth_year", "L'année de naissance ne peut pas être dans le futur.");
             }
             if (empty($child['gift'])) {
                 $this->addError("children.{$index}.gift", 'Le cadeau souhaité est obligatoire.');

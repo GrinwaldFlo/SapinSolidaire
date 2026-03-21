@@ -29,6 +29,17 @@
             </div>
 
             <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Âge maximum des enfants (inclus) *</label>
+                <input type="number" wire:model.live="maxChildAge" min="1" max="25" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white">
+                @php $minBirthYear = date('Y') - $maxChildAge; @endphp
+                <p class="mt-1 text-sm text-gray-500">
+                    Année de naissance minimale acceptée : <strong>{{ $minBirthYear }}</strong>
+                    — Un enfant né en {{ $minBirthYear }} aura exactement {{ $maxChildAge }} ans au 31.12.{{ date('Y') }} ({{ date('Y') }} − {{ $maxChildAge }} = {{ $minBirthYear }}).
+                </p>
+                @error('maxChildAge') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Propositions de cadeaux</label>
                 <textarea wire:model="giftSuggestions" rows="6" placeholder="Un cadeau par ligne" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white"></textarea>
                 <p class="mt-1 text-sm text-gray-500">Un cadeau par ligne. Ces suggestions apparaîtront dans l'autocomplétion du formulaire.</p>

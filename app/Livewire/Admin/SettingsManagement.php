@@ -12,6 +12,7 @@ class SettingsManagement extends Component
     public string $siteName = '';
     public string $allowedCities = '';
     public int $maxConsecutiveYears = 3;
+    public int $maxChildAge = 12;
     public string $giftSuggestions = '';
     public string $introductionText = '';
     public string $replyToEmail = '';
@@ -25,6 +26,7 @@ class SettingsManagement extends Component
         $this->siteName = Setting::getSiteName();
         $this->allowedCities = Setting::getValue(Setting::ALLOWED_CITIES, '');
         $this->maxConsecutiveYears = Setting::getMaxConsecutiveYears();
+        $this->maxChildAge = Setting::getMaxChildAge();
         $this->giftSuggestions = Setting::getValue(Setting::GIFT_SUGGESTIONS, '');
         $this->introductionText = Setting::getIntroductionText();
         $this->replyToEmail = Setting::getReplyToEmail() ?? '';
@@ -39,6 +41,7 @@ class SettingsManagement extends Component
         $this->validate([
             'siteName' => ['required', 'string', 'max:255'],
             'maxConsecutiveYears' => ['required', 'integer', 'min:1', 'max:10'],
+            'maxChildAge' => ['required', 'integer', 'min:1', 'max:25'],
             'replyToEmail' => ['nullable', 'email'],
             'codePrefix' => ['nullable', 'string', 'max:10'],
             'codeFamilyPadding' => ['required', 'integer', 'min:1', 'max:10'],
@@ -64,6 +67,7 @@ class SettingsManagement extends Component
         Setting::setValue(Setting::SITE_NAME, $this->siteName);
         Setting::setValue(Setting::ALLOWED_CITIES, implode(', ', $cities));
         Setting::setValue(Setting::MAX_CONSECUTIVE_YEARS, $this->maxConsecutiveYears);
+        Setting::setValue(Setting::MAX_CHILD_AGE, $this->maxChildAge);
         Setting::setValue(Setting::GIFT_SUGGESTIONS, $this->giftSuggestions);
         Setting::setValue(Setting::INTRODUCTION_TEXT, $this->introductionText);
         Setting::setValue(Setting::REPLY_TO_EMAIL, $this->replyToEmail);
