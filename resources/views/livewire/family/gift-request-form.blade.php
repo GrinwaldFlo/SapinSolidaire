@@ -220,10 +220,10 @@
 
                         <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
                             <p class="text-sm text-blue-800 dark:text-blue-200">
-                                📷 Veuillez prendre en photo un courrier récent indiquant votre adresse (facture de téléphone, facture d'électricité, courrier officiel, etc.).
+                                📎 Veuillez transmettre un justificatif récent indiquant votre adresse (photo ou PDF).
                             </p>
                             <p class="text-xs text-blue-600 dark:text-blue-300 mt-2">
-                                ℹ️ Ce justificatif sera supprimé en fin de saison et ne sera utilisé que pour vérifier votre adresse.
+                                ℹ️ Formats acceptés : image (jpg, png, webp) ou PDF, maximum 10 Mo. Ce justificatif sera supprimé en fin de saison et ne sera utilisé que pour vérifier votre adresse.
                             </p>
                         </div>
 
@@ -236,14 +236,13 @@
 
                         <div>
                             <label for="proofOfHabitation" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Photo du justificatif {{ $existingProofPath ? '' : '*' }}
+                                Justificatif (image ou PDF) {{ $existingProofPath ? '' : '*' }}
                             </label>
                             <input
                                 type="file"
                                 id="proofOfHabitation"
                                 wire:model="proofOfHabitation"
-                                accept="image/*"
-                                capture="environment"
+                                accept="image/*,.pdf,application/pdf"
                                 class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
                             >
                             <div wire:loading wire:target="proofOfHabitation" class="mt-2 text-sm text-gray-500 dark:text-gray-400">
@@ -254,8 +253,12 @@
 
                         @if($proofOfHabitation)
                             <div class="mt-2">
-                                <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">Aperçu :</p>
-                                <img src="{{ $proofOfHabitation->temporaryUrl() }}" alt="Aperçu du justificatif" class="max-w-xs max-h-48 rounded-lg border border-gray-200 dark:border-zinc-600">
+                                @if(str_starts_with((string) $proofOfHabitation->getMimeType(), 'image/'))
+                                    <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">Aperçu :</p>
+                                    <img src="{{ $proofOfHabitation->temporaryUrl() }}" alt="Aperçu du justificatif" class="max-w-xs max-h-48 rounded-lg border border-gray-200 dark:border-zinc-600">
+                                @else
+                                    <p class="text-sm text-gray-600 dark:text-gray-300">Fichier sélectionné : {{ $proofOfHabitation->getClientOriginalName() }}</p>
+                                @endif
                             </div>
                         @endif
                     </div>

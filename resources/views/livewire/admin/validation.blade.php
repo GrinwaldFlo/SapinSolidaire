@@ -48,13 +48,31 @@
                 </div>
 
                 @if($currentRequest->proof_of_habitation_path)
+                    @php
+                        $proofUrl = route('admin.proof-of-habitation', $currentRequest);
+                        $isPdfProof = \Illuminate\Support\Str::endsWith(strtolower($currentRequest->proof_of_habitation_path), '.pdf');
+                    @endphp
                     <div class="mb-4">
                         <span class="text-sm text-gray-500 dark:text-gray-400">Justificatif de domicile :</span>
                         <div class="mt-2">
-                            <button type="button" @click="imageUrl = '{{ route('admin.proof-of-habitation', $currentRequest) }}'; imageAlt = 'Justificatif de domicile'; showImageModal = true" class="inline-block cursor-pointer">
-                                <img src="{{ route('admin.proof-of-habitation', $currentRequest) }}" alt="Justificatif de domicile" class="max-w-sm max-h-64 rounded-lg border border-gray-200 dark:border-zinc-700 hover:opacity-90 transition">
-                            </button>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Cliquez sur l'image pour l'agrandir</p>
+                            @if($isPdfProof)
+                                <div class="border border-gray-200 dark:border-zinc-700 rounded-lg p-4 bg-gray-50 dark:bg-zinc-900/40 max-w-2xl">
+                                    <p class="text-sm text-gray-700 dark:text-gray-200 mb-3">Document PDF reçu.</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        <a href="{{ $proofUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm">
+                                            Ouvrir le PDF
+                                        </a>
+                                        <a href="{{ $proofUrl }}" download class="inline-flex items-center bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-sm">
+                                            Télécharger
+                                        </a>
+                                    </div>
+                                </div>
+                            @else
+                                <button type="button" @click="imageUrl = '{{ $proofUrl }}'; imageAlt = 'Justificatif de domicile'; showImageModal = true" class="inline-block cursor-pointer">
+                                    <img src="{{ $proofUrl }}" alt="Justificatif de domicile" class="max-w-sm max-h-64 rounded-lg border border-gray-200 dark:border-zinc-700 hover:opacity-90 transition">
+                                </button>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Cliquez sur l'image pour l'agrandir</p>
+                            @endif
                         </div>
                     </div>
                 @endif

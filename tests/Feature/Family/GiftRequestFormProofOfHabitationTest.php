@@ -106,6 +106,30 @@ test('submit succeeds with proof of habitation when feature is enabled', functio
         ->assertSet('submitted', true);
 });
 
+test('succeed with proof of habitation PDF when feature is enabled', function () {
+    Setting::setValue(Setting::PROOF_OF_HABITATION_ENABLED, '1');
+
+    $file = UploadedFile::fake()->create('proof.pdf', 100, 'application/pdf');
+
+    Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
+        ->call('acceptConsecutiveYears')
+        ->call('acceptCity')
+        ->set('firstName', 'Jean')
+        ->set('lastName', 'Dupont')
+        ->set('streetName', 'Rue de Test')
+        ->set('houseNo', '1')
+        ->set('postalCode', '1000')
+        ->set('city', 'Lausanne')
+        ->set('phone', '+41791234567')
+        ->set('proofOfHabitation', $file)
+        ->set('children.0.first_name', 'Petit')
+        ->set('children.0.birth_year', '2018')
+        ->set('children.0.gift', 'Livre')
+        ->call('submit')
+        ->assertHasNoErrors('proofOfHabitation')
+        ->assertSet('submitted', true);
+});
+
 test('proof of habitation file is stored on submit', function () {
     Setting::setValue(Setting::PROOF_OF_HABITATION_ENABLED, '1');
 

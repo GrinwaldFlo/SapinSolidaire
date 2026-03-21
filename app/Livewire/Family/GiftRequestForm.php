@@ -335,10 +335,11 @@ class GiftRequestForm extends Component
 
         if ($this->proofOfHabitation) {
             $this->validate([
-                'proofOfHabitation' => ['image', 'max:10240'],
+                'proofOfHabitation' => ['file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:10240'],
             ], [
-                'proofOfHabitation.image' => 'Le fichier doit être une image (jpg, png, etc.).',
-                'proofOfHabitation.max' => 'L\'image ne doit pas dépasser 10 Mo.',
+                'proofOfHabitation.file' => 'Le justificatif doit être un fichier valide.',
+                'proofOfHabitation.mimes' => 'Le fichier doit être une image (jpg, png, webp) ou un PDF.',
+                'proofOfHabitation.max' => 'Le fichier ne doit pas dépasser 10 Mo.',
             ]);
         }
 
