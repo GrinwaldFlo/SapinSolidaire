@@ -45,7 +45,8 @@
     </div>
 
     @if($selectedSeasonId)
-        <div class="bg-white dark:bg-zinc-800 rounded-lg shadow overflow-hidden">
+        {{-- Desktop table --}}
+        <div class="hidden sm:block bg-white dark:bg-zinc-800 rounded-lg shadow overflow-hidden">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
                 <thead class="bg-gray-50 dark:bg-zinc-700">
                     <tr>
@@ -118,6 +119,46 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        {{-- Mobile cards --}}
+        <div class="sm:hidden space-y-3">
+            @forelse($children as $child)
+                <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-4 space-y-3">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="font-mono font-bold text-gray-900 dark:text-white">{{ $child->code ?? '—' }}</span>
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full
+                            @switch($child->status)
+                                @case('pending') bg-yellow-100 text-yellow-800 @break
+                                @case('validated') bg-blue-100 text-blue-800 @break
+                                @case('rejected') bg-orange-100 text-orange-800 @break
+                                @case('rejected_final') bg-red-100 text-red-800 @break
+                                @case('printed') bg-purple-100 text-purple-800 @break
+                                @case('received') bg-cyan-100 text-cyan-800 @break
+                                @case('given') bg-green-100 text-green-800 @break
+                            @endswitch
+                        ">
+                            {{ $child->status_label }}
+                        </span>
+                    </div>
+                    <div class="text-gray-900 dark:text-white font-medium">
+                        {{ $child->first_name }}
+                        @if($child->anonymous)
+                            <span class="ml-1 text-xs text-orange-600 dark:text-orange-400">(A)</span>
+                        @endif
+                    </div>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-gray-600 dark:text-gray-300">
+                        <div><span class="font-medium text-gray-700 dark:text-gray-200">Genre :</span> @if($child->gender !== 'unspecified') {{ $child->gender_label }} @else - @endif</div>
+                        <div><span class="font-medium text-gray-700 dark:text-gray-200">Âge :</span> {{ $child->age }} ans</div>
+                        <div class="col-span-2"><span class="font-medium text-gray-700 dark:text-gray-200">Cadeau :</span> {{ $child->gift }}</div>
+                        <div class="col-span-2"><span class="font-medium text-gray-700 dark:text-gray-200">Famille :</span> {{ $child->giftRequest->family->last_name }}</div>
+                    </div>
+                </div>
+            @empty
+                <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-4 text-center text-gray-500 dark:text-gray-400">
+                    Aucun enfant trouvé
+                </div>
+            @endforelse
         </div>
 
         <div class="mt-4">
