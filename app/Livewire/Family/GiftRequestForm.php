@@ -114,7 +114,12 @@ class GiftRequestForm extends Component
                 $this->houseNo = $this->family->house_no ?? '';
                 $this->postalCode = $this->family->postal_code ?? '';
                 $this->city = $this->family->city ?? '';
-                $this->phone = $this->family->phone ?? '';
+
+                $rawPhone = $this->family->phone ?? '';
+                $phoneService = app(PhoneValidationService::class);
+                $this->phone = ($rawPhone && ($formatted = $phoneService->formatInternational($rawPhone)))
+                    ? $formatted
+                    : $rawPhone;
 
                 // Check for existing request this season
                 $this->giftRequest = $this->family->getRequestForSeason($this->season);

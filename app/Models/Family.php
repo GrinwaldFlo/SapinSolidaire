@@ -91,4 +91,57 @@ class Family extends Model
 
         return trim("{$streetLine}, {$this->postal_code} {$this->city}", ' ,');
     }
+
+    /**
+     * Normalize the stored phone number to a 10-digit local Swiss number (0XXXXXXXXX).
+     */
+    protected function normalizePhone(): ?string
+    {
+        if (! $this->phone) {
+            return null;
+        }
+
+        $digits = preg_replace('/\D/', '', $this->phone);
+
+        // +41... or 0041...
+        if (str_starts_with($digits, '0041')) {
+            $digits = '0'.substr($digits, 4);
+        } elseif (str_starts_with($digits, '41') && strlen($digits) === 11) {
+            $digits = '0'.substr($digits, 2);
+        }
+
+        if (strlen($digits) !== 10 || ! str_starts_with($digits, '0')) {
+            return null;
+        }
+
+        return $digits;
+    }
+
+    /**
+     * Get the phone number formatted for Swiss display: 076 444 56 66
+     */
+    public function getFormattedPhoneAttribute(): ?string
+    {
+        $digits = $this->normalizePhone();
+
+        if (! $digits) {
+            return $this->phone;
+        }
+
+        return substr($digits, 0, 3).' '.substr($digits, 3, 3).' '.substr($digits, 6, 2).' '.substr($digits, 8, 2);
+    }
+
+    /**
+     * Get the phone number in E.164 format for tel: links: +41XXXXXXXXX
+     */
+    public function getTelPhoneAttribute(): ?string
+    {
+        $digits = $this->normalizePhone();
+
+        if (! $digits) {
+            return $this->phone;
+        }
+
+        return '+41'.substr($digits, 1);
+    }
 }

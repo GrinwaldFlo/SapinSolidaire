@@ -30,7 +30,10 @@
                     </div>
                     <div>
                         <span class="text-sm text-gray-500 dark:text-gray-400">Téléphone :</span>
-                        <span class="ml-2 text-gray-900 dark:text-white">{{ $currentRequest->family->phone }}</span>
+                        <a href="tel:{{ $currentRequest->family->tel_phone }}" class="ml-2 inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.01-.24 11.47 11.47 0 0 0 3.58.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.58a1 1 0 0 1-.25 1.01z"/></svg>
+                            {{ $currentRequest->family->formatted_phone }}
+                        </a>
                     </div>
                     <div>
                         <span class="text-sm text-gray-500 dark:text-gray-400">Adresse :</span>

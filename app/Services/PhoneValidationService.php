@@ -60,4 +60,22 @@ class PhoneValidationService
             return null;
         }
     }
+
+    /**
+     * Format a phone number for display with country code and spaces: +41 79 123 45 67
+     */
+    public function formatInternational(string $phone): ?string
+    {
+        try {
+            $phoneNumber = $this->phoneUtil->parse($phone, 'CH');
+
+            if (! $this->phoneUtil->isValidNumber($phoneNumber)) {
+                return null;
+            }
+
+            return $this->phoneUtil->format($phoneNumber, PhoneNumberFormat::INTERNATIONAL);
+        } catch (NumberParseException $e) {
+            return null;
+        }
+    }
 }
