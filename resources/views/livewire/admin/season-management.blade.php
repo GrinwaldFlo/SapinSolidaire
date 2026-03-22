@@ -48,7 +48,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date limite de modification</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date limite d'inscription et modification</label>
                     <input type="date" wire:model="modificationDeadline" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white">
                 </div>
 

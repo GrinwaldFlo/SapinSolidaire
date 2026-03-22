@@ -63,6 +63,9 @@ class Home extends Component
     {
         return view('livewire.family.home', [
             'introductionText' => Setting::getIntroductionText(),
+            'pickupSlots' => $this->season
+                ? $this->season->pickupSlots()->orderBy('start_datetime')->get()
+                : collect(),
         ]);
     }
 }
