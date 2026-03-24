@@ -174,7 +174,8 @@ class Child extends Model
             $giftRequest = $this->giftRequest()->lockForUpdate()->first();
 
             if ($giftRequest->family_number === null) {
-                return;
+                $giftRequest->family_number = $giftRequest->season->assignNextFamilyNumber();
+                $giftRequest->save();
             }
 
             $maxChildNumber = Child::where('gift_request_id', $giftRequest->id)

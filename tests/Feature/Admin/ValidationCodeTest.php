@@ -276,3 +276,57 @@ test('validateChild sets validated_at timestamp', function () {
     $child->refresh();
     expect($child->validated_at)->not->toBeNull();
 });
+
+test('validateChild assigns code even when family is not yet validated', function () {
+    $child = Child::create([
+        'gift_request_id' => $this->giftRequest->id,
+        'first_name' => 'Alice',
+        'gender' => Child::GENDER_GIRL,
+        'birth_year' => 2018,
+        'gift' => 'Poupée',
+        'status' => Child::STATUS_PENDING,
+    ]);
+
+    $this->actingAs($this->admin);
+
+    // Validate the child BEFORE the family is validated (no family_number yet)
+    Livewire::test(Validation::class)
+        ->call('validateChild', $child->id);
+
+    $child->refresh();
+    $this->giftRequest->refresh();
+
+    expect($child->status)->toBe(Child::STATUS_VALIDATED);
+    expect($this->giftRequest->family_number)->toBe(1);
+    expect($child->child_number)->toBe(1);
+    expect($child->code)->toBe('Y0001/1');
+});
+
+test('validateChild before family then validateFamily does not reassign family number', function () {
+    $child = Child::create([
+        'gift_request_id' => $this->giftRequest->id,
+        'first_name' => 'Alice',
+        'gender' => Child::GENDER_GIRL,
+        'birth_year' => 2018,
+        'gift' => 'Poupée',
+        'status' => Child::STATUS_PENDING,
+    ]);
+
+    $this->actingAs($this->admin);
+
+    // Validate child first (auto-assigns family_number = 1)
+    Livewire::test(Validation::class)
+        ->call('validateChild', $child->id);
+
+    // Then validate family — should not consume a new family number
+    Livewire::test(Validation::class)
+        ->call('validateFamily');
+
+    $child->refresh();
+    $this->giftRequest->refresh();
+    $this->season->refresh();
+
+    expect($this->giftRequest->family_number)->toBe(1);
+    expect($child->code)->toBe('Y0001/1');
+    expect($this->season->next_family_number)->toBe(2);
+});
