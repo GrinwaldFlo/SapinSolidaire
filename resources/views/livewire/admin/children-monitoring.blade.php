@@ -1,4 +1,73 @@
 <div class="space-y-6">
+    {{-- Family details modal --}}
+    @if($showFamilyModal && $selectedFamily)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4" x-data x-on:keydown.escape.window="$wire.closeFamilyModal()">
+            <div class="fixed inset-0 bg-black/50" wire:click="closeFamilyModal"></div>
+            <div class="relative bg-white dark:bg-zinc-800 rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto z-10">
+                <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-zinc-700">
+                    <h2 class="text-lg font-bold text-gray-900 dark:text-white">Famille {{ $selectedFamily['last_name'] }}</h2>
+                    <button wire:click="closeFamilyModal" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div class="p-4 space-y-4">
+                    {{-- Parent --}}
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Parent</h3>
+                        <p class="text-gray-900 dark:text-white font-medium">{{ $selectedFamily['first_name'] }} {{ $selectedFamily['last_name'] }}</p>
+                    </div>
+
+                    {{-- Email --}}
+                    @if($selectedFamily['email'])
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Email</h3>
+                            <a href="mailto:{{ $selectedFamily['email'] }}" class="text-blue-600 dark:text-blue-400 hover:underline break-all">{{ $selectedFamily['email'] }}</a>
+                        </div>
+                    @endif
+
+                    {{-- Phone --}}
+                    @if($selectedFamily['phone'])
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Téléphone</h3>
+                            <a href="tel:{{ $selectedFamily['tel_phone'] }}" class="text-blue-600 dark:text-blue-400 hover:underline">{{ $selectedFamily['formatted_phone'] }}</a>
+                        </div>
+                    @endif
+
+                    {{-- Address --}}
+                    @if($selectedFamily['full_address'])
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Adresse</h3>
+                            <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($selectedFamily['full_address']) }}" target="_blank" rel="noopener" class="text-blue-600 dark:text-blue-400 hover:underline">{{ $selectedFamily['full_address'] }}</a>
+                        </div>
+                    @endif
+
+                    {{-- Children --}}
+                    @if(count($selectedFamily['children']) > 0)
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Enfants</h3>
+                            <ul class="space-y-2">
+                                @foreach($selectedFamily['children'] as $familyChild)
+                                    <li class="bg-gray-50 dark:bg-zinc-700 rounded-lg p-3">
+                                        <p class="font-medium text-gray-900 dark:text-white">{{ $familyChild['first_name'] }}</p>
+                                        <p class="text-sm text-gray-600 dark:text-gray-300">
+                                            {{ $familyChild['age'] }} ans
+                                            @if($familyChild['gender_label']) — {{ $familyChild['gender_label'] }} @endif
+                                            @if($familyChild['gift']) — {{ $familyChild['gift'] }} @endif
+                                        </p>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                </div>
+                <div class="p-4 border-t border-gray-200 dark:border-zinc-700">
+                    <button wire:click="closeFamilyModal" class="w-full px-4 py-2 bg-gray-200 dark:bg-zinc-600 text-gray-800 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-zinc-500 font-medium">
+                        Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Suivi des enfants</h1>
 
     <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-4">
@@ -95,7 +164,11 @@
                             </td>
                             <td class="px-6 py-4 text-gray-600 dark:text-gray-300">{{ $child->age }} ans</td>
                             <td class="px-6 py-4 text-gray-600 dark:text-gray-300">{{ $child->gift }}</td>
-                            <td class="px-6 py-4 text-gray-600 dark:text-gray-300">{{ $child->giftRequest->family->last_name }}</td>
+                            <td class="px-6 py-4">
+                                <button wire:click="showFamilyDetails('{{ $child->giftRequest->family->id }}')" class="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer font-medium">
+                                    {{ $child->giftRequest->family->last_name }}
+                                </button>
+                            </td>
                             <td class="px-6 py-4">
                                 <span class="px-2 py-1 text-xs font-semibold rounded-full
                                     @switch($child->status)
@@ -151,7 +224,12 @@
                         <div><span class="font-medium text-gray-700 dark:text-gray-200">Genre :</span> @if($child->gender !== 'unspecified') {{ $child->gender_label }} @else - @endif</div>
                         <div><span class="font-medium text-gray-700 dark:text-gray-200">Âge :</span> {{ $child->age }} ans</div>
                         <div class="col-span-2"><span class="font-medium text-gray-700 dark:text-gray-200">Cadeau :</span> {{ $child->gift }}</div>
-                        <div class="col-span-2"><span class="font-medium text-gray-700 dark:text-gray-200">Famille :</span> {{ $child->giftRequest->family->last_name }}</div>
+                        <div class="col-span-2">
+                            <span class="font-medium text-gray-700 dark:text-gray-200">Famille :</span>
+                            <button wire:click="showFamilyDetails('{{ $child->giftRequest->family->id }}')" class="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer font-medium">
+                                {{ $child->giftRequest->family->last_name }}
+                            </button>
+                        </div>
                     </div>
                 </div>
             @empty
