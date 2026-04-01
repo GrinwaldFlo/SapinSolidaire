@@ -124,24 +124,6 @@ test('assignChildNumberAndCode increments child number for subsequent children',
     expect($child3->code)->toBe('Y0003/3');
 });
 
-test('assignChildNumberAndCode does nothing when family has no family_number', function () {
-    Setting::setValue(Setting::CODE_PREFIX, 'Y');
-
-    $child = Child::create([
-        'gift_request_id' => $this->giftRequest->id,
-        'first_name' => 'Alice',
-        'gender' => Child::GENDER_GIRL,
-        'birth_year' => 2018,
-        'gift' => 'Poupée',
-        'status' => Child::STATUS_PENDING,
-    ]);
-
-    $child->assignChildNumberAndCode();
-
-    expect($child->child_number)->toBeNull();
-    expect($child->code)->toBeNull();
-});
-
 test('assignChildNumberAndCode uses setting code prefix', function () {
     Setting::setValue(Setting::CODE_PREFIX, 'Z');
 

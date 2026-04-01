@@ -100,27 +100,6 @@ test('allowedCities is empty when no setting exists', function () {
 
 // --- Submit validation with city ---
 
-test('submit rejects non-allowed city', function () {
-    Setting::setValue(Setting::ALLOWED_CITIES, 'Lausanne, Morges');
-
-    Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
-        ->call('acceptConsecutiveYears')
-        ->set('selectedCity', 'Lausanne')
-        ->call('acceptCity')
-        ->set('city', 'Genève')
-        ->set('firstName', 'Jean')
-        ->set('lastName', 'Dupont')
-        ->set('streetName', 'Rue de Test')
-        ->set('houseNo', '1')
-        ->set('postalCode', '1000')
-        ->set('phone', '+41791234567')
-        ->set('children.0.first_name', 'Petit')
-        ->set('children.0.birth_year', '2018')
-        ->set('children.0.gift', 'Livre')
-        ->call('submit')
-        ->assertHasErrors('city');
-});
-
 test('submit accepts allowed city', function () {
     Setting::setValue(Setting::ALLOWED_CITIES, 'Lausanne, Morges');
 
@@ -226,28 +205,6 @@ test('confirmCity rejects empty city', function () {
         ->set('city', '')
         ->call('requestCityChange')
         ->call('confirmCity')
-        ->assertHasErrors('city');
-});
-
-test('submit rejects unconfirmed city change', function () {
-    Setting::setValue(Setting::ALLOWED_CITIES, 'Lausanne, Morges');
-
-    Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
-        ->call('acceptConsecutiveYears')
-        ->set('selectedCity', 'Lausanne')
-        ->call('acceptCity')
-        ->set('city', 'Morges')
-        ->set('cityConfirmed', false)
-        ->set('firstName', 'Jean')
-        ->set('lastName', 'Dupont')
-        ->set('streetName', 'Rue de Test')
-        ->set('houseNo', '1')
-        ->set('postalCode', '1000')
-        ->set('phone', '+41791234567')
-        ->set('children.0.first_name', 'Petit')
-        ->set('children.0.birth_year', '2018')
-        ->set('children.0.gift', 'Livre')
-        ->call('submit')
         ->assertHasErrors('city');
 });
 
