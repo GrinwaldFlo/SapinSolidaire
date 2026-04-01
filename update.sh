@@ -70,6 +70,11 @@ main() {
         print_error "PHP not found, cannot run migrations"
         exit 1
     fi
+
+    # Step 5b: Run database seeders
+    print_info "Running database seeders..."
+    php artisan db:seed --force
+    print_success "Database seeding completed"
     
     # Step 6: Clear caches
     print_info "Clearing application caches..."
@@ -77,8 +82,17 @@ main() {
     php artisan config:clear
     php artisan view:clear
     print_success "Caches cleared"
-    
-    # Step 7: Set permissions (if running on Linux/macOS)
+
+    # Step 7: Flush sessions (forces re-login, clears stale session data)
+    print_info "Flushing sessions..."
+    if [ -d "storage/framework/sessions" ]; then
+        find storage/framework/sessions -type f -delete 2>/dev/null
+        print_success "File sessions flushed"
+    fi
+    php artisan tinker --execute="try { DB::table('sessions')->truncate(); echo 'DB sessions flushed'; } catch (\Throwable \$e) {}" 2>/dev/null || true
+    print_success "Sessions flushed"
+
+    # Step 8: Set permissions (if running on Linux/macOS)
     if [[ "$OSTYPE" != "msys" && "$OSTYPE" != "win32" ]]; then
         print_info "Setting directory permissions..."
         chmod -R 775 storage bootstrap/cache

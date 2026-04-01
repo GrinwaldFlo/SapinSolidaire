@@ -28,7 +28,8 @@ beforeEach(function () {
         'email' => 'test@example.com',
         'first_name' => 'Jean',
         'last_name' => 'Dupont',
-        'address' => 'Rue de la Gare 1',
+        'street_name' => 'Rue de la Gare',
+        'house_no' => '1',
         'postal_code' => '1000',
         'city' => 'Lausanne',
         'phone' => '0791234567',
@@ -59,7 +60,8 @@ test('validateFamily assigns sequential family numbers to different families', f
         'email' => 'family2@example.com',
         'first_name' => 'Marie',
         'last_name' => 'Martin',
-        'address' => 'Rue du Lac 5',
+        'street_name' => 'Rue du Lac',
+        'house_no' => '5',
         'postal_code' => '1000',
         'city' => 'Lausanne',
         'phone' => '0799999999',
@@ -202,7 +204,8 @@ test('full validation flow produces correct codes', function () {
         'email' => 'family2@example.com',
         'first_name' => 'Marie',
         'last_name' => 'Martin',
-        'address' => 'Rue du Lac 5',
+        'street_name' => 'Rue du Lac',
+        'house_no' => '5',
         'postal_code' => '1000',
         'city' => 'Lausanne',
         'phone' => '0799999999',
@@ -272,4 +275,58 @@ test('validateChild sets validated_at timestamp', function () {
 
     $child->refresh();
     expect($child->validated_at)->not->toBeNull();
+});
+
+test('validateChild assigns code even when family is not yet validated', function () {
+    $child = Child::create([
+        'gift_request_id' => $this->giftRequest->id,
+        'first_name' => 'Alice',
+        'gender' => Child::GENDER_GIRL,
+        'birth_year' => 2018,
+        'gift' => 'Poupée',
+        'status' => Child::STATUS_PENDING,
+    ]);
+
+    $this->actingAs($this->admin);
+
+    // Validate the child BEFORE the family is validated (no family_number yet)
+    Livewire::test(Validation::class)
+        ->call('validateChild', $child->id);
+
+    $child->refresh();
+    $this->giftRequest->refresh();
+
+    expect($child->status)->toBe(Child::STATUS_VALIDATED);
+    expect($this->giftRequest->family_number)->toBe(1);
+    expect($child->child_number)->toBe(1);
+    expect($child->code)->toBe('Y0001/1');
+});
+
+test('validateChild before family then validateFamily does not reassign family number', function () {
+    $child = Child::create([
+        'gift_request_id' => $this->giftRequest->id,
+        'first_name' => 'Alice',
+        'gender' => Child::GENDER_GIRL,
+        'birth_year' => 2018,
+        'gift' => 'Poupée',
+        'status' => Child::STATUS_PENDING,
+    ]);
+
+    $this->actingAs($this->admin);
+
+    // Validate child first (auto-assigns family_number = 1)
+    Livewire::test(Validation::class)
+        ->call('validateChild', $child->id);
+
+    // Then validate family — should not consume a new family number
+    Livewire::test(Validation::class)
+        ->call('validateFamily');
+
+    $child->refresh();
+    $this->giftRequest->refresh();
+    $this->season->refresh();
+
+    expect($this->giftRequest->family_number)->toBe(1);
+    expect($child->code)->toBe('Y0001/1');
+    expect($this->season->next_family_number)->toBe(2);
 });

@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Child;
+use App\Models\EmailToken;
 use App\Models\Family;
 use App\Models\GiftRequest;
 use App\Models\Season;
@@ -16,10 +17,36 @@ class DevTools extends Component
     public int $familyCount = 5;
     public string $flashMessage = '';
     public string $flashType = '';
+    public string $familyEmail = '';
+    public string $familyAccessLink = '';
 
     public function mount(): void
     {
         $this->activeSeason = Season::getActive();
+    }
+
+    public function generateFamilyAccessLink(): void
+    {
+        $this->validate([
+            'familyEmail' => ['required', 'email'],
+        ], [
+            'familyEmail.required' => 'Veuillez entrer une adresse e-mail.',
+            'familyEmail.email' => 'Veuillez entrer une adresse e-mail valide.',
+        ]);
+
+        $family = Family::where('email', $this->familyEmail)->first();
+
+        if (! $family) {
+            $this->familyAccessLink = '';
+            $this->flash('Aucune famille trouvée avec cette adresse e-mail.', 'error');
+
+            return;
+        }
+
+        $token = EmailToken::createForEmail($family->email);
+
+        $this->familyAccessLink = route('gift.form', ['token' => $token->token]);
+        $this->flash('Lien de connexion généré.', 'success');
     }
 
     public function seedFamilies(): void
@@ -62,7 +89,8 @@ class DevTools extends Component
                     'email' => $email,
                     'first_name' => $firstName,
                     'last_name' => $lastName,
-                    'address' => $streets[array_rand($streets)].' '.rand(1, 50),
+                    'street_name' => $streets[array_rand($streets)],
+                    'house_no' => strval(rand(1, 50)),
                     'postal_code' => strval(rand(1000, 1999)),
                     'city' => $cities[array_rand($cities)],
                     'phone' => '07'.str_pad(strval(rand(0, 99999999)), 8, '0', STR_PAD_LEFT),

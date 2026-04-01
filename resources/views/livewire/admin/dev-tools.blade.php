@@ -45,6 +45,43 @@
             </div>
         </div>
 
+        {{-- Family Access Link --}}
+        <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Récupérer un lien de connexion famille</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                Génère un lien d'accès identique à celui envoyé par e-mail depuis la page d'accueil.
+            </p>
+
+            <form wire:submit="generateFamilyAccessLink" class="space-y-4">
+                <div class="flex items-end gap-4">
+                    <div class="flex-1">
+                        <label for="familyEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">E-mail de la famille</label>
+                        <input type="email" id="familyEmail" wire:model="familyEmail"
+                            class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            placeholder="exemple@email.com">
+                        @error('familyEmail')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <button type="submit" wire:loading.attr="disabled"
+                        class="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm">
+                        <span wire:loading.remove wire:target="generateFamilyAccessLink">🔗 Générer le lien</span>
+                        <span wire:loading wire:target="generateFamilyAccessLink">Génération...</span>
+                    </button>
+                </div>
+            </form>
+
+            @if($familyAccessLink)
+                <div class="mt-4 rounded-lg border border-indigo-200 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-900/20 p-3">
+                    <p class="text-sm text-indigo-800 dark:text-indigo-200 mb-2">Lien de connexion :</p>
+                    <a href="{{ $familyAccessLink }}" target="_blank" rel="noopener"
+                        class="text-sm text-indigo-700 dark:text-indigo-300 break-all hover:underline">
+                        {{ $familyAccessLink }}
+                    </a>
+                </div>
+            @endif
+        </div>
+
         {{-- Seed Families --}}
         <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Générer des familles de test</h2>

@@ -1,4 +1,4 @@
-<div class="space-y-6">
+<div class="space-y-6" x-data="{ showImageModal: false, imageUrl: '', imageAlt: '' }">
     <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Validation des demandes</h1>
         <div class="text-sm text-gray-600 dark:text-gray-400">
@@ -30,7 +30,10 @@
                     </div>
                     <div>
                         <span class="text-sm text-gray-500 dark:text-gray-400">Téléphone :</span>
-                        <span class="ml-2 text-gray-900 dark:text-white">{{ $currentRequest->family->phone }}</span>
+                        <a href="tel:{{ $currentRequest->family->tel_phone }}" class="ml-2 inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.01-.24 11.47 11.47 0 0 0 3.58.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.58a1 1 0 0 1-.25 1.01z"/></svg>
+                            {{ $currentRequest->family->formatted_phone }}
+                        </a>
                     </div>
                     <div>
                         <span class="text-sm text-gray-500 dark:text-gray-400">Adresse :</span>
@@ -48,13 +51,31 @@
                 </div>
 
                 @if($currentRequest->proof_of_habitation_path)
+                    @php
+                        $proofUrl = route('admin.proof-of-habitation', $currentRequest);
+                        $isPdfProof = \Illuminate\Support\Str::endsWith(strtolower($currentRequest->proof_of_habitation_path), '.pdf');
+                    @endphp
                     <div class="mb-4">
                         <span class="text-sm text-gray-500 dark:text-gray-400">Justificatif de domicile :</span>
                         <div class="mt-2">
-                            <a href="{{ route('admin.proof-of-habitation', $currentRequest) }}" target="_blank" class="inline-block">
-                                <img src="{{ route('admin.proof-of-habitation', $currentRequest) }}" alt="Justificatif de domicile" class="max-w-sm max-h-64 rounded-lg border border-gray-200 dark:border-zinc-700 hover:opacity-90 transition">
-                            </a>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Cliquez sur l'image pour l'agrandir</p>
+                            @if($isPdfProof)
+                                <div class="border border-gray-200 dark:border-zinc-700 rounded-lg p-4 bg-gray-50 dark:bg-zinc-900/40 max-w-2xl">
+                                    <p class="text-sm text-gray-700 dark:text-gray-200 mb-3">Document PDF reçu.</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        <a href="{{ $proofUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm">
+                                            Ouvrir le PDF
+                                        </a>
+                                        <a href="{{ $proofUrl }}" download class="inline-flex items-center bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-sm">
+                                            Télécharger
+                                        </a>
+                                    </div>
+                                </div>
+                            @else
+                                <button type="button" @click="imageUrl = '{{ $proofUrl }}'; imageAlt = 'Justificatif de domicile'; showImageModal = true" class="inline-block cursor-pointer">
+                                    <img src="{{ $proofUrl }}" alt="Justificatif de domicile" class="max-w-sm max-h-64 rounded-lg border border-gray-200 dark:border-zinc-700 hover:opacity-90 transition">
+                                </button>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Cliquez sur l'image pour l'agrandir</p>
+                            @endif
                         </div>
                     </div>
                 @endif
@@ -137,6 +158,16 @@
             </div>
         </div>
     @endif
+
+    {{-- Image Preview Modal --}}
+    <div x-show="showImageModal" x-transition.opacity class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4" @click.self="showImageModal = false" @keydown.escape.window="showImageModal = false" x-cloak>
+        <div class="relative max-w-full max-h-full flex items-center justify-center">
+            <button type="button" @click="showImageModal = false" class="absolute -top-3 -right-3 bg-white dark:bg-zinc-700 text-gray-800 dark:text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg hover:bg-gray-100 dark:hover:bg-zinc-600 z-10">
+                ✕
+            </button>
+            <img :src="imageUrl" :alt="imageAlt" @click="showImageModal = false" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl cursor-pointer">
+        </div>
+    </div>
 
     {{-- Rejection Modal --}}
     @if($showRejectionModal)

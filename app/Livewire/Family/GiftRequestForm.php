@@ -40,7 +40,8 @@ class GiftRequestForm extends Component
     // Family data
     public string $firstName = '';
     public string $lastName = '';
-    public string $address = '';
+    public string $streetName = '';
+    public string $houseNo = '';
     public string $postalCode = '';
     public string $city = '';
     public string $phone = '';
@@ -61,6 +62,7 @@ class GiftRequestForm extends Component
 
     // Settings
     public int $maxConsecutiveYears = 3;
+    public int $maxChildAge = 12;
     public array $allowedCities = [];
     public string $selectedCity = '';
     public array $giftSuggestions = [];
@@ -96,6 +98,7 @@ class GiftRequestForm extends Component
 
             // Load settings
             $this->maxConsecutiveYears = Setting::getMaxConsecutiveYears();
+            $this->maxChildAge = Setting::getMaxChildAge();
             $this->allowedCities = Setting::getAllowedCities();
             $this->giftSuggestions = Setting::getGiftSuggestions();
             $this->proofOfHabitationEnabled = Setting::isProofOfHabitationEnabled();
@@ -107,10 +110,16 @@ class GiftRequestForm extends Component
                 // Load family data
                 $this->firstName = $this->family->first_name ?? '';
                 $this->lastName = $this->family->last_name ?? '';
-                $this->address = $this->family->address ?? '';
+                $this->streetName = $this->family->street_name ?? '';
+                $this->houseNo = $this->family->house_no ?? '';
                 $this->postalCode = $this->family->postal_code ?? '';
                 $this->city = $this->family->city ?? '';
-                $this->phone = $this->family->phone ?? '';
+
+                $rawPhone = $this->family->phone ?? '';
+                $phoneService = app(PhoneValidationService::class);
+                $this->phone = ($rawPhone && ($formatted = $phoneService->formatInternational($rawPhone)))
+                    ? $formatted
+                    : $rawPhone;
 
                 // Check for existing request this season
                 $this->giftRequest = $this->family->getRequestForSeason($this->season);
@@ -230,7 +239,7 @@ class GiftRequestForm extends Component
         $this->children[] = [
             'id' => null,
             'first_name' => '',
-            'gender' => 'unspecified',
+            'gender' => '',
             'anonymous' => false,
             'birth_year' => '',
             'height' => '',
@@ -262,7 +271,8 @@ class GiftRequestForm extends Component
         $rules = [
             'firstName' => ['required', 'string', 'max:255'],
             'lastName' => ['required', 'string', 'max:255'],
-            'address' => ['required', 'string', 'max:255'],
+            'streetName' => ['required', 'string', 'max:255'],
+            'houseNo' => ['required', 'string', 'max:20'],
             'postalCode' => ['required', 'string', 'max:10'],
             'city' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:20'],
@@ -271,7 +281,8 @@ class GiftRequestForm extends Component
         $messages = [
             'firstName.required' => 'Le prénom est obligatoire.',
             'lastName.required' => 'Le nom est obligatoire.',
-            'address.required' => 'L\'adresse est obligatoire.',
+            'streetName.required' => 'Le nom de rue est obligatoire.',
+            'houseNo.required' => 'Le numéro de rue est obligatoire.',
             'postalCode.required' => 'Le code postal est obligatoire.',
             'city.required' => 'La ville est obligatoire.',
             'phone.required' => 'Le numéro de téléphone est obligatoire.',
@@ -292,12 +303,19 @@ class GiftRequestForm extends Component
 
         // Validate address (optional API)
         $addressService = app(AddressValidationService::class);
-        $addressResult = $addressService->validate($this->address, $this->postalCode, $this->city);
+        $addressResult = $addressService->validate($this->streetName, $this->houseNo, $this->postalCode, $this->city);
 
-        if (! $addressResult['valid']) {
-            $this->addError('address', $addressResult['message']);
-
+        if (! $addressResult['Valide']) {
+            $this->addError('streetName', $addressResult['Message']);
             return;
+        }
+
+        if (! empty($addressResult['FormatedAddress'])) {
+            $formatted = $addressResult['FormatedAddress'];
+            $this->streetName = $formatted['StreetName'] ?? $this->streetName;
+            $this->houseNo    = $formatted['HouseNo']    ?? $this->houseNo;
+            $this->postalCode = $formatted['ZipCode']    ?? $this->postalCode;
+            //$this->city       = $formatted['TownName']   ?? $this->city;
         }
 
         // Validate city
@@ -322,10 +340,11 @@ class GiftRequestForm extends Component
 
         if ($this->proofOfHabitation) {
             $this->validate([
-                'proofOfHabitation' => ['image', 'max:10240'],
+                'proofOfHabitation' => ['file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:10240'],
             ], [
-                'proofOfHabitation.image' => 'Le fichier doit être une image (jpg, png, etc.).',
-                'proofOfHabitation.max' => 'L\'image ne doit pas dépasser 10 Mo.',
+                'proofOfHabitation.file' => 'Le justificatif doit être un fichier valide.',
+                'proofOfHabitation.mimes' => 'Le fichier doit être une image (jpg, png, webp) ou un PDF.',
+                'proofOfHabitation.max' => 'Le fichier ne doit pas dépasser 10 Mo.',
             ]);
         }
 
@@ -334,8 +353,17 @@ class GiftRequestForm extends Component
             if (empty($child['first_name'])) {
                 $this->addError("children.{$index}.first_name", 'Le prénom est obligatoire.');
             }
+            if (empty($child['gender'])) {
+                $this->addError("children.{$index}.gender", 'Le genre est obligatoire.');
+            }
+            $currentYear = (int) date('Y');
+            $minBirthYear = $currentYear - $this->maxChildAge;
             if (empty($child['birth_year']) || ! is_numeric($child['birth_year'])) {
                 $this->addError("children.{$index}.birth_year", 'L\'année de naissance est obligatoire.');
+            } elseif ((int) $child['birth_year'] < $minBirthYear) {
+                $this->addError("children.{$index}.birth_year", "L'enfant doit avoir au maximum {$this->maxChildAge} ans au 31.12.{$currentYear} (année de naissance minimum : {$minBirthYear}).");
+            } elseif ((int) $child['birth_year'] > $currentYear) {
+                $this->addError("children.{$index}.birth_year", "L'année de naissance ne peut pas être dans le futur.");
             }
             if (empty($child['gift'])) {
                 $this->addError("children.{$index}.gift", 'Le cadeau souhaité est obligatoire.');
@@ -366,7 +394,8 @@ class GiftRequestForm extends Component
                 [
                     'first_name' => $this->firstName,
                     'last_name' => $this->lastName,
-                    'address' => $this->address,
+                    'street_name' => $this->streetName,
+                    'house_no' => $this->houseNo,
                     'postal_code' => $this->postalCode,
                     'city' => $this->city,
                     'phone' => $formattedPhone,
@@ -404,7 +433,7 @@ class GiftRequestForm extends Component
                     // Update existing child
                     $childRecord->update([
                         'first_name' => $childData['first_name'],
-                        'gender' => $childData['gender'] ?? 'unspecified',
+                        'gender' => $childData['gender'] ?? '',
                         'anonymous' => $childData['anonymous'] ?? false,
                         'birth_year' => $childData['birth_year'],
                         'height' => $childData['height'] ?: null,
@@ -419,7 +448,7 @@ class GiftRequestForm extends Component
                     $newChild = Child::create([
                         'gift_request_id' => $this->giftRequest->id,
                         'first_name' => $childData['first_name'],
-                        'gender' => $childData['gender'] ?? 'unspecified',
+                        'gender' => $childData['gender'] ?? '',
                         'anonymous' => $childData['anonymous'] ?? false,
                         'birth_year' => $childData['birth_year'],
                         'height' => $childData['height'] ?: null,

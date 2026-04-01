@@ -4,6 +4,7 @@ use App\Livewire\Admin\SettingsManagement;
 use App\Models\Role;
 use App\Models\Setting;
 use App\Models\User;
+use App\Services\AddressValidationService;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -33,6 +34,10 @@ test('settings page loads empty allowedCities when not set', function () {
 
 test('admin can save allowedCities setting', function () {
     $this->actingAs($this->admin);
+
+    $this->mock(AddressValidationService::class)
+        ->shouldReceive('validateTown')
+        ->andReturn(['Valide' => true, 'Message' => '', 'FormatedAddress' => []]);
 
     Livewire::test(SettingsManagement::class)
         ->set('siteName', 'Test Site')

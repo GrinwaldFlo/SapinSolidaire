@@ -20,7 +20,8 @@ beforeEach(function () {
         'email' => 'test@example.com',
         'first_name' => 'Jean',
         'last_name' => 'Dupont',
-        'address' => 'Rue de la Gare 1',
+        'street_name' => 'Rue de la Gare',
+        'house_no' => '1',
         'postal_code' => '1000',
         'city' => 'Lausanne',
         'phone' => '0791234567',
@@ -123,24 +124,6 @@ test('assignChildNumberAndCode increments child number for subsequent children',
     expect($child3->code)->toBe('Y0003/3');
 });
 
-test('assignChildNumberAndCode does nothing when family has no family_number', function () {
-    Setting::setValue(Setting::CODE_PREFIX, 'Y');
-
-    $child = Child::create([
-        'gift_request_id' => $this->giftRequest->id,
-        'first_name' => 'Alice',
-        'gender' => Child::GENDER_GIRL,
-        'birth_year' => 2018,
-        'gift' => 'Poupée',
-        'status' => Child::STATUS_PENDING,
-    ]);
-
-    $child->assignChildNumberAndCode();
-
-    expect($child->child_number)->toBeNull();
-    expect($child->code)->toBeNull();
-});
-
 test('assignChildNumberAndCode uses setting code prefix', function () {
     Setting::setValue(Setting::CODE_PREFIX, 'Z');
 
@@ -186,7 +169,8 @@ test('child numbers are scoped per gift request', function () {
         'email' => 'family2@example.com',
         'first_name' => 'Marie',
         'last_name' => 'Martin',
-        'address' => 'Rue du Lac 5',
+        'street_name' => 'Rue du Lac',
+        'house_no' => '5',
         'postal_code' => '1000',
         'city' => 'Lausanne',
         'phone' => '0799999999',

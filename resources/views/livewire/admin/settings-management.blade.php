@@ -17,14 +17,26 @@
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Communes autorisées</label>
-                <input type="text" wire:model="allowedCities" placeholder="Lausanne, Morges, Renens" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white">
+                <textarea wire:model="allowedCities" rows="3" placeholder="Lausanne, Morges, Renens" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white"></textarea>
                 <p class="mt-1 text-sm text-gray-500">Séparez les communes par des virgules. Laissez vide pour autoriser toutes les communes.</p>
+                @error('allowedCities') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre maximal d'années consécutives *</label>
                 <input type="number" wire:model="maxConsecutiveYears" min="1" max="10" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white">
                 @error('maxConsecutiveYears') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Âge maximum des enfants (inclus) *</label>
+                <input type="number" wire:model.live="maxChildAge" min="1" max="25" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white">
+                @php $minBirthYear = date('Y') - $maxChildAge; @endphp
+                <p class="mt-1 text-sm text-gray-500">
+                    Année de naissance minimale acceptée : <strong>{{ $minBirthYear }}</strong>
+                    — Un enfant né en {{ $minBirthYear }} aura exactement {{ $maxChildAge }} ans au 31.12.{{ date('Y') }} ({{ date('Y') }} − {{ $maxChildAge }} = {{ $minBirthYear }}).
+                </p>
+                @error('maxChildAge') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             <div>
@@ -80,6 +92,7 @@
                 <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg">
                     Enregistrer les paramètres
                 </button>
+                @error('allowedCities') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
         </form>
     </div>

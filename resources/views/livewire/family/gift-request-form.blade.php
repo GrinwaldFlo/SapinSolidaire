@@ -157,10 +157,18 @@
                         </div>
                     </div>
 
-                    <div>
-                        <label for="address" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Adresse *</label>
-                        <input type="text" id="address" wire:model="address" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white">
-                        @error('address') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="md:col-span-2">
+                            <label for="streetName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rue *</label>
+                            <input type="text" id="streetName" wire:model="streetName" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white">
+                            @error('streetName') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div>
+                            <label for="houseNo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">N° *</label>
+                            <input type="text" id="houseNo" wire:model="houseNo" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white">
+                            @error('houseNo') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -212,10 +220,10 @@
 
                         <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
                             <p class="text-sm text-blue-800 dark:text-blue-200">
-                                📷 Veuillez prendre en photo un courrier récent indiquant votre adresse (facture de téléphone, facture d'électricité, courrier officiel, etc.).
+                                📎 Veuillez transmettre un justificatif récent indiquant votre adresse (photo ou PDF).
                             </p>
                             <p class="text-xs text-blue-600 dark:text-blue-300 mt-2">
-                                ℹ️ Ce justificatif sera supprimé en fin de saison et ne sera utilisé que pour vérifier votre adresse.
+                                ℹ️ Formats acceptés : image (jpg, png, webp) ou PDF, maximum 10 Mo. Ce justificatif sera supprimé en fin de saison et ne sera utilisé que pour vérifier votre adresse.
                             </p>
                         </div>
 
@@ -228,14 +236,13 @@
 
                         <div>
                             <label for="proofOfHabitation" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Photo du justificatif {{ $existingProofPath ? '' : '*' }}
+                                Justificatif (image ou PDF) {{ $existingProofPath ? '' : '*' }}
                             </label>
                             <input
                                 type="file"
                                 id="proofOfHabitation"
                                 wire:model="proofOfHabitation"
-                                accept="image/*"
-                                capture="environment"
+                                accept="image/*,.pdf,application/pdf"
                                 class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
                             >
                             <div wire:loading wire:target="proofOfHabitation" class="mt-2 text-sm text-gray-500 dark:text-gray-400">
@@ -246,8 +253,12 @@
 
                         @if($proofOfHabitation)
                             <div class="mt-2">
-                                <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">Aperçu :</p>
-                                <img src="{{ $proofOfHabitation->temporaryUrl() }}" alt="Aperçu du justificatif" class="max-w-xs max-h-48 rounded-lg border border-gray-200 dark:border-zinc-600">
+                                @if(str_starts_with((string) $proofOfHabitation->getMimeType(), 'image/'))
+                                    <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">Aperçu :</p>
+                                    <img src="{{ $proofOfHabitation->temporaryUrl() }}" alt="Aperçu du justificatif" class="max-w-xs max-h-48 rounded-lg border border-gray-200 dark:border-zinc-600">
+                                @else
+                                    <p class="text-sm text-gray-600 dark:text-gray-300">Fichier sélectionné : {{ $proofOfHabitation->getClientOriginalName() }}</p>
+                                @endif
                             </div>
                         @endif
                     </div>
@@ -289,10 +300,12 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Genre *</label>
                                     <select wire:model="children.{{ $index }}.gender" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white" {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
-                                        <option value="unspecified">Non précisé</option>
+                                        <option value=""></option>
                                         <option value="boy">Garçon</option>
                                         <option value="girl">Fille</option>
+                                        <option value="unspecified">Non précisé</option>
                                     </select>
+                                    @error("children.{$index}.gender") <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
                                 </div>
 
                                 <div class="md:col-span-2">
@@ -309,7 +322,10 @@
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Année de naissance *</label>
-                                    <input type="number" wire:model="children.{{ $index }}.birth_year" min="2000" max="{{ date('Y') }}" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white" {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
+                                    <input type="number" wire:model="children.{{ $index }}.birth_year" min="{{ date('Y') - $maxChildAge }}" max="{{ date('Y') }}" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white" {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                        Année minimale : <strong>{{ date('Y') - $maxChildAge }}</strong> — les enfants doivent avoir au maximum {{ $maxChildAge }} ans au 31.12.{{ date('Y') }}.
+                                    </p>
                                     @error("children.{$index}.birth_year") <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
                                 </div>
 
@@ -363,6 +379,19 @@
                         <p class="mt-2 text-sm text-center text-gray-500 dark:text-gray-400">
                             Veuillez sélectionner et confirmer votre commune de résidence pour pouvoir envoyer votre demande.
                         </p>
+                    @endif
+
+                    @if($errors->any())
+                        <div class="mt-4 rounded-lg border border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20 p-4">
+                            <p class="text-sm font-semibold text-red-700 dark:text-red-300 mb-2">
+                                Veuillez corriger les erreurs suivantes :
+                            </p>
+                            <ul class="list-disc list-inside text-sm text-red-700 dark:text-red-300 space-y-1">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
                     @endif
                 </div>
             </form>

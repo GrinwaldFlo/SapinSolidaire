@@ -114,4 +114,59 @@
             </p>
         </div>
     @endif
+
+    @if($season)
+        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-8 mt-6">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
+                <span>📅</span> Agenda
+            </h2>
+
+            <div class="space-y-4">
+                <div class="flex items-start gap-3">
+                    <span class="text-green-500 text-lg mt-0.5">🟢</span>
+                    <div>
+                        <p class="font-semibold text-gray-800 dark:text-white">Ouverture des inscriptions</p>
+                        <p class="text-gray-600 dark:text-gray-300">{{ $season->start_date->format('d/m/Y') }}</p>
+                    </div>
+                </div>
+
+                @if($season->modification_deadline)
+                    <div class="flex items-start gap-3">
+                        <span class="text-orange-500 text-lg mt-0.5">⏰</span>
+                        <div>
+                            <p class="font-semibold text-gray-800 dark:text-white">Clôture des inscriptions</p>
+                            <p class="text-gray-600 dark:text-gray-300">{{ $season->modification_deadline->format('d/m/Y') }}</p>
+                        </div>
+                    </div>
+                @endif
+
+                @if($pickupSlots->isNotEmpty())
+                    <div class="pt-2">
+                        <div class="flex items-start gap-3 mb-3">
+                            <span class="text-lg mt-0.5">🎁</span>
+                            <div>
+                                <p class="font-semibold text-gray-800 dark:text-white">Créneaux de récupération des cadeaux</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                    Vous devrez être disponible lors de l'un de ces créneaux. Vous recevrez une invitation précisant le créneau auquel vous devrez vous présenter.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="ml-8 space-y-2">
+                            @foreach($pickupSlots as $slot)
+                                <div class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-zinc-700 rounded-lg px-3 py-2">
+                                    <span>📦</span>
+                                    <span>
+                                        {{ $slot->start_datetime->translatedFormat('l d/m/Y') }}
+                                        de {{ $slot->start_datetime->format('H\hi') }}
+                                        à {{ $slot->end_datetime->format('H\hi') }}
+                                    </span>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+    @endif
 </div>

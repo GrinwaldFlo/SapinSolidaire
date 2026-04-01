@@ -48,7 +48,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date limite de modification</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date limite d'inscription et modification</label>
                     <input type="date" wire:model="modificationDeadline" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white">
                 </div>
 
@@ -148,8 +148,8 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
-                @forelse($seasons as $season)
-                    <tr>
+                @forelse($this->seasons as $season)
+                    <tr wire:key="season-{{ $season->id }}">
                         <td class="px-6 py-4 text-gray-900 dark:text-white">{{ $season->name }}</td>
                         <td class="px-6 py-4 text-gray-600 dark:text-gray-300">
                             {{ $season->start_date->format('d/m/Y') }} - {{ $season->end_date->format('d/m/Y') }}
