@@ -4,6 +4,7 @@ use App\Livewire\Admin\ChildrenMonitoring;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\DevTools;
 use App\Livewire\Admin\FamilyManagement;
+use App\Livewire\Admin\FamilyValidation;
 use App\Livewire\Admin\GiftDelivery;
 use App\Livewire\Admin\GiftReception;
 use App\Livewire\Admin\LabelGeneration;
@@ -30,6 +31,11 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('/', Dashboard::class)
         ->middleware('any.role:'.Role::ADMIN.','.Role::VALIDATOR.','.Role::ORGANIZER.','.Role::RECEPTION)
         ->name('admin.dashboard');
+
+    // Family validation - Validator or Admin
+    Route::get('/validation-familles', FamilyValidation::class)
+        ->middleware('any.role:'.Role::VALIDATOR.','.Role::ADMIN)
+        ->name('admin.family-validation');
 
     // Validation - Validator or Admin
     Route::get('/validation', Validation::class)

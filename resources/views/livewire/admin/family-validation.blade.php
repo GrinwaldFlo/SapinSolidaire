@@ -1,0 +1,39 @@
+<div class="space-y-6" x-data="{ showImageModal: false, imageUrl: '', imageAlt: '' }">
+    <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Validation des familles</h1>
+        <div class="text-sm text-gray-600 dark:text-gray-400">
+            {{ $pendingFamiliesCount }} famille(s) en attente
+        </div>
+    </div>
+
+    @if(!$activeSeason)
+        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
+            <p class="text-yellow-800 dark:text-yellow-200">Aucune saison n'est actuellement active.</p>
+        </div>
+    @elseif(!$currentRequest)
+        <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-4">
+            <p class="text-green-800 dark:text-green-200">🎉 Toutes les familles ont été traitées !</p>
+        </div>
+    @else
+        <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
+            <div class="mb-6">
+                <x-validation.family-info :request="$currentRequest">
+                    <div class="flex flex-wrap gap-2">
+                        <button wire:click="validateFamily" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm">
+                            ✓ Valider la famille
+                        </button>
+                        <button wire:click="openRejectionModal('{{ $currentRequest->id }}', false)" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm">
+                            Demander correction
+                        </button>
+                        <button wire:click="openRejectionModal('{{ $currentRequest->id }}', true)" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm">
+                            Refuser définitivement
+                        </button>
+                    </div>
+                </x-validation.family-info>
+            </div>
+        </div>
+    @endif
+
+    <x-validation.image-preview-modal />
+    <x-validation.rejection-modal :showRejectionModal="$showRejectionModal" :isFinalRejection="$isFinalRejection" />
+</div>
