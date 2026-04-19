@@ -28,6 +28,9 @@ class ChildrenMonitoring extends Component
     public string $sortBy = 'first_name';
     public string $sortDirection = 'asc';
 
+    public bool $showFamilyModal = false;
+    public ?array $selectedFamily = null;
+
     public function mount(): void
     {
         $this->seasons = Season::orderByDesc('start_date')->get();
@@ -64,6 +67,48 @@ class ChildrenMonitoring extends Component
         }
 
         $this->resetPage();
+    }
+
+    public function showFamilyDetails(string $familyId): void
+    {
+        $family = \App\Models\Family::find($familyId);
+
+        if (! $family) {
+            return;
+        }
+
+        $children = collect();
+        if ($this->selectedSeasonId) {
+            $giftRequest = $family->giftRequests()->where('season_id', $this->selectedSeasonId)->first();
+            if ($giftRequest) {
+                $children = $giftRequest->children()->orderBy('first_name')->get()
+                    ->map(fn ($child) => [
+                        'first_name' => $child->first_name,
+                        'age' => $child->age,
+                        'gender_label' => $child->gender !== 'unspecified' ? $child->gender_label : null,
+                        'gift' => $child->gift,
+                    ]);
+            }
+        }
+
+        $this->selectedFamily = [
+            'last_name' => $family->last_name,
+            'first_name' => $family->first_name,
+            'email' => $family->email,
+            'phone' => $family->phone,
+            'formatted_phone' => $family->formatted_phone,
+            'tel_phone' => $family->tel_phone,
+            'full_address' => $family->full_address,
+            'children' => $children->toArray(),
+        ];
+
+        $this->showFamilyModal = true;
+    }
+
+    public function closeFamilyModal(): void
+    {
+        $this->showFamilyModal = false;
+        $this->selectedFamily = null;
     }
 
     public function exportPdf()
