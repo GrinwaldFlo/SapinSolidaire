@@ -79,6 +79,7 @@ main() {
     # Step 6: Clear caches
     print_info "Clearing application caches..."
     php artisan cache:clear
+    php artisan route:clear
     php artisan config:clear
     php artisan view:clear
     print_success "Caches cleared"
