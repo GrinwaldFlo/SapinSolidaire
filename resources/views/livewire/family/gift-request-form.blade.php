@@ -220,7 +220,7 @@
 
                         <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
                             <p class="text-sm text-blue-800 dark:text-blue-200">
-                                📎 Veuillez transmettre un justificatif récent indiquant votre adresse (photo ou PDF).
+                                📎 Veuillez télécharger une photo de justificatif de domicile (facture de téléphone, courrier, etc.)
                             </p>
                             <p class="text-xs text-blue-600 dark:text-blue-300 mt-2">
                                 ℹ️ Formats acceptés : image (jpg, png, webp) ou PDF, maximum 10 Mo. Ce justificatif sera supprimé en fin de saison et ne sera utilisé que pour vérifier votre adresse.
