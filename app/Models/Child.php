@@ -91,6 +91,14 @@ class Child extends Model
     }
 
     /**
+     * Get a human-readable age label ("bébé" when 0, "X ans" otherwise).
+     */
+    public function getFormattedAgeAttribute(): string
+    {
+        return $this->age === 0 ? 'bébé' : $this->age . ' ans';
+    }
+
+    /**
      * Check if the child can be modified.
      */
     public function canModify(): bool

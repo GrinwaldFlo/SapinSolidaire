@@ -114,7 +114,7 @@
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500 dark:text-gray-400">Âge :</span>
-                                <span class="ml-2 text-gray-900 dark:text-white">{{ $child->age }} ans ({{ $child->birth_year }})</span>
+                                <span class="ml-2 text-gray-900 dark:text-white">{{ $child->formatted_age }} ({{ $child->birth_year }})</span>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500 dark:text-gray-400">Taille :</span>

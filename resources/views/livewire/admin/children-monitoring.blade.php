@@ -50,7 +50,7 @@
                                     <li class="bg-gray-50 dark:bg-zinc-700 rounded-lg p-3">
                                         <p class="font-medium text-gray-900 dark:text-white">{{ $familyChild['first_name'] }}</p>
                                         <p class="text-sm text-gray-600 dark:text-gray-300">
-                                            {{ $familyChild['age'] }} ans
+                                            {{ $familyChild['formatted_age'] }}
                                             @if($familyChild['gender_label']) — {{ $familyChild['gender_label'] }} @endif
                                             @if($familyChild['gift']) — {{ $familyChild['gift'] }} @endif
                                         </p>
@@ -162,7 +162,7 @@
                             <td class="px-6 py-4 text-gray-600 dark:text-gray-300">
                                 @if($child->gender !== 'unspecified') {{ $child->gender_label }} @else - @endif
                             </td>
-                            <td class="px-6 py-4 text-gray-600 dark:text-gray-300">{{ $child->age }} ans</td>
+                            <td class="px-6 py-4 text-gray-600 dark:text-gray-300">{{ $child->formatted_age }}</td>
                             <td class="px-6 py-4 text-gray-600 dark:text-gray-300">{{ $child->gift }}</td>
                             <td class="px-6 py-4">
                                 <button wire:click="showFamilyDetails('{{ $child->giftRequest->family->id }}')" class="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer font-medium">
@@ -222,7 +222,7 @@
                     </div>
                     <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-gray-600 dark:text-gray-300">
                         <div><span class="font-medium text-gray-700 dark:text-gray-200">Genre :</span> @if($child->gender !== 'unspecified') {{ $child->gender_label }} @else - @endif</div>
-                        <div><span class="font-medium text-gray-700 dark:text-gray-200">Âge :</span> {{ $child->age }} ans</div>
+                        <div><span class="font-medium text-gray-700 dark:text-gray-200">Âge :</span> {{ $child->formatted_age }}</div>
                         <div class="col-span-2"><span class="font-medium text-gray-700 dark:text-gray-200">Cadeau :</span> {{ $child->gift }}</div>
                         <div class="col-span-2">
                             <span class="font-medium text-gray-700 dark:text-gray-200">Famille :</span>

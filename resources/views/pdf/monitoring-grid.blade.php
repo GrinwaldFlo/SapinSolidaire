@@ -87,7 +87,7 @@
                     <td>{{ $child->code ?? '—' }}</td>
                     <td>{{ $child->anonymous ? '***' : $child->first_name }}</td>
                     <td>{{ $child->gender !== 'unspecified' ? $child->gender_label : '—' }}</td>
-                    <td>{{ $child->age }} ans</td>
+                    <td>{{ $child->formatted_age }}</td>
                     <td>{{ $child->gift }}</td>
                     <td>
                         @if($child->height){{ $child->height }} cm @endif

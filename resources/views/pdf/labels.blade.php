@@ -84,7 +84,7 @@
                         <div class="label-content">
                             <div class="label-code">{{ $child->code ?? '—' }}</div>
                             <div class="label-name">{{ $child->anonymous ? '***' : $child->first_name }}</div>
-                            <div class="label-age">{{ $child->age }} ans @if($child->gender !== 'unspecified') ({{ $child->gender_label }}) @endif</div>
+                            <div class="label-age">{{ $child->formatted_age }} @if($child->gender !== 'unspecified') ({{ $child->gender_label }}) @endif</div>
                             <div class="label-gift">{{ $child->gift }}</div>
                             <div class="label-details">
                                 @if($child->height)
