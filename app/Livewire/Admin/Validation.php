@@ -101,7 +101,9 @@ class Validation extends Component
                 return;
             }
 
-            $child->assignChildNumberAndCode();
+            if (! $child->code) {
+                $child->assignChildNumberAndCode();
+            }
             $child->setStatus(Child::STATUS_VALIDATED);
         });
 
