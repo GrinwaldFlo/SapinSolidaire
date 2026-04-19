@@ -68,10 +68,10 @@
         @if($slotDate && $slotStartTime && $slotEndTime)
         <p>Merci de venir chercher vos cadeaux le <strong>{{ $slotDate }}</strong> :</p>
         <p style="text-align: center;">🕐 <strong>{{ $slotStartTime }}</strong> - <strong>{{ $slotEndTime }}</strong></p>
-        <p style="text-align: center;">📍 <strong><a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($pickupAddress) }}" target="_blank">{{ $pickupAddress }}</a></strong></p>
+        <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($pickupAddress) }}" target="_blank" style="color:#2d5a27!important;">{{ $pickupAddress }}</a>
         @if($googleCalendarUrl)
         <p style="text-align: center; margin-top: 15px;">
-            📅 <a href="{{ $googleCalendarUrl }}" target="_blank">Ajouter à mon agenda Google</a>
+            📅 <a href="{{ $googleCalendarUrl }}" target="_blank" style="color:#2d5a27!important;">Ajouter à mon agenda Google</a>
         </p>
         @endif
         @endif

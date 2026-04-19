@@ -66,7 +66,7 @@
         <p>Cliquez sur le bouton ci-dessous pour modifier votre demande :</p>
         
         <p style="text-align: center;">
-            <a href="{{ $accessUrl }}" class="button">Modifier ma demande</a>
+            <a href="{{ $accessUrl }}" class="button" style="display:inline-block;background-color:#2d5a27;color:#ffffff!important;padding:15px 30px;text-decoration:none;border-radius:5px;font-weight:bold;">Modifier ma demande</a>
         </p>
         
         <p>Si vous avez des questions, n'hésitez pas à nous contacter.</p>
