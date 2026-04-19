@@ -374,6 +374,17 @@ class GiftRequestForm extends Component
             }
         }
 
+        // Check for duplicate children (same first_name, birth_year, gender)
+        $seen = [];
+        foreach ($this->children as $index => $child) {
+            $key = mb_strtolower(trim($child['first_name'] ?? '')) . '|' . ($child['birth_year'] ?? '') . '|' . ($child['gender'] ?? '');
+            if (isset($seen[$key])) {
+                $this->addError("children.{$index}.first_name", 'Cet enfant semble être un doublon (même prénom, année de naissance et genre).');
+            } else {
+                $seen[$key] = $index;
+            }
+        }
+
         if ($this->getErrorBag()->isNotEmpty()) {
             return;
         }
