@@ -70,7 +70,7 @@ class Validation extends Component
                         $q->where('status', Child::STATUS_PENDING);
                     });
             })
-            ->orderBy('created_at')
+            ->orderBy('updated_at')
             ->pluck('id');
 
         $this->currentRequest = null;
@@ -189,6 +189,17 @@ class Validation extends Component
             $isFinal = ($this->familyDecision === 'rejected'); 
             
             $this->sendRejectionEmail($this->currentRequest->family->email, $isFinal, $finalComment);
+        }
+
+        $this->loadNextRequest();
+        $this->loadCounts();
+    }
+
+    public function skip(): void
+    {
+        if ($this->currentRequest) {
+            $this->currentRequest->touch();
+            $this->releaseReservation((string) auth()->id());
         }
 
         $this->loadNextRequest();

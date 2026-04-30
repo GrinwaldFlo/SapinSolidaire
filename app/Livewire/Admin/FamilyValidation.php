@@ -38,7 +38,7 @@ class FamilyValidation extends Component
 
         $candidateIds = GiftRequest::where('season_id', $this->activeSeason->id)
             ->where('status', GiftRequest::STATUS_PENDING)
-            ->orderBy('created_at')
+            ->orderBy('updated_at')
             ->pluck('id');
 
         $this->currentRequest = null;
@@ -101,6 +101,17 @@ class FamilyValidation extends Component
         $this->sendRejectionEmail($request->family->email, $this->isFinalRejection, $this->rejectionComment);
 
         $this->closeRejectionModal();
+        $this->loadNextRequest();
+        $this->loadCounts();
+    }
+
+    public function skip(): void
+    {
+        if ($this->currentRequest) {
+            $this->currentRequest->touch();
+            $this->releaseReservation((string) auth()->id());
+        }
+
         $this->loadNextRequest();
         $this->loadCounts();
     }

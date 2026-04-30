@@ -123,7 +123,10 @@
                 @endforeach
             </div>
             
-            <div class="mt-8 pt-6 border-t border-gray-200 dark:border-zinc-700 flex justify-end">
+            <div class="mt-8 pt-6 border-t border-gray-200 dark:border-zinc-700 flex justify-end gap-3">
+                <button wire:click="skip" class="px-6 py-3 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-200 bg-gray-200 dark:bg-zinc-600 hover:bg-gray-300 dark:hover:bg-zinc-500 transition-colors">
+                    Passer au suivant
+                </button>
                 <button wire:click="submitValidation" 
                         class="px-6 py-3 rounded-lg font-semibold text-sm text-white transition-colors {{ $this->has_pending_decisions ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700' }}"
                         @if($this->has_pending_decisions) disabled @endif>
