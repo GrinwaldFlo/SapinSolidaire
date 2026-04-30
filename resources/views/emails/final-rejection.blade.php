@@ -51,7 +51,7 @@
         
         <div class="comment-box">
             <strong>Motif :</strong><br>
-            {{ $comment }}
+            {!! nl2br(e($comment)) !!}
         </div>
         
         <p>Nous vous remercions de votre compréhension.</p>

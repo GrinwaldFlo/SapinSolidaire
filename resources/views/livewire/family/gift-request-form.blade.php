@@ -209,6 +209,18 @@
                         <input type="tel" id="phone" wire:model="phone" placeholder="079 123 45 67" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white">
                         @error('phone') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
                     </div>
+
+                    <div class="mt-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="isAnonymous" wire:model="isAnonymous" class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 dark:border-zinc-600 dark:bg-zinc-700">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Demande anonyme (les prénoms des enfants ne seront pas affichés sur les étiquettes des cadeaux)
+                            </span>
+                        </label>
+                        <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
+                            Si coché, les personnes qui achèteront les cadeaux ne verront pas les prénoms des enfants de la famille.
+                        </p>
+                    </div>
                 </div>
 
                 @if($proofOfHabitationEnabled)
@@ -348,18 +360,6 @@
                                         <option value="unspecified">Non précisé</option>
                                     </select>
                                     @error("children.{$index}.gender") <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
-                                </div>
-
-                                <div class="md:col-span-2">
-                                    <label class="flex items-center gap-2 cursor-pointer">
-                                        <input type="checkbox" wire:model="children.{{ $index }}.anonymous" class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 dark:border-zinc-600 dark:bg-zinc-700" {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
-                                        <span class="text-sm text-gray-700 dark:text-gray-300">
-                                            Anonyme (le prénom ne sera pas affiché sur l'étiquette du cadeau)
-                                        </span>
-                                    </label>
-                                    <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
-                                        Si coché, la personne qui achètera le cadeau ne verra pas le prénom de l'enfant.
-                                    </p>
                                 </div>
 
                                 <div>

@@ -45,6 +45,7 @@ class GiftRequestForm extends Component
     public string $postalCode = '';
     public string $city = '';
     public string $phone = '';
+    public bool $isAnonymous = false;
 
     // Proof of habitation
     public $proofOfHabitation = null;
@@ -133,6 +134,10 @@ class GiftRequestForm extends Component
 
                     // Load children for this request
                     $this->loadChildrenFromRequest();
+
+                    if (!empty($this->children)) {
+                        $this->isAnonymous = $this->children[0]['anonymous'] ?? false;
+                    }
 
                     // Skip eligibility if already accepted
                     $this->step = 2;
@@ -242,7 +247,7 @@ class GiftRequestForm extends Component
             'id' => null,
             'first_name' => '',
             'gender' => '',
-            'anonymous' => false,
+            'anonymous' => $this->isAnonymous,
             'birth_year' => '',
             'height' => '',
             'gift' => '',
@@ -449,7 +454,7 @@ class GiftRequestForm extends Component
                     $childRecord->update([
                         'first_name' => $childData['first_name'],
                         'gender' => $childData['gender'] ?? '',
-                        'anonymous' => $childData['anonymous'] ?? false,
+                        'anonymous' => $this->isAnonymous,
                         'birth_year' => $childData['birth_year'],
                         'height' => $childData['height'] ?: null,
                         'gift' => $childData['gift'],
@@ -464,7 +469,7 @@ class GiftRequestForm extends Component
                         'gift_request_id' => $this->giftRequest->id,
                         'first_name' => $childData['first_name'],
                         'gender' => $childData['gender'] ?? '',
-                        'anonymous' => $childData['anonymous'] ?? false,
+                        'anonymous' => $this->isAnonymous,
                         'birth_year' => $childData['birth_year'],
                         'height' => $childData['height'] ?: null,
                         'gift' => $childData['gift'],

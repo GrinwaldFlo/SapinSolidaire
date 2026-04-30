@@ -174,17 +174,17 @@ class Validation extends Component
                 } elseif ($decision === 'correction') {
                     $hasCorrection = true;
                     $child->setStatus(Child::STATUS_REJECTED, $comment);
-                    $combinedComments[] = "Pour l'enfant {$child->first_name} :\n" . $comment;
+                    $combinedComments[] = "Pour l'enfant {$child->first_name} :\n - " . $comment;
                 } elseif ($decision === 'rejected') {
                     $hasRejection = true;
                     $child->setStatus(Child::STATUS_REJECTED_FINAL, $comment);
-                    $combinedComments[] = "Refus pour l'enfant {$child->first_name} :\n" . $comment;
+                    $combinedComments[] = "Refus pour l'enfant {$child->first_name} :\n - " . $comment;
                 }
             }
         });
 
         if (!empty($combinedComments)) {
-            $finalComment = implode("\n\n-------------------\n\n", $combinedComments);
+            $finalComment = implode("\n-------------------\n", $combinedComments);
             // If the family is completely rejected, we considered it a final rejection
             $isFinal = ($this->familyDecision === 'rejected'); 
             
