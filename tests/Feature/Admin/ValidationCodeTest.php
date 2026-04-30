@@ -48,7 +48,8 @@ test('validateFamily assigns family number from season counter', function () {
     $this->actingAs($this->admin);
 
     Livewire::test(Validation::class)
-        ->call('validateFamily');
+        ->set('familyDecision', 'validated')
+        ->call('submitValidation');
 
     $this->giftRequest->refresh();
     expect($this->giftRequest->family_number)->toBe(1);
@@ -77,11 +78,13 @@ test('validateFamily assigns sequential family numbers to different families', f
 
     // Validate first family
     Livewire::test(Validation::class)
-        ->call('validateFamily');
+        ->set('familyDecision', 'validated')
+        ->call('submitValidation');
 
     // Validate second family
     Livewire::test(Validation::class)
-        ->call('validateFamily');
+        ->set('familyDecision', 'validated')
+        ->call('submitValidation');
 
     $this->giftRequest->refresh();
     $giftRequest2->refresh();
@@ -99,7 +102,8 @@ test('validateFamily does not reassign family number if already set', function (
     $this->actingAs($this->admin);
 
     Livewire::test(Validation::class)
-        ->call('validateFamily');
+        ->set('familyDecision', 'validated')
+        ->call('submitValidation');
 
     $this->giftRequest->refresh();
     expect($this->giftRequest->family_number)->toBe(42);
@@ -127,7 +131,9 @@ test('validateChild assigns child number and code', function () {
     $this->actingAs($this->admin);
 
     Livewire::test(Validation::class)
-        ->call('validateChild', $child->id);
+        ->set('familyDecision', 'validated')
+        ->set("childDecisions.{$child->id}", 'validated')
+        ->call('submitValidation');
 
     $child->refresh();
     expect($child->child_number)->toBe(1);
@@ -162,10 +168,10 @@ test('validateChild assigns sequential child numbers within same family', functi
     $this->actingAs($this->admin);
 
     Livewire::test(Validation::class)
-        ->call('validateChild', $child1->id);
-
-    Livewire::test(Validation::class)
-        ->call('validateChild', $child2->id);
+        ->set('familyDecision', 'validated')
+        ->set("childDecisions.{$child1->id}", 'validated')
+        ->set("childDecisions.{$child2->id}", 'validated')
+        ->call('submitValidation');
 
     $child1->refresh();
     $child2->refresh();
@@ -229,13 +235,19 @@ test('full validation flow produces correct codes', function () {
     $this->actingAs($this->admin);
 
     // Validate first family, then its children
-    Livewire::test(Validation::class)->call('validateFamily');
-    Livewire::test(Validation::class)->call('validateChild', $child1->id);
-    Livewire::test(Validation::class)->call('validateChild', $child2->id);
+    Livewire::test(Validation::class)
+        ->set('familyDecision', 'validated')
+        ->set("childDecisions.{$child1->id}", 'validated')
+        ->set("childDecisions.{$child2->id}", 'validated')
+        ->call('submitValidation');
 
     // Validate second family, then its child
-    Livewire::test(Validation::class)->call('validateFamily');
-    Livewire::test(Validation::class)->call('validateChild', $child3->id);
+    // In our component, loadNextRequest loads the next request, so we need a fresh test instance to simulate next page logic or set currentRequest properly manually.
+    // However, Livewire component state carries over, so we need to set the state for the new current request.
+    Livewire::test(Validation::class)
+        ->set('familyDecision', 'validated')
+        ->set("childDecisions.{$child3->id}", 'validated')
+        ->call('submitValidation');
 
     $child1->refresh();
     $child2->refresh();
@@ -271,7 +283,9 @@ test('validateChild sets validated_at timestamp', function () {
     $this->actingAs($this->admin);
 
     Livewire::test(Validation::class)
-        ->call('validateChild', $child->id);
+        ->set('familyDecision', 'validated')
+        ->set("childDecisions.{$child->id}", 'validated')
+        ->call('submitValidation');
 
     $child->refresh();
     expect($child->validated_at)->not->toBeNull();
@@ -291,7 +305,9 @@ test('validateChild assigns code even when family is not yet validated', functio
 
     // Validate the child BEFORE the family is validated (no family_number yet)
     Livewire::test(Validation::class)
-        ->call('validateChild', $child->id);
+        ->set('familyDecision', 'pending')
+        ->set("childDecisions.{$child->id}", 'validated')
+        ->call('submitValidation');
 
     $child->refresh();
     $this->giftRequest->refresh();
@@ -316,11 +332,20 @@ test('validateChild before family then validateFamily does not reassign family n
 
     // Validate child first (auto-assigns family_number = 1)
     Livewire::test(Validation::class)
-        ->call('validateChild', $child->id);
+        ->set('familyDecision', 'pending')
+        ->set("childDecisions.{$child->id}", 'validated')
+        ->call('submitValidation');
 
     // Then validate family — should not consume a new family number
-    Livewire::test(Validation::class)
-        ->call('validateFamily');
+    // Set up mock for request since current iteration advances the cursor
+    // However for this test we only check the data logic, so re-evaluating the object is fine if it works using direct assign
+    $this->giftRequest->refresh();
+    $this->giftRequest->setStatus(GiftRequest::STATUS_PENDING);
+    
+    Livewire::test(Validation::class) // Loads next request, which might be same if pending
+        ->set('familyDecision', 'validated')
+        ->set("childDecisions.{$child->id}", 'validated')
+        ->call('submitValidation');
 
     $child->refresh();
     $this->giftRequest->refresh();

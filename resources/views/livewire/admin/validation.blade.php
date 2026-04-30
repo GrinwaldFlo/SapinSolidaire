@@ -19,17 +19,31 @@
             <div class="mb-6 pb-6 border-b border-gray-200 dark:border-zinc-700">
                 <x-validation.family-info :request="$currentRequest">
                     @if($currentRequest->status === 'pending')
-                        <div class="flex flex-wrap gap-2">
-                            <button wire:click="validateFamily" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm">
-                                ✓ Valider la famille
-                            </button>
-                            <button wire:click="openRejectionModal('family', '{{ $currentRequest->id }}', false)" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm">
-                                Demander correction
-                            </button>
-                            <button wire:click="openRejectionModal('family', '{{ $currentRequest->id }}', true)" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm">
-                                Refuser définitivement
-                            </button>
+                    <div class="mt-4 p-4 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg">
+                        <h3 class="text-sm font-semibold mb-3">Décision pour la famille :</h3>
+                        <div class="flex flex-wrap gap-4 mb-3">
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" wire:model.live="familyDecision" value="pending" class="form-radio text-blue-600">
+                                <span>En attente</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" wire:model.live="familyDecision" value="validated" class="form-radio text-green-600">
+                                <span>Valider</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" wire:model.live="familyDecision" value="correction" class="form-radio text-yellow-600">
+                                <span>Demander correction</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" wire:model.live="familyDecision" value="rejected" class="form-radio text-red-600">
+                                <span>Refuser définitivement</span>
+                            </label>
                         </div>
+                        @if(in_array($familyDecision, ['correction', 'rejected']))
+                            <textarea wire:model="familyComment" class="w-full mt-2 border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 rounded-md shadow-sm" rows="2" placeholder="Commentaire..."></textarea>
+                            @error('familyComment') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
+                        @endif
+                    </div>
                     @endif
                 </x-validation.family-info>
             </div>
@@ -79,25 +93,45 @@
                             </span>
 
                             @if($child->status === 'pending')
-                                <div class="flex flex-wrap gap-2">
-                                    <button wire:click="validateChild('{{ $child->id }}')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm">
-                                        ✓ Valider
-                                    </button>
-                                    <button wire:click="openRejectionModal('child', '{{ $child->id }}', false)" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm">
-                                        Demander correction
-                                    </button>
-                                    <button wire:click="openRejectionModal('child', '{{ $child->id }}', true)" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm">
-                                        Refuser
-                                    </button>
+                            <div class="w-full mt-4 p-3 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg">
+                                <div class="flex flex-wrap gap-4 mb-3">
+                                    <label class="flex items-center space-x-2">
+                                        <input type="radio" wire:model.live="childDecisions.{{ $child->id }}" value="pending" class="form-radio text-blue-600">
+                                        <span class="text-sm">En attente</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2">
+                                        <input type="radio" wire:model.live="childDecisions.{{ $child->id }}" value="validated" class="form-radio text-green-600">
+                                        <span class="text-sm">Valider</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2">
+                                        <input type="radio" wire:model.live="childDecisions.{{ $child->id }}" value="correction" class="form-radio text-yellow-600">
+                                        <span class="text-sm">Correction</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2">
+                                        <input type="radio" wire:model.live="childDecisions.{{ $child->id }}" value="rejected" class="form-radio text-red-600">
+                                        <span class="text-sm">Refuser</span>
+                                    </label>
                                 </div>
+                                @if(in_array($childDecisions[$child->id] ?? '', ['correction', 'rejected']))
+                                    <textarea wire:model="childComments.{{ $child->id }}" class="w-full mt-2 border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 rounded-md shadow-sm text-sm" rows="2" placeholder="Commentaire..."></textarea>
+                                    @error('childComments.'.$child->id) <span class="text-red-500 text-sm mt-1 mb-2 block">{{ $message }}</span> @enderror
+                                @endif
+                            </div>
                             @endif
                         </div>
                     </div>
                 @endforeach
             </div>
+            
+            <div class="mt-8 pt-6 border-t border-gray-200 dark:border-zinc-700 flex justify-end">
+                <button wire:click="submitValidation" 
+                        class="px-6 py-3 rounded-lg font-semibold text-sm text-white transition-colors {{ $this->has_pending_decisions ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700' }}"
+                        @if($this->has_pending_decisions) disabled @endif>
+                    Soumettre la validation
+                </button>
+            </div>
         </div>
     @endif
 
     <x-validation.image-preview-modal />
-    <x-validation.rejection-modal :showRejectionModal="$showRejectionModal" :isFinalRejection="$isFinalRejection" />
 </div>
