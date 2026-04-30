@@ -17,82 +17,21 @@
     @else
         <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
             <div class="mb-6 pb-6 border-b border-gray-200 dark:border-zinc-700">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Informations de la famille</h2>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">Nom :</span>
-                        <span class="ml-2 text-gray-900 dark:text-white">{{ $currentRequest->family->first_name }} {{ $currentRequest->family->last_name }}</span>
-                    </div>
-                    <div>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">Email :</span>
-                        <span class="ml-2 text-gray-900 dark:text-white">{{ $currentRequest->family->email }}</span>
-                    </div>
-                    <div>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">Téléphone :</span>
-                        <a href="tel:{{ $currentRequest->family->tel_phone }}" class="ml-2 inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.01-.24 11.47 11.47 0 0 0 3.58.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.58a1 1 0 0 1-.25 1.01z"/></svg>
-                            {{ $currentRequest->family->formatted_phone }}
-                        </a>
-                    </div>
-                    <div>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">Adresse :</span>
-                        <span class="ml-2 text-gray-900 dark:text-white">{{ $currentRequest->family->full_address }}</span>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-2 mb-4">
-                    <span class="text-sm text-gray-500 dark:text-gray-400">Statut famille :</span>
+                <x-validation.family-info :request="$currentRequest">
                     @if($currentRequest->status === 'pending')
-                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">À valider</span>
-                    @elseif($currentRequest->status === 'validated')
-                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Validé</span>
-                    @endif
-                </div>
-
-                @if($currentRequest->proof_of_habitation_path)
-                    @php
-                        $proofUrl = route('admin.proof-of-habitation', $currentRequest);
-                        $isPdfProof = \Illuminate\Support\Str::endsWith(strtolower($currentRequest->proof_of_habitation_path), '.pdf');
-                    @endphp
-                    <div class="mb-4">
-                        <span class="text-sm text-gray-500 dark:text-gray-400">Justificatif de domicile :</span>
-                        <div class="mt-2">
-                            @if($isPdfProof)
-                                <div class="border border-gray-200 dark:border-zinc-700 rounded-lg p-4 bg-gray-50 dark:bg-zinc-900/40 max-w-2xl">
-                                    <p class="text-sm text-gray-700 dark:text-gray-200 mb-3">Document PDF reçu.</p>
-                                    <div class="flex flex-wrap gap-2">
-                                        <a href="{{ $proofUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm">
-                                            Ouvrir le PDF
-                                        </a>
-                                        <a href="{{ $proofUrl }}" download class="inline-flex items-center bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-sm">
-                                            Télécharger
-                                        </a>
-                                    </div>
-                                </div>
-                            @else
-                                <button type="button" @click="imageUrl = '{{ $proofUrl }}'; imageAlt = 'Justificatif de domicile'; showImageModal = true" class="inline-block cursor-pointer">
-                                    <img src="{{ $proofUrl }}" alt="Justificatif de domicile" class="max-w-sm max-h-64 rounded-lg border border-gray-200 dark:border-zinc-700 hover:opacity-90 transition">
-                                </button>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Cliquez sur l'image pour l'agrandir</p>
-                            @endif
+                        <div class="flex flex-wrap gap-2">
+                            <button wire:click="validateFamily" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm">
+                                ✓ Valider la famille
+                            </button>
+                            <button wire:click="openRejectionModal('family', '{{ $currentRequest->id }}', false)" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm">
+                                Demander correction
+                            </button>
+                            <button wire:click="openRejectionModal('family', '{{ $currentRequest->id }}', true)" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm">
+                                Refuser définitivement
+                            </button>
                         </div>
-                    </div>
-                @endif
-
-                @if($currentRequest->status === 'pending')
-                    <div class="flex flex-wrap gap-2">
-                        <button wire:click="validateFamily" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm">
-                            ✓ Valider la famille
-                        </button>
-                        <button wire:click="openRejectionModal('family', '{{ $currentRequest->id }}', false)" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm">
-                            Demander correction
-                        </button>
-                        <button wire:click="openRejectionModal('family', '{{ $currentRequest->id }}', true)" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm">
-                            Refuser définitivement
-                        </button>
-                    </div>
-                @endif
+                    @endif
+                </x-validation.family-info>
             </div>
 
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Enfants ({{ $currentRequest->children->count() }})</h2>
@@ -114,7 +53,7 @@
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500 dark:text-gray-400">Âge :</span>
-                                <span class="ml-2 text-gray-900 dark:text-white">{{ $child->age }} ans ({{ $child->birth_year }})</span>
+                                <span class="ml-2 text-gray-900 dark:text-white">{{ $child->formatted_age }} ({{ $child->birth_year }})</span>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500 dark:text-gray-400">Taille :</span>
@@ -159,41 +98,6 @@
         </div>
     @endif
 
-    {{-- Image Preview Modal --}}
-    <div x-show="showImageModal" x-transition.opacity class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4" @click.self="showImageModal = false" @keydown.escape.window="showImageModal = false" x-cloak>
-        <div class="relative max-w-full max-h-full flex items-center justify-center">
-            <button type="button" @click="showImageModal = false" class="absolute -top-3 -right-3 bg-white dark:bg-zinc-700 text-gray-800 dark:text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg hover:bg-gray-100 dark:hover:bg-zinc-600 z-10">
-                ✕
-            </button>
-            <img :src="imageUrl" :alt="imageAlt" @click="showImageModal = false" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl cursor-pointer">
-        </div>
-    </div>
-
-    {{-- Rejection Modal --}}
-    @if($showRejectionModal)
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-xl p-6 max-w-lg w-full mx-4">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    {{ $isFinalRejection ? 'Refus définitif' : 'Demande de correction' }}
-                </h3>
-
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Commentaire / Motif *
-                    </label>
-                    <textarea wire:model="rejectionComment" rows="4" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white" placeholder="Expliquez le motif du refus ou les corrections à apporter..."></textarea>
-                    @error('rejectionComment') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-                </div>
-
-                <div class="flex justify-end gap-2">
-                    <button wire:click="closeRejectionModal" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg">
-                        Annuler
-                    </button>
-                    <button wire:click="confirmRejection" class="{{ $isFinalRejection ? 'bg-red-600 hover:bg-red-700' : 'bg-yellow-600 hover:bg-yellow-700' }} text-white px-4 py-2 rounded-lg">
-                        Confirmer
-                    </button>
-                </div>
-            </div>
-        </div>
-    @endif
+    <x-validation.image-preview-modal />
+    <x-validation.rejection-modal :showRejectionModal="$showRejectionModal" :isFinalRejection="$isFinalRejection" />
 </div>

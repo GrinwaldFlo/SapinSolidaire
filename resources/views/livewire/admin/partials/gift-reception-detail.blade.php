@@ -10,7 +10,7 @@
         </div>
         <div>
             <span class="text-sm text-gray-500 dark:text-gray-400">Âge</span>
-            <p class="font-medium text-gray-900 dark:text-white">{{ $selectedChild->age }} ans</p>
+            <p class="font-medium text-gray-900 dark:text-white">{{ $selectedChild->formatted_age }}</p>
         </div>
         <div>
             <span class="text-sm text-gray-500 dark:text-gray-400">Cadeau</span>

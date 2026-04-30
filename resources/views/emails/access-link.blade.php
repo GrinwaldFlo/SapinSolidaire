@@ -54,7 +54,7 @@
         <p>Cliquez sur le bouton ci-dessous pour continuer votre demande :</p>
         
         <p style="text-align: center;">
-            <a href="{{ $accessUrl }}" class="button">Accéder au formulaire</a>
+            <a href="{{ $accessUrl }}" class="button" style="display:inline-block;background-color:#2d5a27;color:#ffffff!important;padding:15px 30px;text-decoration:none;border-radius:5px;font-weight:bold;">Accéder au formulaire</a>
         </p>
         
         <p><strong>Ce lien est valable pendant 48 heures.</strong></p>

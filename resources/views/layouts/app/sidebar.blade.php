@@ -22,8 +22,11 @@
                     </flux:sidebar.item>
 
                     @can('validate')
+                    <flux:sidebar.item icon="check-circle" :href="route('admin.family-validation')" :current="request()->routeIs('admin.family-validation')" wire:navigate>
+                        Validation familles
+                    </flux:sidebar.item>
                     <flux:sidebar.item icon="check-circle" :href="route('admin.validation')" :current="request()->routeIs('admin.validation')" wire:navigate>
-                        Validation
+                        Validation cadeaux
                     </flux:sidebar.item>
                     @endcan
 

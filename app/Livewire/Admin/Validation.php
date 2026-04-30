@@ -2,19 +2,18 @@
 
 namespace App\Livewire\Admin;
 
-use App\Mail\CorrectionRequestMail;
-use App\Mail\FinalRejectionMail;
+use App\Livewire\Admin\Concerns\HandlesFamilyValidation;
 use App\Models\Child;
-use App\Models\EmailToken;
 use App\Models\GiftRequest;
 use App\Models\Season;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 
 class Validation extends Component
 {
+    use HandlesFamilyValidation;
+
     private const LOCK_TTL_SECONDS = 300;
 
     public ?Season $activeSeason = null;
@@ -22,12 +21,7 @@ class Validation extends Component
     public int $pendingFamiliesCount = 0;
     public int $pendingChildrenCount = 0;
 
-    // Rejection modal
-    public bool $showRejectionModal = false;
     public string $rejectionType = ''; // 'family', 'child'
-    public ?string $rejectionTargetId = null;
-    public bool $isFinalRejection = false;
-    public string $rejectionComment = '';
 
     public function mount(): void
     {
@@ -98,32 +92,6 @@ class Validation extends Component
         })->where('status', Child::STATUS_PENDING)->count();
     }
 
-    public function validateFamily(): void
-    {
-        if (! $this->currentRequest) {
-            return;
-        }
-
-        DB::transaction(function () {
-            $request = GiftRequest::lockForUpdate()->find($this->currentRequest->id);
-
-            if (! $request || $request->status !== GiftRequest::STATUS_PENDING) {
-                return;
-            }
-
-            if ($request->family_number === null) {
-                $request->family_number = $this->activeSeason->assignNextFamilyNumber();
-                $request->save();
-            }
-
-            $request->setStatus(GiftRequest::STATUS_VALIDATED);
-            $this->currentRequest = $request;
-        });
-
-        $this->loadNextRequest();
-        $this->loadCounts();
-    }
-
     public function validateChild(string $childId): void
     {
         DB::transaction(function () use ($childId) {
@@ -133,7 +101,9 @@ class Validation extends Component
                 return;
             }
 
-            $child->assignChildNumberAndCode();
+            if (! $child->code) {
+                $child->assignChildNumberAndCode();
+            }
             $child->setStatus(Child::STATUS_VALIDATED);
         });
 
@@ -158,6 +128,7 @@ class Validation extends Component
         $this->isFinalRejection = false;
         $this->rejectionComment = '';
     }
+
 
     public function confirmRejection(): void
     {
@@ -185,16 +156,6 @@ class Validation extends Component
         $this->closeRejectionModal();
         $this->loadNextRequest();
         $this->loadCounts();
-    }
-
-    protected function sendRejectionEmail(string $email, bool $isFinal, string $comment): void
-    {
-        if ($isFinal) {
-            Mail::to($email)->queue(new FinalRejectionMail($comment));
-        } else {
-            $token = EmailToken::createForEmail($email);
-            Mail::to($email)->queue(new CorrectionRequestMail($email, $token->token, $comment));
-        }
     }
 
     public function render()

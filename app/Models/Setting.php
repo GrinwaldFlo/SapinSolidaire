@@ -15,6 +15,7 @@ class Setting extends Model
     public const ALLOWED_CITIES = 'allowed_cities';
     public const MAX_CONSECUTIVE_YEARS = 'max_consecutive_years';
     public const GIFT_SUGGESTIONS = 'gift_suggestions';
+    public const GIFT_RESTRICTIONS = 'gift_restrictions';
     public const INTRODUCTION_TEXT = 'introduction_text';
     public const REPLY_TO_EMAIL = 'reply_to_email';
     public const CODE_PREFIX = 'code_prefix';
@@ -114,6 +115,20 @@ class Setting extends Model
     public static function getGiftSuggestions(): array
     {
         $value = self::getValue(self::GIFT_SUGGESTIONS, '');
+
+        if (empty($value)) {
+            return [];
+        }
+
+        return array_filter(array_map('trim', explode("\n", $value)));
+    }
+
+    /**
+     * Get gift restrictions (forbidden gifts) as array.
+     */
+    public static function getGiftRestrictions(): array
+    {
+        $value = self::getValue(self::GIFT_RESTRICTIONS, '');
 
         if (empty($value)) {
             return [];

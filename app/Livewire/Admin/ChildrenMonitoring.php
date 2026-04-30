@@ -84,7 +84,7 @@ class ChildrenMonitoring extends Component
                 $children = $giftRequest->children()->orderBy('first_name')->get()
                     ->map(fn ($child) => [
                         'first_name' => $child->first_name,
-                        'age' => $child->age,
+                        'formatted_age' => $child->formatted_age,
                         'gender_label' => $child->gender !== 'unspecified' ? $child->gender_label : null,
                         'gift' => $child->gift,
                     ]);

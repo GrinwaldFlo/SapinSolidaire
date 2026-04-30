@@ -66,6 +66,7 @@ class GiftRequestForm extends Component
     public array $allowedCities = [];
     public string $selectedCity = '';
     public array $giftSuggestions = [];
+    public array $giftRestrictions = [];
 
     public function mount(string $token): void
     {
@@ -101,6 +102,7 @@ class GiftRequestForm extends Component
             $this->maxChildAge = Setting::getMaxChildAge();
             $this->allowedCities = Setting::getAllowedCities();
             $this->giftSuggestions = Setting::getGiftSuggestions();
+            $this->giftRestrictions = Setting::getGiftRestrictions();
             $this->proofOfHabitationEnabled = Setting::isProofOfHabitationEnabled();
 
             // Check if family exists
@@ -367,10 +369,23 @@ class GiftRequestForm extends Component
             }
             if (empty($child['gift'])) {
                 $this->addError("children.{$index}.gift", 'Le cadeau souhaité est obligatoire.');
+            } elseif ($this->isForbiddenGift($child['gift'])) {
+                $this->addError("children.{$index}.gift", 'Ce type de cadeau n\'est pas autorisé.');
             }
             // Check if shoes require shoe size
             if ($this->isShoeGift($child['gift']) && empty($child['shoe_size'])) {
                 $this->addError("children.{$index}.shoe_size", 'La pointure est obligatoire pour les chaussures.');
+            }
+        }
+
+        // Check for duplicate children (same first_name, birth_year, gender)
+        $seen = [];
+        foreach ($this->children as $index => $child) {
+            $key = mb_strtolower(trim($child['first_name'] ?? '')) . '|' . ($child['birth_year'] ?? '') . '|' . ($child['gender'] ?? '');
+            if (isset($seen[$key])) {
+                $this->addError("children.{$index}.first_name", 'Cet enfant semble être un doublon (même prénom, année de naissance et genre).');
+            } else {
+                $seen[$key] = $index;
             }
         }
 
@@ -475,6 +490,23 @@ class GiftRequestForm extends Component
         }
 
         $this->submitted = true;
+    }
+
+    protected function isForbiddenGift(string $gift): bool
+    {
+        if (empty($this->giftRestrictions)) {
+            return false;
+        }
+
+        $giftLower = mb_strtolower($gift);
+
+        foreach ($this->giftRestrictions as $keyword) {
+            if (str_contains($giftLower, mb_strtolower($keyword))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     protected function isShoeGift(string $gift): bool
