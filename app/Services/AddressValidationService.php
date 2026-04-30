@@ -44,10 +44,10 @@ class AddressValidationService
             return ['Valide' => false, 'Message' => 'Adresse invalide, merci de la contrôler', 'FormatedAddress' => $verification];
 
         if ($zipcode != $verification["ZipCode"])
-            return ['Valide' => false, 'Message' => 'Code postal éroné', 'FormatedAddress' => $verification];
+            return ['Valide' => false, 'Message' => 'Code postal érroné', 'FormatedAddress' => $verification];
 
         if (!str_contains($verification["TownName"], $townname))
-            return ['Valide' => false, 'Message' => 'Ville éronée', 'FormatedAddress' => $verification];
+            return ['Valide' => false, 'Message' => 'Ville érronée', 'FormatedAddress' => $verification];
 
         return ['Valide' => true, 'Message' => '', 'FormatedAddress' => $verification];
     }

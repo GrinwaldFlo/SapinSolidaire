@@ -46,6 +46,12 @@
             </div>
 
             <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Restrictions de cadeaux (cadeaux interdits)</label>
+                <textarea wire:model="giftRestrictions" rows="4" placeholder="Un mot-clé par ligne" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white"></textarea>
+                <p class="mt-1 text-sm text-gray-500">Un mot-clé par ligne. Si le cadeau demandé contient un de ces mots, il sera refusé.</p>
+            </div>
+
+            <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Texte d'introduction</label>
                 <textarea wire:model="introductionText" rows="4" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white"></textarea>
                 <p class="mt-1 text-sm text-gray-500">Ce texte sera affiché aux familles sur la page d'accueil.</p>
