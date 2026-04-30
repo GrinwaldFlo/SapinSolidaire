@@ -193,6 +193,8 @@ class Validation extends Component
 
         $this->loadNextRequest();
         $this->loadCounts();
+
+        $this->dispatch('scroll-to-top');
     }
 
     public function skip(): void
@@ -204,6 +206,8 @@ class Validation extends Component
 
         $this->loadNextRequest();
         $this->loadCounts();
+
+        $this->dispatch('scroll-to-top');
     }
 
     public function render()
