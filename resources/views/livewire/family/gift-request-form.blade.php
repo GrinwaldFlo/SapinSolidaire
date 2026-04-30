@@ -273,7 +273,24 @@
                     </div>
 
                     @foreach($children as $index => $child)
-                        <div class="border border-gray-200 dark:border-zinc-600 rounded-lg p-4 {{ !($child['can_modify'] ?? true) ? 'bg-gray-50 dark:bg-zinc-700/50' : '' }}">
+                        @php
+                            $borderColorClass = 'border-gray-200 dark:border-zinc-600';
+                            $bgColorClass = '';
+
+                            if (isset($child['status'])) {
+                                if ($child['status'] === 'rejected') {
+                                    $borderColorClass = 'border-red-300 dark:border-red-700';
+                                    $bgColorClass = 'bg-red-50/50 dark:bg-red-900/10';
+                                } elseif ($child['status'] === 'validated') {
+                                    $borderColorClass = 'border-green-300 dark:border-green-700';
+                                }
+                            }
+
+                            if (!($child['can_modify'] ?? true)) {
+                                $bgColorClass = 'bg-gray-50 dark:bg-zinc-700/50';
+                            }
+                        @endphp
+                        <div class="border {{ $borderColorClass }} rounded-lg p-4 {{ $bgColorClass }}">
                             <div class="flex items-center justify-between mb-4">
                                 <div class="flex items-center gap-2">
                                     <h4 class="font-medium text-gray-800 dark:text-white">Enfant {{ $index + 1 }}</h4>
@@ -287,6 +304,19 @@
                                 </div>
                                 @if(!($child['can_modify'] ?? true))
                                     <span class="text-sm text-orange-600 dark:text-orange-400">Non modifiable ({{ $child['status'] ?? '' }})</span>
+                                @elseif(isset($child['status']))
+                                    @if($child['status'] === 'rejected')
+                                        <span class="text-sm font-semibold text-red-600 dark:text-red-400 px-2 py-1 bg-red-100 dark:bg-red-900/30 rounded-md">
+                                            À corriger
+                                        </span>
+                                    @elseif($child['status'] === 'validated')
+                                        <span class="text-sm font-semibold text-green-600 dark:text-green-400 px-2 py-1 bg-green-100 dark:bg-green-900/30 rounded-md flex items-center gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                            </svg>
+                                            Validé
+                                        </span>
+                                    @endif
                                 @endif
                             </div>
 
