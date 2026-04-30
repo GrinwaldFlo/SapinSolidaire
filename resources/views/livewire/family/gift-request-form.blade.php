@@ -303,7 +303,19 @@
                                     @endif
                                 </div>
                                 @if(!($child['can_modify'] ?? true))
-                                    <span class="text-sm text-orange-600 dark:text-orange-400">Non modifiable ({{ $child['status'] ?? '' }})</span>
+                                    @php
+                                        $statusLabel = match($child['status'] ?? '') {
+                                            'pending' => 'À valider',
+                                            'validated' => 'Validé',
+                                            'rejected' => 'Refusé',
+                                            'rejected_final' => 'Refusé définitivement',
+                                            'printed' => 'Imprimé',
+                                            'received' => 'Reçu',
+                                            'given' => 'Donné',
+                                            default => $child['status'] ?? ''
+                                        };
+                                    @endphp
+                                    <span class="text-sm text-orange-600 dark:text-orange-400">Non modifiable ({{ $statusLabel }})</span>
                                 @elseif(isset($child['status']))
                                     @if($child['status'] === 'rejected')
                                         <span class="text-sm font-semibold text-red-600 dark:text-red-400 px-2 py-1 bg-red-100 dark:bg-red-900/30 rounded-md">
