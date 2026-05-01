@@ -105,6 +105,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if user is a family validator.
+     */
+    public function isFamilyValidator(): bool
+    {
+        return $this->hasAnyRole([Role::FAMILY_VALIDATOR, Role::ADMIN]);
+    }
+
+    /**
      * Check if user is an organizer.
      */
     public function isOrganizer(): bool

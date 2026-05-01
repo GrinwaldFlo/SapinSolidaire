@@ -32,9 +32,9 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         ->middleware('any.role:'.Role::ADMIN.','.Role::VALIDATOR.','.Role::ORGANIZER.','.Role::RECEPTION)
         ->name('admin.dashboard');
 
-    // Family validation - Validator or Admin
+    // Family validation - FamilyValidator, Validator or Admin
     Route::get('/validation-familles', FamilyValidation::class)
-        ->middleware('any.role:'.Role::VALIDATOR.','.Role::ADMIN)
+        ->middleware('any.role:'.Role::FAMILY_VALIDATOR.','.Role::VALIDATOR.','.Role::ADMIN)
         ->name('admin.family-validation');
 
     // Validation - Validator or Admin
