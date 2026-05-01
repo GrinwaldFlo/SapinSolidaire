@@ -64,12 +64,13 @@ test('admin can save empty allowedCities to allow all cities', function () {
     expect(Setting::getAllowedCities())->toBe([]);
 });
 
-test('save displays success message', function () {
+test('save displays success message and redirects', function () {
     $this->actingAs($this->admin);
 
     Livewire::test(SettingsManagement::class)
         ->set('siteName', 'Test Site')
         ->call('save')
         ->assertHasNoErrors()
-        ->assertSee('Paramètres enregistrés avec succès.');
+        ->assertSessionHas('message', 'Paramètres enregistrés avec succès.')
+        ->assertRedirect(route('admin.dashboard'));
 });

@@ -88,6 +88,8 @@ class SettingsManagement extends Component
         Setting::setValue(Setting::PDF_STYLE, $this->pdfStyle);
 
         session()->flash('message', 'Paramètres enregistrés avec succès.');
+
+        $this->redirectRoute('admin.dashboard');
     }
 
     public function render()

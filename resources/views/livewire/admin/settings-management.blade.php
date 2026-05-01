@@ -95,8 +95,9 @@
             </div>
 
             <div class="pt-4">
-                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg">
-                    Enregistrer les paramètres
+                <button type="submit" wire:loading.attr="disabled" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span wire:loading.remove wire:target="save">Enregistrer les paramètres</span>
+                    <span wire:loading wire:target="save">Enregistrement...</span>
                 </button>
                 @error('allowedCities') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
