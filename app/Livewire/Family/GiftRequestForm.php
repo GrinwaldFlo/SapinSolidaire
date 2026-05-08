@@ -306,8 +306,19 @@ class GiftRequestForm extends Component
 
         try {
             $this->validate($rules, $messages);
+            // All fields valid: clear all errors managed by this method
+            foreach (array_keys($rules) as $field) {
+                unset($this->fieldErrors[$field]);
+            }
         } catch (\Illuminate\Validation\ValidationException $e) {
-            $this->fieldErrors = $e->errors();
+            $failingFields = $e->errors();
+            foreach (array_keys($rules) as $field) {
+                if (isset($failingFields[$field])) {
+                    $this->fieldErrors[$field] = $failingFields[$field];
+                } else {
+                    unset($this->fieldErrors[$field]);
+                }
+            }
         }
     }
 
@@ -387,6 +398,11 @@ class GiftRequestForm extends Component
         } else {
             unset($this->fieldErrors['proofOfHabitation']);
         }
+    }
+
+    public function updatedProofOfHabitation(): void
+    {
+        $this->validateProofFile();
     }
 
     public function validateProofFile(): void
