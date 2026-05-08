@@ -1,6 +1,6 @@
 <div>
     @if(!$tokenValid)
-        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-8 text-center">
+        <div class="card text-center">
             <span class="text-6xl mb-4 block">⚠️</span>
             <h2 class="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">Lien invalide ou expiré</h2>
             <p class="text-gray-600 dark:text-gray-300 mb-6">
@@ -11,7 +11,7 @@
             </a>
         </div>
     @elseif($submitted)
-        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-8 text-center">
+        <div class="card text-center">
             <span class="text-6xl mb-4 block">✅</span>
             <h2 class="text-2xl font-bold text-green-600 dark:text-green-400 mb-4">Demande {{ $isModifying ? 'modifiée' : 'enregistrée' }} !</h2>
             <p class="text-gray-600 dark:text-gray-300 mb-4">
@@ -22,13 +22,13 @@
             </p>
         </div>
     @elseif(!$canModify)
-        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-8 text-center">
+        <div class="card text-center">
             <span class="text-6xl mb-4 block">🔒</span>
             <h2 class="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">Modification impossible</h2>
             <p class="text-gray-600 dark:text-gray-300 mb-4">
                 La date limite de modification est dépassée. Vous ne pouvez plus modifier votre demande.
             </p>
-            
+
             @if($giftRequest)
                 <div class="mt-6 text-left bg-gray-50 dark:bg-zinc-700 rounded-lg p-6">
                     <h3 class="font-semibold text-gray-800 dark:text-white mb-4">Résumé de votre demande</h3>
@@ -44,7 +44,7 @@
         </div>
     @elseif($step === 1)
         {{-- Eligibility checks --}}
-        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-8">
+        <div class="card">
             <div class="text-center mb-8">
                 <span class="text-6xl mb-4 block">📋</span>
                 <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Conditions d'éligibilité</h2>
@@ -60,15 +60,12 @@
                         <p class="text-gray-600 dark:text-gray-300 mb-4">
                             Je confirme ne pas avoir demandé de cadeau plus de {{ $maxConsecutiveYears - 1 }} années consécutives.
                         </p>
-                        <button
-                            wire:click="acceptConsecutiveYears"
-                            class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
-                        >
+                        <button wire:click="acceptConsecutiveYears" class="btn-confirm">
                             Je confirme
                         </button>
                     </div>
                 @else
-                    <div class="border border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20 rounded-lg p-6">
+                    <div class="badge-success">
                         <div class="flex items-center gap-2 text-green-600 dark:text-green-400">
                             <span>✓</span>
                             <span class="font-semibold">Condition sur les années consécutives acceptée</span>
@@ -83,30 +80,24 @@
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Je confirme habiter dans la commune :
                             </p>
-                            <select
-                                wire:model="selectedCity"
-                                class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white mb-4"
-                            >
+                            <select wire:model="selectedCity" class="field-input mb-4">
                                 <option value="">-- Sélectionnez votre commune --</option>
                                 @foreach($allowedCities as $allowedCity)
                                     <option value="{{ $allowedCity }}">{{ $allowedCity }}</option>
                                 @endforeach
                             </select>
-                            @error('selectedCity') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                            @error('selectedCity') <p class="field-error mt-1">{{ $message }}</p> @enderror
                         @else
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 <span class="italic">Toutes les communes sont acceptées</span>
                             </p>
                         @endif
-                        <button
-                            wire:click="acceptCity"
-                            class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
-                        >
+                        <button wire:click="acceptCity" class="btn-confirm">
                             Je confirme
                         </button>
                     </div>
                 @elseif($cityAccepted)
-                    <div class="border border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20 rounded-lg p-6">
+                    <div class="badge-success">
                         <div class="flex items-center gap-2 text-green-600 dark:text-green-400">
                             <span>✓</span>
                             <span class="font-semibold">Condition sur la zone géographique acceptée</span>
@@ -117,7 +108,7 @@
         </div>
     @else
         {{-- Main form --}}
-        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-8">
+        <div class="card">
             <div class="text-center mb-8">
                 <span class="text-6xl mb-4 block">🎁</span>
                 <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">
@@ -139,59 +130,60 @@
 
                 {{-- Family information --}}
                 <div class="space-y-4">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white border-b border-gray-200 dark:border-zinc-600 pb-2">
-                        Informations de la famille
-                    </h3>
+                    <h3 class="section-title">Informations de la famille</h3>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="firstName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Prénom *</label>
-                            <input type="text" id="firstName" wire:model="firstName" wire:blur="validateFamilyFields" class="w-full px-4 py-2 border {{ isset($fieldErrors['firstName']) && in_array('firstName', $touchedFields) ? 'border-red-500' : 'border-gray-300 dark:border-zinc-600' }} rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white">
+                            <label for="firstName" class="field-label">Prénom *</label>
+                            <input type="text" id="firstName" wire:model="firstName" wire:blur="validateFamilyFields"
+                                class="{{ isset($fieldErrors['firstName']) && in_array('firstName', $touchedFields) ? 'field-input-error' : 'field-input' }}">
                             @if(isset($fieldErrors['firstName']) && in_array('firstName', $touchedFields))
-                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ collect($fieldErrors['firstName'])->first() }}</p>
+                                <p class="field-error">{{ collect($fieldErrors['firstName'])->first() }}</p>
                             @elseif($errors->has('firstName'))
-                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $errors->first('firstName') }}</p>
+                                <p class="field-error">{{ $errors->first('firstName') }}</p>
                             @endif
                         </div>
 
                         <div>
-                            <label for="lastName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom *</label>
-                            <input type="text" id="lastName" wire:model="lastName" wire:blur="validateFamilyFields" class="w-full px-4 py-2 border {{ isset($fieldErrors['lastName']) && in_array('lastName', $touchedFields) ? 'border-red-500' : 'border-gray-300 dark:border-zinc-600' }} rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white">
+                            <label for="lastName" class="field-label">Nom *</label>
+                            <input type="text" id="lastName" wire:model="lastName" wire:blur="validateFamilyFields"
+                                class="{{ isset($fieldErrors['lastName']) && in_array('lastName', $touchedFields) ? 'field-input-error' : 'field-input' }}">
                             @if(isset($fieldErrors['lastName']) && in_array('lastName', $touchedFields))
-                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ collect($fieldErrors['lastName'])->first() }}</p>
+                                <p class="field-error">{{ collect($fieldErrors['lastName'])->first() }}</p>
                             @elseif($errors->has('lastName'))
-                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $errors->first('lastName') }}</p>
+                                <p class="field-error">{{ $errors->first('lastName') }}</p>
                             @endif
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="md:col-span-2">
-                            <label for="streetName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rue *</label>
-                            <input type="text" id="streetName" wire:model="streetName" wire:blur="validateAddress" class="w-full px-4 py-2 border {{ isset($fieldErrors['streetName']) && in_array('streetName', $touchedFields) ? 'border-red-500' : 'border-gray-300 dark:border-zinc-600' }} rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white">
+                            <label for="streetName" class="field-label">Rue *</label>
+                            <input type="text" id="streetName" wire:model="streetName" wire:blur="validateAddress"
+                                class="{{ isset($fieldErrors['streetName']) && in_array('streetName', $touchedFields) ? 'field-input-error' : 'field-input' }}">
                             @if(isset($fieldErrors['streetName']) && in_array('streetName', $touchedFields))
-                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ collect($fieldErrors['streetName'])->first() }}</p>
+                                <p class="field-error">{{ collect($fieldErrors['streetName'])->first() }}</p>
                             @elseif($errors->has('streetName'))
-                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $errors->first('streetName') }}</p>
+                                <p class="field-error">{{ $errors->first('streetName') }}</p>
                             @endif
                         </div>
 
                         <div>
-                            <label for="houseNo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">N° *</label>
-                            <input type="text" id="houseNo" wire:model="houseNo" wire:blur="validateAddress" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white">
-                            @error('houseNo') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                            <label for="houseNo" class="field-label">N° *</label>
+                            <input type="text" id="houseNo" wire:model="houseNo" wire:blur="validateAddress" class="field-input">
+                            @error('houseNo') <p class="field-error">{{ $message }}</p> @enderror
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="postalCode" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Code postal *</label>
-                            <input type="text" id="postalCode" wire:model="postalCode" wire:blur="validateAddress" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white">
-                            @error('postalCode') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                            <label for="postalCode" class="field-label">Code postal *</label>
+                            <input type="text" id="postalCode" wire:model="postalCode" wire:blur="validateAddress" class="field-input">
+                            @error('postalCode') <p class="field-error">{{ $message }}</p> @enderror
                         </div>
 
                         <div>
-                            <label for="city" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ville *</label>
+                            <label for="city" class="field-label">Ville *</label>
                             @if(!empty($allowedCities))
                                 <div class="flex items-center gap-2">
                                     <select
@@ -199,7 +191,7 @@
                                         wire:model="city"
                                         wire:blur="validateCity"
                                         wire:change="requestCityChange"
-                                        class="w-full px-4 py-2 border {{ isset($fieldErrors['city']) && in_array('city', $touchedFields) ? 'border-red-500' : 'border-gray-300 dark:border-zinc-600' }} rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white"
+                                        class="{{ isset($fieldErrors['city']) && in_array('city', $touchedFields) ? 'field-input-error' : 'field-input' }}"
                                     >
                                         <option value="">-- Sélectionnez votre commune --</option>
                                         @foreach($allowedCities as $allowedCity)
@@ -211,22 +203,23 @@
                                     @endif
                                 </div>
                                 @if(isset($fieldErrors['city']) && in_array('city', $touchedFields))
-                                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ collect($fieldErrors['city'])->first() }}</p>
+                                    <p class="field-error">{{ collect($fieldErrors['city'])->first() }}</p>
                                 @endif
                             @else
-                                <input type="text" id="city" wire:model="city" wire:blur="validateFamilyFields" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white">
-                                @error('city') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                                <input type="text" id="city" wire:model="city" wire:blur="validateFamilyFields" class="field-input">
+                                @error('city') <p class="field-error">{{ $message }}</p> @enderror
                             @endif
                         </div>
                     </div>
 
                     <div>
-                        <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Téléphone *</label>
-                        <input type="tel" id="phone" wire:model="phone" wire:blur="validatePhone" placeholder="079 123 45 67" class="w-full px-4 py-2 border {{ isset($fieldErrors['phone']) && in_array('phone', $touchedFields) ? 'border-red-500' : 'border-gray-300 dark:border-zinc-600' }} rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white">
+                        <label for="phone" class="field-label">Téléphone *</label>
+                        <input type="tel" id="phone" wire:model="phone" wire:blur="validatePhone" placeholder="079 123 45 67"
+                            class="{{ isset($fieldErrors['phone']) && in_array('phone', $touchedFields) ? 'field-input-error' : 'field-input' }}">
                         @if(isset($fieldErrors['phone']) && in_array('phone', $touchedFields))
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ collect($fieldErrors['phone'])->first() }}</p>
+                            <p class="field-error">{{ collect($fieldErrors['phone'])->first() }}</p>
                         @elseif($errors->has('phone'))
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $errors->first('phone') }}</p>
+                            <p class="field-error">{{ $errors->first('phone') }}</p>
                         @endif
                     </div>
                 </div>
@@ -234,11 +227,9 @@
                 @if($proofOfHabitationEnabled)
                     {{-- Proof of habitation --}}
                     <div class="space-y-4">
-                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white border-b border-gray-200 dark:border-zinc-600 pb-2">
-                            Justificatif de domicile
-                        </h3>
+                        <h3 class="section-title">Justificatif de domicile</h3>
 
-                        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+                        <div class="notice-info">
                             <p class="text-sm text-blue-800 dark:text-blue-200">
                                 📎 Veuillez télécharger une photo de justificatif de domicile (facture de téléphone, courrier, etc.)
                             </p>
@@ -255,7 +246,7 @@
                         @endif
 
                         <div>
-                            <label for="proofOfHabitation" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label for="proofOfHabitation" class="field-label">
                                 Justificatif (image ou PDF) {{ $existingProofPath ? '' : '*' }}
                             </label>
                             <input
@@ -263,15 +254,15 @@
                                 id="proofOfHabitation"
                                 wire:model="proofOfHabitation"
                                 accept="image/*,.pdf,application/pdf"
-                                class="w-full px-4 py-2 border {{ isset($fieldErrors['proofOfHabitation']) && in_array('proofOfHabitation', $touchedFields) ? 'border-red-500' : 'border-gray-300 dark:border-zinc-600' }} rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                                class="{{ isset($fieldErrors['proofOfHabitation']) && in_array('proofOfHabitation', $touchedFields) ? 'field-input-error' : 'field-input' }} file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
                             >
                             <div wire:loading wire:target="proofOfHabitation" class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                                 Téléchargement en cours...
                             </div>
                             @if(isset($fieldErrors['proofOfHabitation']) && in_array('proofOfHabitation', $touchedFields))
-                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ collect($fieldErrors['proofOfHabitation'])->first() }}</p>
+                                <p class="field-error">{{ collect($fieldErrors['proofOfHabitation'])->first() }}</p>
                             @elseif($errors->has('proofOfHabitation'))
-                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $errors->first('proofOfHabitation') }}</p>
+                                <p class="field-error">{{ $errors->first('proofOfHabitation') }}</p>
                             @endif
                         </div>
 
@@ -370,70 +361,84 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Prénom *</label>
+                                    <label class="field-label">Prénom *</label>
                                     @php $childKey = "children.{$index}.first_name"; @endphp
-                                    <input type="text" wire:model="children.{{ $index }}.first_name" wire:blur="validateChild({{ $index }})" class="w-full px-4 py-2 border {{ (isset($fieldErrors[$childKey]) && in_array("children.{$index}.first_name", $touchedFields)) || $errors->has($childKey) ? 'border-red-500' : 'border-gray-300 dark:border-zinc-600' }} rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white" {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
+                                    <input type="text" wire:model="children.{{ $index }}.first_name" wire:blur="validateChild({{ $index }})"
+                                        class="{{ (isset($fieldErrors[$childKey]) && in_array("children.{$index}.first_name", $touchedFields)) || $errors->has($childKey) ? 'field-input-error' : 'field-input' }}"
+                                        {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
                                     @if(isset($fieldErrors[$childKey]) && in_array("children.{$index}.first_name", $touchedFields))
-                                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ collect($fieldErrors[$childKey])->first() }}</p>
+                                        <p class="field-error">{{ collect($fieldErrors[$childKey])->first() }}</p>
                                     @elseif($errors->has($childKey))
-                                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $errors->first($childKey) }}</p>
+                                        <p class="field-error">{{ $errors->first($childKey) }}</p>
                                     @endif
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Genre *</label>
+                                    <label class="field-label">Genre *</label>
                                     @php $genderKey = "children.{$index}.gender"; @endphp
-                                    <select wire:model="children.{{ $index }}.gender" wire:blur="validateChild({{ $index }})" class="w-full px-4 py-2 border {{ isset($fieldErrors[$genderKey]) && in_array("children.{$index}.gender", $touchedFields) ? 'border-red-500' : 'border-gray-300 dark:border-zinc-600' }} rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white" {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
+                                    <select wire:model="children.{{ $index }}.gender" wire:blur="validateChild({{ $index }})"
+                                        class="{{ isset($fieldErrors[$genderKey]) && in_array("children.{$index}.gender", $touchedFields) ? 'field-input-error' : 'field-input' }}"
+                                        {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
                                         <option value=""></option>
                                         <option value="boy">Garçon</option>
                                         <option value="girl">Fille</option>
                                         <option value="unspecified">Non précisé</option>
                                     </select>
                                     @if(isset($fieldErrors[$genderKey]) && in_array("children.{$index}.gender", $touchedFields))
-                                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ collect($fieldErrors[$genderKey])->first() }}</p>
+                                        <p class="field-error">{{ collect($fieldErrors[$genderKey])->first() }}</p>
                                     @elseif($errors->has($genderKey))
-                                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $errors->first($genderKey) }}</p>
+                                        <p class="field-error">{{ $errors->first($genderKey) }}</p>
                                     @endif
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Année de naissance *</label>
+                                    <label class="field-label">Année de naissance *</label>
                                     @php $birthYearKey = "children.{$index}.birth_year"; @endphp
-                                    <input type="number" wire:model="children.{{ $index }}.birth_year" wire:blur="validateChild({{ $index }})" min="{{ date('Y') - $maxChildAge }}" max="{{ date('Y') }}" class="w-full px-4 py-2 border {{ (isset($fieldErrors[$birthYearKey]) && in_array("children.{$index}.birth_year", $touchedFields)) || $errors->has($birthYearKey) ? 'border-red-500' : 'border-gray-300 dark:border-zinc-600' }} rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white" {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
+                                    <input type="number" wire:model="children.{{ $index }}.birth_year" wire:blur="validateChild({{ $index }})"
+                                        min="{{ date('Y') - $maxChildAge }}" max="{{ date('Y') }}"
+                                        class="{{ (isset($fieldErrors[$birthYearKey]) && in_array("children.{$index}.birth_year", $touchedFields)) || $errors->has($birthYearKey) ? 'field-input-error' : 'field-input' }}"
+                                        {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                         Année minimale : <strong>{{ date('Y') - $maxChildAge }}</strong> — les enfants doivent avoir au maximum {{ $maxChildAge }} ans au 31.12.{{ date('Y') }}.
                                     </p>
                                     @if(isset($fieldErrors[$birthYearKey]) && in_array("children.{$index}.birth_year", $touchedFields))
-                                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ collect($fieldErrors[$birthYearKey])->first() }}</p>
+                                        <p class="field-error">{{ collect($fieldErrors[$birthYearKey])->first() }}</p>
                                     @elseif($errors->has($birthYearKey))
-                                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $errors->first($birthYearKey) }}</p>
+                                        <p class="field-error">{{ $errors->first($birthYearKey) }}</p>
                                     @endif
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Taille (cm)</label>
-                                    <input type="number" wire:model="children.{{ $index }}.height" min="50" max="200" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white" {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
+                                    <label class="field-label">Taille (cm)</label>
+                                    <input type="number" wire:model="children.{{ $index }}.height" min="50" max="200"
+                                        class="field-input"
+                                        {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cadeau souhaité *</label>
+                                    <label class="field-label">Cadeau souhaité *</label>
                                     @php $giftKey = "children.{$index}.gift"; @endphp
-                                    <input type="text" wire:model="children.{{ $index }}.gift" wire:blur="validateChild({{ $index }})" list="gift-suggestions" class="w-full px-4 py-2 border {{ (isset($fieldErrors[$giftKey]) && in_array("children.{$index}.gift", $touchedFields)) || $errors->has($giftKey) ? 'border-red-500' : 'border-gray-300 dark:border-zinc-600' }} rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white" {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
+                                    <input type="text" wire:model="children.{{ $index }}.gift" wire:blur="validateChild({{ $index }})"
+                                        list="gift-suggestions"
+                                        class="{{ (isset($fieldErrors[$giftKey]) && in_array("children.{$index}.gift", $touchedFields)) || $errors->has($giftKey) ? 'field-input-error' : 'field-input' }}"
+                                        {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
                                     @if(isset($fieldErrors[$giftKey]) && in_array("children.{$index}.gift", $touchedFields))
-                                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ collect($fieldErrors[$giftKey])->first() }}</p>
+                                        <p class="field-error">{{ collect($fieldErrors[$giftKey])->first() }}</p>
                                     @elseif($errors->has($giftKey))
-                                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $errors->first($giftKey) }}</p>
+                                        <p class="field-error">{{ $errors->first($giftKey) }}</p>
                                     @endif
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pointure (si chaussures)</label>
+                                    <label class="field-label">Pointure (si chaussures)</label>
                                     @php $shoeSizeKey = "children.{$index}.shoe_size"; @endphp
-                                    <input type="text" wire:model="children.{{ $index }}.shoe_size" wire:blur="validateChild({{ $index }})" class="w-full px-4 py-2 border {{ isset($fieldErrors[$shoeSizeKey]) && in_array("children.{$index}.shoe_size", $touchedFields) ? 'border-red-500' : 'border-gray-300 dark:border-zinc-600' }} rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white" {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
+                                    <input type="text" wire:model="children.{{ $index }}.shoe_size" wire:blur="validateChild({{ $index }})"
+                                        class="{{ isset($fieldErrors[$shoeSizeKey]) && in_array("children.{$index}.shoe_size", $touchedFields) ? 'field-input-error' : 'field-input' }}"
+                                        {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
                                     @if(isset($fieldErrors[$shoeSizeKey]) && in_array("children.{$index}.shoe_size", $touchedFields))
-                                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ collect($fieldErrors[$shoeSizeKey])->first() }}</p>
+                                        <p class="field-error">{{ collect($fieldErrors[$shoeSizeKey])->first() }}</p>
                                     @elseif($errors->has($shoeSizeKey))
-                                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $errors->first($shoeSizeKey) }}</p>
+                                        <p class="field-error">{{ $errors->first($shoeSizeKey) }}</p>
                                     @endif
                                 </div>
                             </div>
@@ -458,7 +463,7 @@
                     @endphp
                     <button
                         type="submit"
-                        class="w-full font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center gap-2 {{ $submitDisabled ? 'bg-gray-400 dark:bg-gray-600 text-white cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 text-white' }}"
+                        class="btn-primary {{ $submitDisabled ? '!bg-gray-400 dark:!bg-gray-600 cursor-not-allowed' : '' }}"
                         wire:loading.attr="disabled"
                         wire:loading.class="opacity-50 cursor-not-allowed"
                         {{ $submitDisabled ? 'disabled' : '' }}
@@ -506,20 +511,11 @@
                     </span>
                 </p>
                 <div class="flex gap-3">
-                    <button
-                        wire:click="cancelCityChange"
-                        class="flex-1 px-4 py-2 border border-gray-300 dark:border-zinc-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-700 transition duration-200"
-                    >
-                        Annuler
-                    </button>
-                    <button
-                        wire:click="confirmCity"
-                        class="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition duration-200"
-                    >
-                        Je confirme
-                    </button>
+                    <button wire:click="cancelCityChange" class="btn-secondary flex-1">Annuler</button>
+                    <button wire:click="confirmCity" class="btn-confirm flex-1">Je confirme</button>
                 </div>
             </div>
         </div>
     @endif
 </div>
+

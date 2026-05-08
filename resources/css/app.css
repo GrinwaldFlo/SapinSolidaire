@@ -61,6 +61,72 @@ select:focus[data-flux-control] {
     @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
 }
 
-/* \[:where(&)\]:size-4 {
-    @apply size-4;
-} */
+@layer components {
+    /* Card */
+    .card {
+        @apply bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-8;
+    }
+
+    /* Section title with bottom border */
+    .section-title {
+        @apply text-lg font-semibold text-gray-800 dark:text-white border-b border-gray-200 dark:border-zinc-600 pb-2;
+    }
+
+    /* Form field label */
+    .field-label {
+        @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1;
+    }
+
+    /* Text input / select / textarea */
+    .field-input {
+        @apply w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white;
+    }
+
+    .field-input-error {
+        @apply w-full px-4 py-2 border border-red-500 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white;
+    }
+
+    /* Inline error message */
+    .field-error {
+        @apply mt-1 text-sm text-red-600 dark:text-red-400;
+    }
+
+    /* Primary action button */
+    .btn-primary {
+        @apply w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center gap-2;
+    }
+
+    .btn-primary:disabled {
+        @apply opacity-50 cursor-not-allowed;
+    }
+
+    /* Secondary / outline button */
+    .btn-secondary {
+        @apply px-4 py-2 border border-gray-300 dark:border-zinc-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-700 transition duration-200;
+    }
+
+    /* Small confirm button (inline) */
+    .btn-confirm {
+        @apply bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200;
+    }
+
+    /* Accepted condition badge */
+    .badge-success {
+        @apply border border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20 rounded-lg p-6;
+    }
+
+    /* Info/notice banner */
+    .notice-info {
+        @apply bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4;
+    }
+
+    /* Agenda timeline item */
+    .agenda-item {
+        @apply flex items-start gap-3;
+    }
+
+    /* Pickup slot pill */
+    .slot-pill {
+        @apply flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-zinc-700 rounded-lg px-3 py-2;
+    }
+}
