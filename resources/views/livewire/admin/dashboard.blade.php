@@ -1,14 +1,14 @@
 <div class="space-y-6">
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Tableau de bord</h1>
+        <h1 class="section-title text-2xl !border-0 !mb-0">Tableau de bord</h1>
     </div>
 
     @if(!$activeSeason)
-        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
+        <div class="notice-info !bg-yellow-50 !dark:!bg-yellow-900/20 !border-yellow-200 !dark:!border-yellow-700">
             <p class="text-yellow-800 dark:text-yellow-200">Aucune saison n'est actuellement active.</p>
         </div>
     @else
-        <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-4">
+        <div class="badge-success !bg-green-50 !dark:!bg-green-900/20 !border-green-200 !dark:!border-green-700 !p-4">
             <p class="text-green-800 dark:text-green-200">
                 <strong>Saison active :</strong> {{ $activeSeason->name }}
                 ({{ $activeSeason->start_date->format('d/m/Y') }} - {{ $activeSeason->end_date->format('d/m/Y') }})
@@ -16,29 +16,29 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
+            <div class="card !p-6">
                 <div class="text-sm text-gray-500 dark:text-gray-400">Familles</div>
                 <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ $totalFamilies }}</div>
             </div>
 
-            <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
+            <div class="card !p-6">
                 <div class="text-sm text-gray-500 dark:text-gray-400">Enfants</div>
                 <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ $totalChildren }}</div>
             </div>
 
-            <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
+            <div class="card !p-6">
                 <div class="text-sm text-gray-500 dark:text-gray-400">Familles en attente</div>
                 <div class="text-3xl font-bold text-orange-600">{{ $pendingFamilies }}</div>
             </div>
 
-            <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
+            <div class="card !p-6">
                 <div class="text-sm text-gray-500 dark:text-gray-400">Enfants en attente</div>
                 <div class="text-3xl font-bold text-orange-600">{{ $pendingChildren }}</div>
             </div>
         </div>
 
-        <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Statut des cadeaux</h2>
+        <div class="card !p-6">
+            <h2 class="section-title text-lg !border-0 !mb-0 mb-4">Statut des cadeaux</h2>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="text-center">
                     <div class="text-2xl font-bold text-blue-600">{{ $validatedChildren }}</div>
@@ -60,7 +60,7 @@
         </div>
     @endif
 
-    <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-4 text-sm text-gray-600 dark:text-gray-400 text-center">
+    <div class="card !p-4 text-sm text-gray-600 dark:text-gray-400 text-center">
         Un bug à signaler ou une fonctionnalité à proposer ?
         <a href="https://github.com/GrinwaldFlo/SapinSolidaire/issues" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300">Ouvrir un ticket sur GitHub</a>
     </div>
