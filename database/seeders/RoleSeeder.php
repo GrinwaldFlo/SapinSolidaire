@@ -15,6 +15,7 @@ class RoleSeeder extends Seeder
         $roles = [
             Role::VISITOR,
             Role::VALIDATOR,
+            Role::FAMILY_VALIDATOR,
             Role::ORGANIZER,
             Role::RECEPTION,
             Role::ADMIN,

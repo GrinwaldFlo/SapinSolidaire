@@ -1,6 +1,6 @@
 <div>
     @if(!$tokenValid)
-        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-8 text-center">
+        <div class="card text-center">
             <span class="text-6xl mb-4 block">⚠️</span>
             <h2 class="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">Lien invalide ou expiré</h2>
             <p class="text-gray-600 dark:text-gray-300 mb-6">
@@ -11,7 +11,7 @@
             </a>
         </div>
     @elseif($submitted)
-        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-8 text-center">
+        <div class="card text-center">
             <span class="text-6xl mb-4 block">✅</span>
             <h2 class="text-2xl font-bold text-green-600 dark:text-green-400 mb-4">Demande {{ $isModifying ? 'modifiée' : 'enregistrée' }} !</h2>
             <p class="text-gray-600 dark:text-gray-300 mb-4">
@@ -22,13 +22,13 @@
             </p>
         </div>
     @elseif(!$canModify)
-        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-8 text-center">
+        <div class="card text-center">
             <span class="text-6xl mb-4 block">🔒</span>
             <h2 class="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">Modification impossible</h2>
             <p class="text-gray-600 dark:text-gray-300 mb-4">
                 La date limite de modification est dépassée. Vous ne pouvez plus modifier votre demande.
             </p>
-            
+
             @if($giftRequest)
                 <div class="mt-6 text-left bg-gray-50 dark:bg-zinc-700 rounded-lg p-6">
                     <h3 class="font-semibold text-gray-800 dark:text-white mb-4">Résumé de votre demande</h3>
@@ -44,7 +44,7 @@
         </div>
     @elseif($step === 1)
         {{-- Eligibility checks --}}
-        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-8">
+        <div class="card">
             <div class="text-center mb-8">
                 <span class="text-6xl mb-4 block">📋</span>
                 <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Conditions d'éligibilité</h2>
@@ -60,15 +60,12 @@
                         <p class="text-gray-600 dark:text-gray-300 mb-4">
                             Je confirme ne pas avoir demandé de cadeau plus de {{ $maxConsecutiveYears - 1 }} années consécutives.
                         </p>
-                        <button
-                            wire:click="acceptConsecutiveYears"
-                            class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
-                        >
+                        <button wire:click="acceptConsecutiveYears" class="btn-confirm">
                             Je confirme
                         </button>
                     </div>
                 @else
-                    <div class="border border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20 rounded-lg p-6">
+                    <div class="badge-success">
                         <div class="flex items-center gap-2 text-green-600 dark:text-green-400">
                             <span>✓</span>
                             <span class="font-semibold">Condition sur les années consécutives acceptée</span>
@@ -83,30 +80,24 @@
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Je confirme habiter dans la commune :
                             </p>
-                            <select
-                                wire:model="selectedCity"
-                                class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white mb-4"
-                            >
+                            <select wire:model="selectedCity" class="field-input mb-4">
                                 <option value="">-- Sélectionnez votre commune --</option>
                                 @foreach($allowedCities as $allowedCity)
                                     <option value="{{ $allowedCity }}">{{ $allowedCity }}</option>
                                 @endforeach
                             </select>
-                            @error('selectedCity') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                            @error('selectedCity') <p class="field-error mt-1">{{ $message }}</p> @enderror
                         @else
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 <span class="italic">Toutes les communes sont acceptées</span>
                             </p>
                         @endif
-                        <button
-                            wire:click="acceptCity"
-                            class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
-                        >
+                        <button wire:click="acceptCity" class="btn-confirm">
                             Je confirme
                         </button>
                     </div>
                 @elseif($cityAccepted)
-                    <div class="border border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20 rounded-lg p-6">
+                    <div class="badge-success">
                         <div class="flex items-center gap-2 text-green-600 dark:text-green-400">
                             <span>✓</span>
                             <span class="font-semibold">Condition sur la zone géographique acceptée</span>
@@ -117,7 +108,7 @@
         </div>
     @else
         {{-- Main form --}}
-        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-8">
+        <div class="card">
             <div class="text-center mb-8">
                 <span class="text-6xl mb-4 block">🎁</span>
                 <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">
@@ -139,54 +130,63 @@
 
                 {{-- Family information --}}
                 <div class="space-y-4">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white border-b border-gray-200 dark:border-zinc-600 pb-2">
-                        Informations de la famille
-                    </h3>
+                    <h3 class="section-title">Informations de la famille</h3>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="firstName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Prénom *</label>
-                            <input type="text" id="firstName" wire:model="firstName" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white">
-                            @error('firstName') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                            <label for="firstName" class="field-label">Prénom *</label>
+                            <input type="text" id="firstName" wire:model="firstName" wire:blur="validateFamilyFields"
+                                class="{{ isset($fieldErrors['firstName']) && in_array('firstName', $touchedFields) ? 'field-input-error' : 'field-input' }}">
+                            @if(isset($fieldErrors['firstName']) && in_array('firstName', $touchedFields))
+                                <p class="field-error">{{ collect($fieldErrors['firstName'])->first() }}</p>
+                            @elseif($errors->has('firstName'))
+                                <p class="field-error">{{ $errors->first('firstName') }}</p>
+                            @endif
                         </div>
 
                         <div>
-                            <label for="lastName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom *</label>
-                            <input type="text" id="lastName" wire:model="lastName" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white">
-                            @error('lastName') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                            <label for="lastName" class="field-label">Nom *</label>
+                            <input type="text" id="lastName" wire:model="lastName" wire:blur="validateFamilyFields"
+                                class="{{ isset($fieldErrors['lastName']) && in_array('lastName', $touchedFields) ? 'field-input-error' : 'field-input' }}">
+                            @if(isset($fieldErrors['lastName']) && in_array('lastName', $touchedFields))
+                                <p class="field-error">{{ collect($fieldErrors['lastName'])->first() }}</p>
+                            @elseif($errors->has('lastName'))
+                                <p class="field-error">{{ $errors->first('lastName') }}</p>
+                            @endif
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="md:col-span-2">
-                            <label for="streetName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rue *</label>
-                            <input type="text" id="streetName" wire:model="streetName" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white">
-                            @error('streetName') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                            <label for="streetName" class="field-label">Rue *</label>
+                            <input type="text" id="streetName" wire:model="streetName" wire:blur="validateAddress"
+                                class="{{ isset($fieldErrors['address']) && in_array('streetName', $touchedFields) ? 'field-input-error' : 'field-input' }}">
                         </div>
 
                         <div>
-                            <label for="houseNo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">N° *</label>
-                            <input type="text" id="houseNo" wire:model="houseNo" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white">
-                            @error('houseNo') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                            <label for="houseNo" class="field-label">N° *</label>
+                            <input type="text" id="houseNo" wire:model="houseNo" wire:blur="validateAddress"
+                                class="{{ isset($fieldErrors['address']) && in_array('houseNo', $touchedFields) ? 'field-input-error' : 'field-input' }}">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="postalCode" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Code postal *</label>
-                            <input type="text" id="postalCode" wire:model="postalCode" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white">
-                            @error('postalCode') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                            <label for="postalCode" class="field-label">Code postal *</label>
+                            <input type="text" id="postalCode" wire:model="postalCode" wire:blur="validateAddress"
+                                class="{{ isset($fieldErrors['address']) && in_array('postalCode', $touchedFields) ? 'field-input-error' : 'field-input' }}">
                         </div>
 
                         <div>
-                            <label for="city" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ville *</label>
+                            <label for="city" class="field-label">Ville *</label>
                             @if(!empty($allowedCities))
                                 <div class="flex items-center gap-2">
                                     <select
                                         id="city"
                                         wire:model="city"
+                                        wire:blur="validateCity"
                                         wire:change="requestCityChange"
-                                        class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white"
+                                        class="{{ isset($fieldErrors['city']) && in_array('city', $touchedFields) ? 'field-input-error' : 'field-input' }}"
                                     >
                                         <option value="">-- Sélectionnez votre commune --</option>
                                         @foreach($allowedCities as $allowedCity)
@@ -197,28 +197,38 @@
                                         <span class="text-green-600 dark:text-green-400 text-lg" title="Commune confirmée">✓</span>
                                     @endif
                                 </div>
+                                @if(isset($fieldErrors['city']) && in_array('city', $touchedFields))
+                                    <p class="field-error">{{ collect($fieldErrors['city'])->first() }}</p>
+                                @endif
                             @else
-                                <input type="text" id="city" wire:model="city" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white">
+                                <input type="text" id="city" wire:model="city" wire:blur="validateFamilyFields" class="field-input">
+                                @error('city') <p class="field-error">{{ $message }}</p> @enderror
                             @endif
-                            @error('city') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
                         </div>
                     </div>
 
+                    @if(isset($fieldErrors['address']) && (in_array('streetName', $touchedFields) || in_array('houseNo', $touchedFields) || in_array('postalCode', $touchedFields)))
+                        <p class="field-error">{{ collect($fieldErrors['address'])->first() }}</p>
+                    @endif
+
                     <div>
-                        <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Téléphone *</label>
-                        <input type="tel" id="phone" wire:model="phone" placeholder="079 123 45 67" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white">
-                        @error('phone') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                        <label for="phone" class="field-label">Téléphone *</label>
+                        <input type="tel" id="phone" wire:model="phone" wire:blur="validatePhone" placeholder="079 123 45 67"
+                            class="{{ isset($fieldErrors['phone']) && in_array('phone', $touchedFields) ? 'field-input-error' : 'field-input' }}">
+                        @if(isset($fieldErrors['phone']) && in_array('phone', $touchedFields))
+                            <p class="field-error">{{ collect($fieldErrors['phone'])->first() }}</p>
+                        @elseif($errors->has('phone'))
+                            <p class="field-error">{{ $errors->first('phone') }}</p>
+                        @endif
                     </div>
                 </div>
 
                 @if($proofOfHabitationEnabled)
                     {{-- Proof of habitation --}}
                     <div class="space-y-4">
-                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white border-b border-gray-200 dark:border-zinc-600 pb-2">
-                            Justificatif de domicile
-                        </h3>
+                        <h3 class="section-title">Justificatif de domicile</h3>
 
-                        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+                        <div class="notice-info">
                             <p class="text-sm text-blue-800 dark:text-blue-200">
                                 📎 Veuillez télécharger une photo de justificatif de domicile (facture de téléphone, courrier, etc.)
                             </p>
@@ -235,7 +245,7 @@
                         @endif
 
                         <div>
-                            <label for="proofOfHabitation" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label for="proofOfHabitation" class="field-label">
                                 Justificatif (image ou PDF) {{ $existingProofPath ? '' : '*' }}
                             </label>
                             <input
@@ -243,12 +253,16 @@
                                 id="proofOfHabitation"
                                 wire:model="proofOfHabitation"
                                 accept="image/*,.pdf,application/pdf"
-                                class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                                class="{{ isset($fieldErrors['proofOfHabitation']) && in_array('proofOfHabitation', $touchedFields) ? 'field-input-error' : 'field-input' }} file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
                             >
                             <div wire:loading wire:target="proofOfHabitation" class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                                 Téléchargement en cours...
                             </div>
-                            @error('proofOfHabitation') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                            @if(isset($fieldErrors['proofOfHabitation']) && in_array('proofOfHabitation', $touchedFields))
+                                <p class="field-error">{{ collect($fieldErrors['proofOfHabitation'])->first() }}</p>
+                            @elseif($errors->has('proofOfHabitation'))
+                                <p class="field-error">{{ $errors->first('proofOfHabitation') }}</p>
+                            @endif
                         </div>
 
                         @if($proofOfHabitation)
@@ -272,8 +286,37 @@
                         </h3>
                     </div>
 
+                    <div class="mt-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="isAnonymous" wire:model="isAnonymous" class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 dark:border-zinc-600 dark:bg-zinc-700">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Demande anonyme (les prénoms des enfants ne seront pas affichés sur les étiquettes des cadeaux)
+                            </span>
+                        </label>
+                        <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
+                            Si coché, les personnes qui achèteront les cadeaux ne verront pas les prénoms des enfants de la famille.
+                        </p>
+                    </div>
+
                     @foreach($children as $index => $child)
-                        <div class="border border-gray-200 dark:border-zinc-600 rounded-lg p-4 {{ !($child['can_modify'] ?? true) ? 'bg-gray-50 dark:bg-zinc-700/50' : '' }}">
+                        @php
+                            $borderColorClass = 'border-gray-200 dark:border-zinc-600';
+                            $bgColorClass = '';
+
+                            if (isset($child['status'])) {
+                                if ($child['status'] === 'rejected') {
+                                    $borderColorClass = 'border-red-300 dark:border-red-700';
+                                    $bgColorClass = 'bg-red-50/50 dark:bg-red-900/10';
+                                } elseif ($child['status'] === 'validated') {
+                                    $borderColorClass = 'border-green-300 dark:border-green-700';
+                                }
+                            }
+
+                            if (!($child['can_modify'] ?? true)) {
+                                $bgColorClass = 'bg-gray-50 dark:bg-zinc-700/50';
+                            }
+                        @endphp
+                        <div class="border {{ $borderColorClass }} rounded-lg p-4 {{ $bgColorClass }}">
                             <div class="flex items-center justify-between mb-4">
                                 <div class="flex items-center gap-2">
                                     <h4 class="font-medium text-gray-800 dark:text-white">Enfant {{ $index + 1 }}</h4>
@@ -286,64 +329,116 @@
                                     @endif
                                 </div>
                                 @if(!($child['can_modify'] ?? true))
-                                    <span class="text-sm text-orange-600 dark:text-orange-400">Non modifiable ({{ $child['status'] ?? '' }})</span>
+                                    @php
+                                        $statusLabel = match($child['status'] ?? '') {
+                                            'pending' => 'À valider',
+                                            'validated' => 'Validé',
+                                            'rejected' => 'Refusé',
+                                            'rejected_final' => 'Refusé définitivement',
+                                            'printed' => 'Imprimé',
+                                            'received' => 'Reçu',
+                                            'given' => 'Donné',
+                                            default => $child['status'] ?? ''
+                                        };
+                                    @endphp
+                                    <span class="text-sm text-orange-600 dark:text-orange-400">Non modifiable ({{ $statusLabel }})</span>
+                                @elseif(isset($child['status']))
+                                    @if($child['status'] === 'rejected')
+                                        <span class="text-sm font-semibold text-red-600 dark:text-red-400 px-2 py-1 bg-red-100 dark:bg-red-900/30 rounded-md">
+                                            À corriger
+                                        </span>
+                                    @elseif($child['status'] === 'validated')
+                                        <span class="text-sm font-semibold text-green-600 dark:text-green-400 px-2 py-1 bg-green-100 dark:bg-green-900/30 rounded-md flex items-center gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                            </svg>
+                                            Validé
+                                        </span>
+                                    @endif
                                 @endif
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Prénom *</label>
-                                    <input type="text" wire:model="children.{{ $index }}.first_name" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white" {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
-                                    @error("children.{$index}.first_name") <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                                    <label class="field-label">Prénom *</label>
+                                    @php $childKey = "children.{$index}.first_name"; @endphp
+                                    <input type="text" wire:model="children.{{ $index }}.first_name" wire:blur="validateChild({{ $index }})"
+                                        class="{{ (isset($fieldErrors[$childKey]) && in_array("children.{$index}.first_name", $touchedFields)) || $errors->has($childKey) ? 'field-input-error' : 'field-input' }}"
+                                        {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
+                                    @if(isset($fieldErrors[$childKey]) && in_array("children.{$index}.first_name", $touchedFields))
+                                        <p class="field-error">{{ collect($fieldErrors[$childKey])->first() }}</p>
+                                    @elseif($errors->has($childKey))
+                                        <p class="field-error">{{ $errors->first($childKey) }}</p>
+                                    @endif
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Genre *</label>
-                                    <select wire:model="children.{{ $index }}.gender" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white" {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
+                                    <label class="field-label">Genre *</label>
+                                    @php $genderKey = "children.{$index}.gender"; @endphp
+                                    <select wire:model="children.{{ $index }}.gender" wire:blur="validateChild({{ $index }})"
+                                        class="{{ isset($fieldErrors[$genderKey]) && in_array("children.{$index}.gender", $touchedFields) ? 'field-input-error' : 'field-input' }}"
+                                        {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
                                         <option value=""></option>
                                         <option value="boy">Garçon</option>
                                         <option value="girl">Fille</option>
                                         <option value="unspecified">Non précisé</option>
                                     </select>
-                                    @error("children.{$index}.gender") <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
-                                </div>
-
-                                <div class="md:col-span-2">
-                                    <label class="flex items-center gap-2 cursor-pointer">
-                                        <input type="checkbox" wire:model="children.{{ $index }}.anonymous" class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 dark:border-zinc-600 dark:bg-zinc-700" {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
-                                        <span class="text-sm text-gray-700 dark:text-gray-300">
-                                            Anonyme (le prénom ne sera pas affiché sur l'étiquette du cadeau)
-                                        </span>
-                                    </label>
-                                    <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
-                                        Si coché, la personne qui achètera le cadeau ne verra pas le prénom de l'enfant.
-                                    </p>
+                                    @if(isset($fieldErrors[$genderKey]) && in_array("children.{$index}.gender", $touchedFields))
+                                        <p class="field-error">{{ collect($fieldErrors[$genderKey])->first() }}</p>
+                                    @elseif($errors->has($genderKey))
+                                        <p class="field-error">{{ $errors->first($genderKey) }}</p>
+                                    @endif
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Année de naissance *</label>
-                                    <input type="number" wire:model="children.{{ $index }}.birth_year" min="{{ date('Y') - $maxChildAge }}" max="{{ date('Y') }}" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white" {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
+                                    <label class="field-label">Année de naissance *</label>
+                                    @php $birthYearKey = "children.{$index}.birth_year"; @endphp
+                                    <input type="number" wire:model="children.{{ $index }}.birth_year" wire:blur="validateChild({{ $index }})"
+                                        min="{{ date('Y') - $maxChildAge }}" max="{{ date('Y') }}"
+                                        class="{{ (isset($fieldErrors[$birthYearKey]) && in_array("children.{$index}.birth_year", $touchedFields)) || $errors->has($birthYearKey) ? 'field-input-error' : 'field-input' }}"
+                                        {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                         Année minimale : <strong>{{ date('Y') - $maxChildAge }}</strong> — les enfants doivent avoir au maximum {{ $maxChildAge }} ans au 31.12.{{ date('Y') }}.
                                     </p>
-                                    @error("children.{$index}.birth_year") <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                                    @if(isset($fieldErrors[$birthYearKey]) && in_array("children.{$index}.birth_year", $touchedFields))
+                                        <p class="field-error">{{ collect($fieldErrors[$birthYearKey])->first() }}</p>
+                                    @elseif($errors->has($birthYearKey))
+                                        <p class="field-error">{{ $errors->first($birthYearKey) }}</p>
+                                    @endif
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Taille (cm)</label>
-                                    <input type="number" wire:model="children.{{ $index }}.height" min="50" max="200" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white" {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
+                                    <label class="field-label">Taille (cm)</label>
+                                    <input type="number" wire:model="children.{{ $index }}.height" min="50" max="200"
+                                        class="field-input"
+                                        {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cadeau souhaité *</label>
-                                    <input type="text" wire:model="children.{{ $index }}.gift" list="gift-suggestions" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white" {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
-                                    @error("children.{$index}.gift") <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                                    <label class="field-label">Cadeau souhaité *</label>
+                                    @php $giftKey = "children.{$index}.gift"; @endphp
+                                    <input type="text" wire:model="children.{{ $index }}.gift" wire:blur="validateChild({{ $index }})"
+                                        list="gift-suggestions"
+                                        class="{{ (isset($fieldErrors[$giftKey]) && in_array("children.{$index}.gift", $touchedFields)) || $errors->has($giftKey) ? 'field-input-error' : 'field-input' }}"
+                                        {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
+                                    @if(isset($fieldErrors[$giftKey]) && in_array("children.{$index}.gift", $touchedFields))
+                                        <p class="field-error">{{ collect($fieldErrors[$giftKey])->first() }}</p>
+                                    @elseif($errors->has($giftKey))
+                                        <p class="field-error">{{ $errors->first($giftKey) }}</p>
+                                    @endif
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pointure (si chaussures)</label>
-                                    <input type="text" wire:model="children.{{ $index }}.shoe_size" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white" {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
-                                    @error("children.{$index}.shoe_size") <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                                    <label class="field-label">Pointure (si chaussures)</label>
+                                    @php $shoeSizeKey = "children.{$index}.shoe_size"; @endphp
+                                    <input type="text" wire:model="children.{{ $index }}.shoe_size" wire:blur="validateChild({{ $index }})"
+                                        class="{{ isset($fieldErrors[$shoeSizeKey]) && in_array("children.{$index}.shoe_size", $touchedFields) ? 'field-input-error' : 'field-input' }}"
+                                        {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
+                                    @if(isset($fieldErrors[$shoeSizeKey]) && in_array("children.{$index}.shoe_size", $touchedFields))
+                                        <p class="field-error">{{ collect($fieldErrors[$shoeSizeKey])->first() }}</p>
+                                    @elseif($errors->has($shoeSizeKey))
+                                        <p class="field-error">{{ $errors->first($shoeSizeKey) }}</p>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -367,7 +462,7 @@
                     @endphp
                     <button
                         type="submit"
-                        class="w-full font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center gap-2 {{ $submitDisabled ? 'bg-gray-400 dark:bg-gray-600 text-white cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 text-white' }}"
+                        class="btn-primary {{ $submitDisabled ? '!bg-gray-400 dark:!bg-gray-600 cursor-not-allowed' : '' }}"
                         wire:loading.attr="disabled"
                         wire:loading.class="opacity-50 cursor-not-allowed"
                         {{ $submitDisabled ? 'disabled' : '' }}
@@ -393,6 +488,15 @@
                             </ul>
                         </div>
                     @endif
+
+                    @if($hasAttemptedSubmit && !empty($fieldErrors))
+                        <div class="mt-4 rounded-lg border border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20 p-4 flex items-start gap-3">
+                            <span class="text-red-500 dark:text-red-400 text-lg leading-none mt-0.5">⚠️</span>
+                            <p class="text-sm text-red-700 dark:text-red-300">
+                                Le formulaire contient des erreurs. Veuillez les corriger avant de soumettre votre demande.
+                            </p>
+                        </div>
+                    @endif
                 </div>
             </form>
         </div>
@@ -415,20 +519,11 @@
                     </span>
                 </p>
                 <div class="flex gap-3">
-                    <button
-                        wire:click="cancelCityChange"
-                        class="flex-1 px-4 py-2 border border-gray-300 dark:border-zinc-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-700 transition duration-200"
-                    >
-                        Annuler
-                    </button>
-                    <button
-                        wire:click="confirmCity"
-                        class="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition duration-200"
-                    >
-                        Je confirme
-                    </button>
+                    <button wire:click="cancelCityChange" class="btn-secondary flex-1">Annuler</button>
+                    <button wire:click="confirmCity" class="btn-confirm flex-1">Je confirme</button>
                 </div>
             </div>
         </div>
     @endif
 </div>
+

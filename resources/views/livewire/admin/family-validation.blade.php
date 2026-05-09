@@ -28,6 +28,9 @@
                         <button wire:click="openRejectionModal('{{ $currentRequest->id }}', true)" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm">
                             Refuser définitivement
                         </button>
+                        <button wire:click="skip" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm ml-auto">
+                            Passer au suivant
+                        </button>
                     </div>
                 </x-validation.family-info>
             </div>

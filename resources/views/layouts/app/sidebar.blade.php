@@ -21,10 +21,13 @@
                         Tableau de bord
                     </flux:sidebar.item>
 
-                    @can('validate')
+                    @canany(['validate', 'validateFamily'])
                     <flux:sidebar.item icon="check-circle" :href="route('admin.family-validation')" :current="request()->routeIs('admin.family-validation')" wire:navigate>
                         Validation familles
                     </flux:sidebar.item>
+                    @endcanany
+
+                    @can('validate')
                     <flux:sidebar.item icon="check-circle" :href="route('admin.validation')" :current="request()->routeIs('admin.validation')" wire:navigate>
                         Validation cadeaux
                     </flux:sidebar.item>

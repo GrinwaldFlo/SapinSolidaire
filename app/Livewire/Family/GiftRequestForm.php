@@ -45,11 +45,17 @@ class GiftRequestForm extends Component
     public string $postalCode = '';
     public string $city = '';
     public string $phone = '';
+    public bool $isAnonymous = false;
 
     // Proof of habitation
     public $proofOfHabitation = null;
     public bool $proofOfHabitationEnabled = false;
     public ?string $existingProofPath = null;
+
+    // Real-time validation tracking
+    public array $touchedFields = [];
+    public array $fieldErrors = [];
+    public bool $hasAttemptedSubmit = false;
 
     // Children
     public array $children = [];
@@ -133,6 +139,10 @@ class GiftRequestForm extends Component
 
                     // Load children for this request
                     $this->loadChildrenFromRequest();
+
+                    if (!empty($this->children)) {
+                        $this->isAnonymous = $this->children[0]['anonymous'] ?? false;
+                    }
 
                     // Skip eligibility if already accepted
                     $this->step = 2;
@@ -242,7 +252,7 @@ class GiftRequestForm extends Component
             'id' => null,
             'first_name' => '',
             'gender' => '',
-            'anonymous' => false,
+            'anonymous' => $this->isAnonymous,
             'birth_year' => '',
             'height' => '',
             'gift' => '',
@@ -263,19 +273,28 @@ class GiftRequestForm extends Component
         }
     }
 
-    public function submit(): void
+    // Real-time validation methods
+    public function touchField(string $field): void
     {
-        if (! $this->canModify) {
-            return;
+        if (! in_array($field, $this->touchedFields)) {
+            $this->touchedFields[] = $field;
+        }
+    }
+
+    public function validateFamilyFields(): void
+    {
+        $allFields = ['firstName', 'lastName', 'city', 'phone'];
+
+        // Only touch fields that already have a value, or touch all on submit
+        foreach ($allFields as $field) {
+            if ($this->hasAttemptedSubmit || !empty($this->$field)) {
+                $this->touchField($field);
+            }
         }
 
-        // Validate family data
         $rules = [
             'firstName' => ['required', 'string', 'max:255'],
             'lastName' => ['required', 'string', 'max:255'],
-            'streetName' => ['required', 'string', 'max:255'],
-            'houseNo' => ['required', 'string', 'max:20'],
-            'postalCode' => ['required', 'string', 'max:10'],
             'city' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:20'],
         ];
@@ -283,64 +302,142 @@ class GiftRequestForm extends Component
         $messages = [
             'firstName.required' => 'Le prénom est obligatoire.',
             'lastName.required' => 'Le nom est obligatoire.',
-            'streetName.required' => 'Le nom de rue est obligatoire.',
-            'houseNo.required' => 'Le numéro de rue est obligatoire.',
-            'postalCode.required' => 'Le code postal est obligatoire.',
             'city.required' => 'La ville est obligatoire.',
             'phone.required' => 'Le numéro de téléphone est obligatoire.',
         ];
 
-        $this->validate($rules, $messages);
+        try {
+            $this->validate($rules, $messages);
+            foreach (array_keys($rules) as $field) {
+                unset($this->fieldErrors[$field]);
+            }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $failingFields = $e->errors();
+            foreach (array_keys($rules) as $field) {
+                if (isset($failingFields[$field])) {
+                    // Only show required errors for empty fields after submit attempt
+                    if ($this->hasAttemptedSubmit || !empty($this->$field)) {
+                        $this->fieldErrors[$field] = $failingFields[$field];
+                    }
+                } else {
+                    unset($this->fieldErrors[$field]);
+                }
+            }
+        }
 
-        // Validate phone
-        $phoneService = app(PhoneValidationService::class);
-        if (! $phoneService->isValid($this->phone)) {
-            $this->addError('phone', 'Le numéro de téléphone n\'est pas valide.');
+        // Address required fields (street, houseNo, postalCode) are validated together
+        if ($this->hasAttemptedSubmit && (empty($this->streetName) || empty($this->houseNo) || empty($this->postalCode))) {
+            $this->fieldErrors['address'] = ['Veuillez renseigner la rue, le numéro et le code postal.'];
+        } elseif (!empty($this->streetName) && !empty($this->houseNo) && !empty($this->postalCode)) {
+            // Only clear if there is no API-level address error already set
+            if (isset($this->fieldErrors['address']) && str_contains($this->fieldErrors['address'][0] ?? '', 'renseigner')) {
+                unset($this->fieldErrors['address']);
+            }
+        }
+    }
 
+    public function validatePhone(): void
+    {
+        $this->touchField('phone');
+        
+        if (empty($this->phone)) {
             return;
         }
 
-        // Format phone to E.164
-        $formattedPhone = $phoneService->formatE164($this->phone);
+        $phoneService = app(PhoneValidationService::class);
+        if (! $phoneService->isValid($this->phone)) {
+            $this->fieldErrors['phone'] = ['Le numéro de téléphone n\'est pas valide.'];
+        } else {
+            unset($this->fieldErrors['phone']);
+        }
+    }
 
-        // Validate address (optional API)
+    public function validateAddress(): void
+    {
+        $this->touchField('streetName');
+        $this->touchField('houseNo');
+        $this->touchField('postalCode');
+
+        // Required fields check (only shown after submit attempt)
+        if (empty($this->streetName) || empty($this->houseNo) || empty($this->postalCode)) {
+            if ($this->hasAttemptedSubmit) {
+                $this->fieldErrors['address'] = ['Veuillez renseigner la rue, le numéro et le code postal.'];
+            }
+            return;
+        }
+
+        if (empty($this->city)) {
+            return;
+        }
+
         $addressService = app(AddressValidationService::class);
         $addressResult = $addressService->validate($this->streetName, $this->houseNo, $this->postalCode, $this->city);
 
         if (! $addressResult['Valide']) {
-            $this->addError('streetName', $addressResult['Message']);
+            $this->fieldErrors['address'] = [$addressResult['Message']];
+        } else {
+            unset($this->fieldErrors['address']);
+
+            // Update address with formatted data
+            if (! empty($addressResult['FormatedAddress'])) {
+                $formatted = $addressResult['FormatedAddress'];
+                $this->streetName = $formatted['StreetName'] ?? $this->streetName;
+                $this->houseNo    = $formatted['HouseNo']    ?? $this->houseNo;
+                $this->postalCode = $formatted['ZipCode']    ?? $this->postalCode;
+            }
+        }
+    }
+
+    public function validateCity(): void
+    {
+        $this->touchField('city');
+        
+        if (empty($this->city)) {
             return;
         }
 
-        if (! empty($addressResult['FormatedAddress'])) {
-            $formatted = $addressResult['FormatedAddress'];
-            $this->streetName = $formatted['StreetName'] ?? $this->streetName;
-            $this->houseNo    = $formatted['HouseNo']    ?? $this->houseNo;
-            $this->postalCode = $formatted['ZipCode']    ?? $this->postalCode;
-            //$this->city       = $formatted['TownName']   ?? $this->city;
-        }
-
-        // Validate city
         if (! empty($this->allowedCities)) {
             if (! in_array($this->city, $this->allowedCities)) {
-                $this->addError('city', 'Cette commune n\'est pas éligible.');
-
-                return;
+                $this->fieldErrors['city'] = ['Cette commune n\'est pas éligible.'];
+            } elseif (! $this->cityConfirmed) {
+                $this->fieldErrors['city'] = ['Veuillez confirmer votre commune de résidence.'];
+            } else {
+                unset($this->fieldErrors['city']);
             }
+        } else {
+            unset($this->fieldErrors['city']);
+        }
+    }
 
-            if (! $this->cityConfirmed) {
-                $this->addError('city', 'Veuillez confirmer votre commune de résidence.');
-
-                return;
-            }
+    public function validateProofOfHabitation(): void
+    {
+        $this->touchField('proofOfHabitation');
+        
+        if (! $this->proofOfHabitationEnabled) {
+            return;
         }
 
-        // Validate proof of habitation
-        if ($this->proofOfHabitationEnabled && !$this->existingProofPath && !$this->proofOfHabitation) {
-            $this->addError('proofOfHabitation', 'Le justificatif de domicile est obligatoire.');
+        if (! $this->existingProofPath && ! $this->proofOfHabitation) {
+            if ($this->hasAttemptedSubmit) {
+                $this->fieldErrors['proofOfHabitation'] = ['Le justificatif de domicile est obligatoire.'];
+            }
+        } else {
+            unset($this->fieldErrors['proofOfHabitation']);
+        }
+    }
+
+    public function updatedProofOfHabitation(): void
+    {
+        $this->validateProofFile();
+    }
+
+    public function validateProofFile(): void
+    {
+        if (! $this->proofOfHabitation) {
+            return;
         }
 
-        if ($this->proofOfHabitation) {
+        try {
             $this->validate([
                 'proofOfHabitation' => ['file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:10240'],
             ], [
@@ -348,50 +445,121 @@ class GiftRequestForm extends Component
                 'proofOfHabitation.mimes' => 'Le fichier doit être une image (jpg, png, webp) ou un PDF.',
                 'proofOfHabitation.max' => 'Le fichier ne doit pas dépasser 10 Mo.',
             ]);
+            unset($this->fieldErrors['proofOfHabitation']);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->fieldErrors['proofOfHabitation'] = $e->errors()['proofOfHabitation'] ?? ['Le fichier n\'est pas valide.'];
+        }
+    }
+
+    public function validateChild(int $index): void
+    {
+        $child = $this->children[$index] ?? null;
+        if (! $child) {
+            return;
         }
 
-        // Validate children
-        foreach ($this->children as $index => $child) {
-            if (empty($child['first_name'])) {
-                $this->addError("children.{$index}.first_name", 'Le prénom est obligatoire.');
-            }
-            if (empty($child['gender'])) {
-                $this->addError("children.{$index}.gender", 'Le genre est obligatoire.');
-            }
-            $currentYear = (int) date('Y');
-            $minBirthYear = $currentYear - $this->maxChildAge;
-            if (empty($child['birth_year']) || ! is_numeric($child['birth_year'])) {
-                $this->addError("children.{$index}.birth_year", 'L\'année de naissance est obligatoire.');
-            } elseif ((int) $child['birth_year'] < $minBirthYear) {
-                $this->addError("children.{$index}.birth_year", "L'enfant doit avoir au maximum {$this->maxChildAge} ans au 31.12.{$currentYear} (année de naissance minimum : {$minBirthYear}).");
-            } elseif ((int) $child['birth_year'] > $currentYear) {
-                $this->addError("children.{$index}.birth_year", "L'année de naissance ne peut pas être dans le futur.");
-            }
-            if (empty($child['gift'])) {
-                $this->addError("children.{$index}.gift", 'Le cadeau souhaité est obligatoire.');
-            } elseif ($this->isForbiddenGift($child['gift'])) {
-                $this->addError("children.{$index}.gift", 'Ce type de cadeau n\'est pas autorisé.');
-            }
-            // Check if shoes require shoe size
-            if ($this->isShoeGift($child['gift']) && empty($child['shoe_size'])) {
-                $this->addError("children.{$index}.shoe_size", 'La pointure est obligatoire pour les chaussures.');
+        $fields = ['first_name', 'gender', 'birth_year', 'gift', 'shoe_size'];
+        foreach ($fields as $field) {
+            if ($this->hasAttemptedSubmit || !empty($child[$field])) {
+                $this->touchField("children.{$index}.{$field}");
             }
         }
 
+        if (empty($child['first_name'])) {
+            if ($this->hasAttemptedSubmit) {
+                $this->fieldErrors["children.{$index}.first_name"] = ['Le prénom est obligatoire.'];
+            }
+        } else {
+            unset($this->fieldErrors["children.{$index}.first_name"]);
+        }
+
+        if (empty($child['gender'])) {
+            if ($this->hasAttemptedSubmit) {
+                $this->fieldErrors["children.{$index}.gender"] = ['Le genre est obligatoire.'];
+            }
+        } else {
+            unset($this->fieldErrors["children.{$index}.gender"]);
+        }
+
+        $currentYear = (int) date('Y');
+        $minBirthYear = $currentYear - $this->maxChildAge;
+
+        if (empty($child['birth_year']) || ! is_numeric($child['birth_year'])) {
+            if ($this->hasAttemptedSubmit) {
+                $this->fieldErrors["children.{$index}.birth_year"] = ['L\'année de naissance est obligatoire.'];
+            }
+        } elseif ((int) $child['birth_year'] < $minBirthYear) {
+            $this->fieldErrors["children.{$index}.birth_year"] = ["L'enfant doit avoir au maximum {$this->maxChildAge} ans au 31.12.{$currentYear} (année de naissance minimum : {$minBirthYear})."];
+        } elseif ((int) $child['birth_year'] > $currentYear) {
+            $this->fieldErrors["children.{$index}.birth_year"] = ["L'année de naissance ne peut pas être dans le futur."];
+        } else {
+            unset($this->fieldErrors["children.{$index}.birth_year"]);
+        }
+
+        if (empty($child['gift'])) {
+            if ($this->hasAttemptedSubmit) {
+                $this->fieldErrors["children.{$index}.gift"] = ['Le cadeau souhaité est obligatoire.'];
+            }
+        } elseif ($this->isForbiddenGift($child['gift'])) {
+            $this->fieldErrors["children.{$index}.gift"] = ['Ce type de cadeau n\'est pas autorisé.'];
+        } else {
+            unset($this->fieldErrors["children.{$index}.gift"]);
+        }
+
+        // Check if shoes require shoe size
+        if ($this->isShoeGift($child['gift'] ?? '') && empty($child['shoe_size'])) {
+            if ($this->hasAttemptedSubmit) {
+                $this->fieldErrors["children.{$index}.shoe_size"] = ['La pointure est obligatoire pour les chaussures.'];
+            }
+        } else {
+            unset($this->fieldErrors["children.{$index}.shoe_size"]);
+        }
+    }
+
+    public function validateChildrenDuplicates(): void
+    {
         // Check for duplicate children (same first_name, birth_year, gender)
         $seen = [];
         foreach ($this->children as $index => $child) {
             $key = mb_strtolower(trim($child['first_name'] ?? '')) . '|' . ($child['birth_year'] ?? '') . '|' . ($child['gender'] ?? '');
             if (isset($seen[$key])) {
-                $this->addError("children.{$index}.first_name", 'Cet enfant semble être un doublon (même prénom, année de naissance et genre).');
+                $this->fieldErrors["children.{$index}.first_name"] = ['Cet enfant semble être un doublon (même prénom, année de naissance et genre).'];
+            } elseif (isset($this->fieldErrors["children.{$index}.first_name"])) {
+                // Keep existing errors for this field
             } else {
-                $seen[$key] = $index;
+                unset($this->fieldErrors["children.{$index}.first_name"]);
             }
+            $seen[$key] = $index;
         }
+    }
 
-        if ($this->getErrorBag()->isNotEmpty()) {
+    public function submit(): void
+    {
+        if (! $this->canModify) {
             return;
         }
+
+        $this->hasAttemptedSubmit = true;
+
+        // Touch all fields to trigger validation
+        foreach (array_keys($this->children) as $index) {
+            $this->validateChild($index);
+        }
+        $this->validateChildrenDuplicates();
+        $this->validateFamilyFields();
+        $this->validatePhone();
+        $this->validateAddress();
+        $this->validateCity();
+        $this->validateProofOfHabitation();
+        $this->validateProofFile();
+
+        if ($this->fieldErrors !== []) {
+            return;
+        }
+
+        // Format phone to E.164
+        $phoneService = app(PhoneValidationService::class);
+        $formattedPhone = $phoneService->formatE164($this->phone);
 
         // Store proof of habitation file before the transaction
         $proofPath = $this->giftRequest?->proof_of_habitation_path;
@@ -449,7 +617,7 @@ class GiftRequestForm extends Component
                     $childRecord->update([
                         'first_name' => $childData['first_name'],
                         'gender' => $childData['gender'] ?? '',
-                        'anonymous' => $childData['anonymous'] ?? false,
+                        'anonymous' => $this->isAnonymous,
                         'birth_year' => $childData['birth_year'],
                         'height' => $childData['height'] ?: null,
                         'gift' => $childData['gift'],
@@ -464,7 +632,7 @@ class GiftRequestForm extends Component
                         'gift_request_id' => $this->giftRequest->id,
                         'first_name' => $childData['first_name'],
                         'gender' => $childData['gender'] ?? '',
-                        'anonymous' => $childData['anonymous'] ?? false,
+                        'anonymous' => $this->isAnonymous,
                         'birth_year' => $childData['birth_year'],
                         'height' => $childData['height'] ?: null,
                         'gift' => $childData['gift'],

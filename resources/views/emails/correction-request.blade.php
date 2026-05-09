@@ -60,7 +60,7 @@
         
         <div class="comment-box">
             <strong>Motif :</strong><br>
-            {{ $comment }}
+            {!! nl2br(e($comment)) !!}
         </div>
         
         <p>Cliquez sur le bouton ci-dessous pour modifier votre demande :</p>

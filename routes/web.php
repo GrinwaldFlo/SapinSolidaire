@@ -29,12 +29,12 @@ Route::get('/cadeau/{token}', GiftRequestForm::class)->name('gift.form');
 Route::prefix('admin')->middleware(['auth'])->group(function () {
     // Dashboard - accessible to all authenticated users with any role
     Route::get('/', Dashboard::class)
-        ->middleware('any.role:'.Role::ADMIN.','.Role::VALIDATOR.','.Role::ORGANIZER.','.Role::RECEPTION)
+        ->middleware('any.role:'.Role::ADMIN.','.Role::VALIDATOR.','.Role::FAMILY_VALIDATOR.','.Role::ORGANIZER.','.Role::RECEPTION)
         ->name('admin.dashboard');
 
-    // Family validation - Validator or Admin
+    // Family validation - FamilyValidator, Validator or Admin
     Route::get('/validation-familles', FamilyValidation::class)
-        ->middleware('any.role:'.Role::VALIDATOR.','.Role::ADMIN)
+        ->middleware('any.role:'.Role::FAMILY_VALIDATOR.','.Role::VALIDATOR.','.Role::ADMIN)
         ->name('admin.family-validation');
 
     // Validation - Validator or Admin

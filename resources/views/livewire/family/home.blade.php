@@ -40,12 +40,12 @@
     @endif
 
     @if($seasonStatus === 'active')
-        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-8">
+        <div class="card">
             @if(!$emailSent)
                 <div class="text-center mb-8">
                     <span class="text-6xl mb-4 block">🎁</span>
                     <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Demande de cadeau</h2>
-                    
+
                     @if($introductionText)
                         <div class="text-gray-600 dark:text-gray-300 mb-6 whitespace-pre-line">
                             {{ $introductionText }}
@@ -55,25 +55,25 @@
 
                 <form wire:submit="sendLink" class="space-y-6">
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label for="email" class="field-label !mb-2">
                             Votre adresse e-mail
                         </label>
                         <input
                             type="email"
                             id="email"
                             wire:model="email"
-                            class="w-full px-4 py-3 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white"
+                            class="field-input py-3"
                             placeholder="exemple@email.com"
                             required
                         >
                         @error('email')
-                            <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            <p class="field-error mt-2">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <button
                         type="submit"
-                        class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center gap-2"
+                        class="btn-primary"
                         wire:loading.attr="disabled"
                         wire:loading.class="opacity-50 cursor-not-allowed"
                     >
@@ -98,31 +98,27 @@
             @endif
         </div>
     @elseif($seasonStatus === 'future')
-        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-8 text-center">
+        <div class="card text-center">
             <span class="text-6xl mb-4 block">📅</span>
             <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Bientôt disponible</h2>
-            <p class="text-gray-600 dark:text-gray-300">
-                {{ $statusMessage }}
-            </p>
+            <p class="text-gray-600 dark:text-gray-300">{{ $statusMessage }}</p>
         </div>
     @else
-        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-8 text-center">
+        <div class="card text-center">
             <span class="text-6xl mb-4 block">🎄</span>
             <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">À bientôt !</h2>
-            <p class="text-gray-600 dark:text-gray-300">
-                {{ $statusMessage }}
-            </p>
+            <p class="text-gray-600 dark:text-gray-300">{{ $statusMessage }}</p>
         </div>
     @endif
 
     @if($season)
-        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-8 mt-6">
+        <div class="card mt-6">
             <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
                 <span>📅</span> Agenda
             </h2>
 
             <div class="space-y-4">
-                <div class="flex items-start gap-3">
+                <div class="agenda-item">
                     <span class="text-green-500 text-lg mt-0.5">🟢</span>
                     <div>
                         <p class="font-semibold text-gray-800 dark:text-white">Ouverture des inscriptions</p>
@@ -131,7 +127,7 @@
                 </div>
 
                 @if($season->modification_deadline)
-                    <div class="flex items-start gap-3">
+                    <div class="agenda-item">
                         <span class="text-orange-500 text-lg mt-0.5">⏰</span>
                         <div>
                             <p class="font-semibold text-gray-800 dark:text-white">Clôture des inscriptions</p>
@@ -142,7 +138,7 @@
 
                 @if($pickupSlots->isNotEmpty())
                     <div class="pt-2">
-                        <div class="flex items-start gap-3 mb-3">
+                        <div class="agenda-item mb-3">
                             <span class="text-lg mt-0.5">🎁</span>
                             <div>
                                 <p class="font-semibold text-gray-800 dark:text-white">Créneaux de récupération des cadeaux</p>
@@ -154,7 +150,7 @@
 
                         <div class="ml-8 space-y-2">
                             @foreach($pickupSlots as $slot)
-                                <div class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-zinc-700 rounded-lg px-3 py-2">
+                                <div class="slot-pill">
                                     <span>📦</span>
                                     <span>
                                         {{ $slot->start_datetime->translatedFormat('l d/m/Y') }}

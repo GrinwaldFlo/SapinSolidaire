@@ -58,6 +58,10 @@ class AppServiceProvider extends ServiceProvider
             return $user->isValidator();
         });
 
+        Gate::define('validateFamily', function ($user) {
+            return $user->isFamilyValidator();
+        });
+
         Gate::define('organize', function ($user) {
             return $user->isOrganizer();
         });
@@ -70,6 +74,7 @@ class AppServiceProvider extends ServiceProvider
             return $user->hasAnyRole([
                 Role::ADMIN,
                 Role::VALIDATOR,
+                Role::FAMILY_VALIDATOR,
                 Role::ORGANIZER,
                 Role::RECEPTION,
             ]);
