@@ -270,6 +270,39 @@ class GiftRequestForm extends Component
             unset($this->children[$index]);
             $this->children = array_values($this->children);
             $this->childCount = count($this->children);
+
+            // Remove validation errors for the deleted child and re-index remaining ones
+            $newFieldErrors = [];
+            foreach ($this->fieldErrors as $key => $value) {
+                if (preg_match('/^children\.(\d+)\.(.+)$/', $key, $matches)) {
+                    $errorIndex = (int) $matches[1];
+                    if ($errorIndex === $index) {
+                        continue; // Drop errors for removed child
+                    }
+                    // Re-index errors for children that shifted down
+                    $newIndex = $errorIndex > $index ? $errorIndex - 1 : $errorIndex;
+                    $newFieldErrors["children.{$newIndex}.{$matches[2]}"] = $value;
+                } else {
+                    $newFieldErrors[$key] = $value;
+                }
+            }
+            $this->fieldErrors = $newFieldErrors;
+
+            // Re-index touched fields the same way
+            $newTouchedFields = [];
+            foreach ($this->touchedFields as $field) {
+                if (preg_match('/^children\.(\d+)\.(.+)$/', $field, $matches)) {
+                    $fieldIndex = (int) $matches[1];
+                    if ($fieldIndex === $index) {
+                        continue;
+                    }
+                    $newIndex = $fieldIndex > $index ? $fieldIndex - 1 : $fieldIndex;
+                    $newTouchedFields[] = "children.{$newIndex}.{$matches[2]}";
+                } else {
+                    $newTouchedFields[] = $field;
+                }
+            }
+            $this->touchedFields = $newTouchedFields;
         }
     }
 
