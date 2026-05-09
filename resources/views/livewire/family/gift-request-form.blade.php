@@ -160,26 +160,21 @@
                         <div class="md:col-span-2">
                             <label for="streetName" class="field-label">Rue *</label>
                             <input type="text" id="streetName" wire:model="streetName" wire:blur="validateAddress"
-                                class="{{ isset($fieldErrors['streetName']) && in_array('streetName', $touchedFields) ? 'field-input-error' : 'field-input' }}">
-                            @if(isset($fieldErrors['streetName']) && in_array('streetName', $touchedFields))
-                                <p class="field-error">{{ collect($fieldErrors['streetName'])->first() }}</p>
-                            @elseif($errors->has('streetName'))
-                                <p class="field-error">{{ $errors->first('streetName') }}</p>
-                            @endif
+                                class="{{ isset($fieldErrors['address']) && in_array('streetName', $touchedFields) ? 'field-input-error' : 'field-input' }}">
                         </div>
 
                         <div>
                             <label for="houseNo" class="field-label">N° *</label>
-                            <input type="text" id="houseNo" wire:model="houseNo" wire:blur="validateAddress" class="field-input">
-                            @error('houseNo') <p class="field-error">{{ $message }}</p> @enderror
+                            <input type="text" id="houseNo" wire:model="houseNo" wire:blur="validateAddress"
+                                class="{{ isset($fieldErrors['address']) && in_array('houseNo', $touchedFields) ? 'field-input-error' : 'field-input' }}">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label for="postalCode" class="field-label">Code postal *</label>
-                            <input type="text" id="postalCode" wire:model="postalCode" wire:blur="validateAddress" class="field-input">
-                            @error('postalCode') <p class="field-error">{{ $message }}</p> @enderror
+                            <input type="text" id="postalCode" wire:model="postalCode" wire:blur="validateAddress"
+                                class="{{ isset($fieldErrors['address']) && in_array('postalCode', $touchedFields) ? 'field-input-error' : 'field-input' }}">
                         </div>
 
                         <div>
@@ -211,6 +206,10 @@
                             @endif
                         </div>
                     </div>
+
+                    @if(isset($fieldErrors['address']) && (in_array('streetName', $touchedFields) || in_array('houseNo', $touchedFields) || in_array('postalCode', $touchedFields)))
+                        <p class="field-error">{{ collect($fieldErrors['address'])->first() }}</p>
+                    @endif
 
                     <div>
                         <label for="phone" class="field-label">Téléphone *</label>
@@ -487,6 +486,15 @@
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
+                        </div>
+                    @endif
+
+                    @if($hasAttemptedSubmit && !empty($fieldErrors))
+                        <div class="mt-4 rounded-lg border border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20 p-4 flex items-start gap-3">
+                            <span class="text-red-500 dark:text-red-400 text-lg leading-none mt-0.5">⚠️</span>
+                            <p class="text-sm text-red-700 dark:text-red-300">
+                                Le formulaire contient des erreurs. Veuillez les corriger avant de soumettre votre demande.
+                            </p>
                         </div>
                     @endif
                 </div>
