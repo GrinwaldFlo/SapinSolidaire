@@ -206,7 +206,7 @@
                                     <p class="field-error">{{ collect($fieldErrors['city'])->first() }}</p>
                                 @endif
                             @else
-                                <input type="text" id="city" wire:model="city" wire:blur="validateFamilyFields" wire:blur.debounce="validateAddress" autocomplete="address-level2" class="field-input">
+                                <input type="text" id="city" wire:model="city" wire:blur.debounce="validateAddress" autocomplete="address-level2" class="field-input">
                                 @error('city') <p class="field-error">{{ $message }}</p> @enderror
                             @endif
                         </div>
