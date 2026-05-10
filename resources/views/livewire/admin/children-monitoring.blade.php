@@ -173,7 +173,7 @@
                                 <span class="
                                     @switch($child->status)
                                         @case('pending') badge--pending @break
-                                        @case('validated') badge--info @break
+                                        @case('validated') badge--validated @break
                                         @case('rejected') badge--warning @break
                                         @case('rejected_final') badge--rejected @break
                                         @case('printed') badge--printed @break
