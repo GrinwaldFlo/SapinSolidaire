@@ -1,12 +1,12 @@
 <div class="space-y-6">
-    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Gestion des familles</h1>
+    <h1 class="section-title">Gestion des familles</h1>
 
-    <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-4">
-        <input type="text" wire:model.live.debounce.300ms="search" placeholder="Rechercher par nom ou email..." class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white">
+    <div class="card !p-4">
+        <input type="text" wire:model.live.debounce.300ms="search" placeholder="Rechercher par nom ou email..." class="field-input">
     </div>
 
     {{-- Desktop table --}}
-    <div class="hidden sm:block bg-white dark:bg-zinc-800 rounded-lg shadow overflow-hidden">
+    <div class="hidden sm:block card !p-0 overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
             <thead class="bg-gray-50 dark:bg-zinc-700">
                 <tr>
@@ -51,7 +51,7 @@
     {{-- Mobile cards --}}
     <div class="sm:hidden space-y-3">
         @forelse($families as $family)
-            <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-4 space-y-2">
+            <div class="card !p-4 space-y-2">
                 <div class="font-semibold text-gray-900 dark:text-white text-base">
                     {{ $family->first_name }} {{ $family->last_name }}
                 </div>

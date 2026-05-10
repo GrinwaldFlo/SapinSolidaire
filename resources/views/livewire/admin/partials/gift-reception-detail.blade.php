@@ -29,7 +29,7 @@
     </div>
 
     <div class="pt-6 border-t border-gray-200 dark:border-zinc-700">
-        <button wire:click="markAsReceived('{{ $selectedChild->id }}')" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold">
+        <button wire:click="markAsReceived('{{ $selectedChild->id }}')" class="w-full btn-primary">
             ✓ Marquer comme reçu
         </button>
     </div>

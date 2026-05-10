@@ -2,6 +2,7 @@
 
 use App\Livewire\Admin\ChildrenMonitoring;
 use App\Livewire\Admin\Dashboard;
+use App\Livewire\Admin\CssShowcase;
 use App\Livewire\Admin\DevTools;
 use App\Livewire\Admin\FamilyManagement;
 use App\Livewire\Admin\FamilyValidation;
@@ -100,6 +101,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::get('/utilisateurs', UserManagement::class)->name('admin.users');
         Route::get('/parametres', SettingsManagement::class)->name('admin.settings');
         Route::get('/dev-tools', DevTools::class)->name('admin.dev-tools');
+        Route::get('/css-showcase', CssShowcase::class)->name('admin.css-showcase');
     });
 });
 

@@ -1,26 +1,26 @@
 <div class="space-y-6" x-data="{ showImageModal: false, imageUrl: '', imageAlt: '' }">
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Validation des demandes</h1>
+        <h1 class="section-title">Validation des demandes</h1>
         <div class="text-sm text-gray-600 dark:text-gray-400">
             {{ $pendingFamiliesCount }} famille(s) · {{ $pendingChildrenCount }} enfant(s) en attente
         </div>
     </div>
 
     @if(!$activeSeason)
-        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
-            <p class="text-yellow-800 dark:text-yellow-200">Aucune saison n'est actuellement active.</p>
+        <div class="notice-warning">
+            Aucune saison n'est actuellement active.
         </div>
     @elseif(!$currentRequest)
-        <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-4">
-            <p class="text-green-800 dark:text-green-200">🎉 Toutes les demandes ont été traitées !</p>
+        <div class="notice-success">
+            🎉 Toutes les demandes ont été traitées !
         </div>
     @else
-        <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
+        <div class="card !p-6">
             <div class="mb-6 pb-6 border-b border-gray-200 dark:border-zinc-700">
                 <x-validation.family-info :request="$currentRequest">
                     @if($currentRequest->status === 'pending')
                     <div class="mt-4 p-4 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg">
-                        <h3 class="text-sm font-semibold mb-3">Décision pour la famille :</h3>
+                        <h3 class="section-title">Décision pour la famille :</h3>
                         <div class="flex flex-wrap gap-4 mb-3">
                             <label class="flex items-center space-x-2">
                                 <input type="radio" wire:model.live="familyDecision" value="pending" class="form-radio text-blue-600">
@@ -48,7 +48,7 @@
                 </x-validation.family-info>
             </div>
 
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Enfants ({{ $currentRequest->children->count() }})</h2>
+            <h2 class="section-title">Enfants ({{ $currentRequest->children->count() }})</h2>
 
             <div class="space-y-4">
                 @foreach($currentRequest->children as $child)
@@ -124,11 +124,11 @@
             </div>
             
             <div class="mt-8 pt-6 border-t border-gray-200 dark:border-zinc-700 flex justify-end gap-3">
-                <button wire:click="skip" class="px-6 py-3 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-200 bg-gray-200 dark:bg-zinc-600 hover:bg-gray-300 dark:hover:bg-zinc-500 transition-colors">
+                <button wire:click="skip" class="btn-secondary">
                     Passer au suivant
                 </button>
                 <button wire:click="submitValidation" 
-                        class="px-6 py-3 rounded-lg font-semibold text-sm text-white transition-colors {{ $this->has_pending_decisions ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700' }}"
+                        class="btn-confirm {{ $this->has_pending_decisions ? 'bg-gray-400 opacity-50 cursor-not-allowed' : '' }}"
                         @if($this->has_pending_decisions) disabled @endif>
                     Soumettre la validation
                 </button>

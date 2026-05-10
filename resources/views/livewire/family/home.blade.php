@@ -44,7 +44,7 @@
             @if(!$emailSent)
                 <div class="text-center mb-8">
                     <span class="text-6xl mb-4 block">🎁</span>
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Demande de cadeau</h2>
+                    <h2 class="section-title">Demande de cadeau</h2>
 
                     @if($introductionText)
                         <div class="text-gray-600 dark:text-gray-300 mb-6 whitespace-pre-line">
@@ -62,7 +62,7 @@
                             type="email"
                             id="email"
                             wire:model="email"
-                            class="field-input py-3"
+                            class="field-input"
                             placeholder="exemple@email.com"
                             required
                         >
@@ -100,20 +100,20 @@
     @elseif($seasonStatus === 'future')
         <div class="card text-center">
             <span class="text-6xl mb-4 block">📅</span>
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Bientôt disponible</h2>
+            <h2 class="section-title">Bientôt disponible</h2>
             <p class="text-gray-600 dark:text-gray-300">{{ $statusMessage }}</p>
         </div>
     @else
         <div class="card text-center">
             <span class="text-6xl mb-4 block">🎄</span>
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">À bientôt !</h2>
+            <h2 class="section-title">À bientôt !</h2>
             <p class="text-gray-600 dark:text-gray-300">{{ $statusMessage }}</p>
         </div>
     @endif
 
     @if($season)
         <div class="card mt-6">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
+            <h2 class="section-title">
                 <span>📅</span> Agenda
             </h2>
 

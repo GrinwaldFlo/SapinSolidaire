@@ -68,13 +68,13 @@
             </div>
         </div>
     @endif
-    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Suivi des enfants</h1>
+    <h1 class="section-title">Suivi des enfants</h1>
 
-    <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-4">
+    <div class="card !p-4">
         <div class="flex flex-wrap gap-4 items-end">
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Saison</label>
-                <select wire:model.live="selectedSeasonId" class="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white">
+                <label class="field-label">Saison</label>
+                <select wire:model.live="selectedSeasonId" class="field-input">
                     <option value="">-- Sélectionner --</option>
                     @foreach($seasons as $season)
                         <option value="{{ $season->id }}">{{ $season->name }}</option>
@@ -83,8 +83,8 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Statut</label>
-                <select wire:model.live="statusFilter" class="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white">
+                <label class="field-label">Statut</label>
+                <select wire:model.live="statusFilter" class="field-input">
                     <option value="">Tous les statuts</option>
                     @foreach($statuses as $value => $label)
                         <option value="{{ $value }}">{{ $label }}</option>
@@ -93,8 +93,8 @@
             </div>
 
             <div class="flex-1 min-w-[200px]">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Recherche</label>
-                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Code, prénom, nom, cadeau…" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white" />
+                <label class="field-label">Recherche</label>
+                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Code, prénom, nom, cadeau…" class="field-input" />
             </div>
 
             @if($selectedSeasonId)
@@ -103,7 +103,7 @@
                         wire:click="exportPdf"
                         wire:loading.attr="disabled"
                         wire:target="exportPdf"
-                        class="flex items-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-semibold text-sm"
+                        class="btn-confirm"
                     >
                         <span wire:loading.remove wire:target="exportPdf">📄 Exporter PDF</span>
                         <span wire:loading wire:target="exportPdf">⏳ Export en cours…</span>
@@ -115,7 +115,7 @@
 
     @if($selectedSeasonId)
         {{-- Desktop table --}}
-        <div class="hidden sm:block bg-white dark:bg-zinc-800 rounded-lg shadow overflow-hidden">
+        <div class="hidden sm:block card !p-0 overflow-hidden">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
                 <thead class="bg-gray-50 dark:bg-zinc-700">
                     <tr>
@@ -197,7 +197,7 @@
         {{-- Mobile cards --}}
         <div class="sm:hidden space-y-3">
             @forelse($children as $child)
-                <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-4 space-y-3">
+                <div class="card !p-4 space-y-3">
                     <div class="flex items-center justify-between gap-2">
                         <span class="font-mono font-bold text-gray-900 dark:text-white">{{ $child->code ?? '—' }}</span>
                         <span class="px-2 py-1 text-xs font-semibold rounded-full
@@ -233,7 +233,7 @@
                     </div>
                 </div>
             @empty
-                <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-4 text-center text-gray-500 dark:text-gray-400">
+                <div class="card !p-4 text-center text-gray-500 dark:text-gray-400">
                     Aucun enfant trouvé
                 </div>
             @endforelse
@@ -243,7 +243,7 @@
             {{ $children->links() }}
         </div>
     @else
-        <div class="bg-gray-50 dark:bg-zinc-700 rounded-lg p-8 text-center text-gray-500 dark:text-gray-400">
+        <div class="notice-info">
             Sélectionnez une saison pour voir les enfants.
         </div>
     @endif

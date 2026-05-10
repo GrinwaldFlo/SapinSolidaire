@@ -279,8 +279,10 @@ Always use these predefined classes instead of writing inline Tailwind utilities
 #### Badges & Banners
 | Class | Usage | Style |
 |-------|-------|-------|
-| `.badge-success` | Success/accepted condition display | `border border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20 rounded-lg p-6` |
-| `.notice-info` | Info/notice banner | `bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4` |
+| `.notice-success` | Success/accepted condition display | `rounded-lg px-4 py-3 bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-300` |
+| `.notice-info` | Info/notice banner | `rounded-lg px-4 py-3 bg-blue-50 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300` |
+| `.notice-error` | Error/issue banner | `rounded-lg px-4 py-3 bg-red-50 text-red-800 dark:bg-red-900/30 dark:text-red-300` |
+| `.notice-warning` | Warning banner | `rounded-lg px-4 py-3 bg-yellow-50 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300` |
 
 #### Layout Helpers
 | Class | Usage | Style |
