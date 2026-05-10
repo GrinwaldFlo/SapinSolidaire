@@ -184,8 +184,8 @@
                                     <select
                                         id="city"
                                         wire:model="city"
-                                        wire:blur="validateCity"
-                                        wire:change="requestCityChange"
+                                            wire:blur="validateCity"
+                                            wire:change="requestCityChange"
                                         class="{{ isset($fieldErrors['city']) && in_array('city', $touchedFields) ? 'field-input-error' : 'field-input' }}"
                                     >
                                         <option value="">-- Sélectionnez votre commune --</option>
@@ -201,7 +201,7 @@
                                     <p class="field-error">{{ collect($fieldErrors['city'])->first() }}</p>
                                 @endif
                             @else
-                                <input type="text" id="city" wire:model="city" wire:blur="validateFamilyFields" class="field-input">
+                                <input type="text" id="city" wire:model="city" wire:blur="validateFamilyFields" wire:blur.debounce="validateAddress" class="field-input">
                                 @error('city') <p class="field-error">{{ $message }}</p> @enderror
                             @endif
                         </div>
