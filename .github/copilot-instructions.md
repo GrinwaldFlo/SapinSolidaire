@@ -239,7 +239,7 @@ The live visual reference for all classes is: `/admin/css-showcase`
     <span class="badge--pending">À valider</span>
 
     <div class="notice-warning mt-4">
-        Veuillez verifier le justificatif.
+        Veuillez vérifier le justificatif.
     </div>
 
     <label class="field-label">Commentaire</label>
