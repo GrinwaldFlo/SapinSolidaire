@@ -15,7 +15,7 @@
     @endif
 
     @if(session()->has('error'))
-        <div class="notice-info">
+        <div class="notice-error">
             {{ session('error') }}
         </div>
     @endif
