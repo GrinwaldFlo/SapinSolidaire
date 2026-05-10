@@ -85,13 +85,13 @@
                 <div class="text-center">
                     <span class="text-6xl mb-4 block">✉️</span>
                     <h2 class="text-2xl font-bold text-green-600 dark:text-green-400 mb-4">E-mail envoyé !</h2>
-                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                    <p class="text-muted mb-4">
                         Un lien d'accès a été envoyé à <strong>{{ $email }}</strong>.
                     </p>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">
+                    <p class="text-sm text-muted">
                         Vérifiez votre boîte de réception (et vos spams) et cliquez sur le lien pour continuer votre demande.
                     </p>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm mt-4">
+                    <p class="text-sm text-muted mt-4">
                         Le lien est valable pendant 48 heures.
                     </p>
                 </div>
@@ -101,13 +101,13 @@
         <div class="card text-center">
             <span class="text-6xl mb-4 block">📅</span>
             <h2 class="section-title">Bientôt disponible</h2>
-            <p class="text-gray-600 dark:text-gray-300">{{ $statusMessage }}</p>
+            <p class="text-muted">{{ $statusMessage }}</p>
         </div>
     @else
         <div class="card text-center">
             <span class="text-6xl mb-4 block">🎄</span>
             <h2 class="section-title">À bientôt !</h2>
-            <p class="text-gray-600 dark:text-gray-300">{{ $statusMessage }}</p>
+            <p class="text-muted">{{ $statusMessage }}</p>
         </div>
     @endif
 
@@ -121,8 +121,8 @@
                 <div class="agenda-item">
                     <span class="text-green-500 text-lg mt-0.5">🟢</span>
                     <div>
-                        <p class="font-semibold text-gray-800 dark:text-white">Ouverture des inscriptions</p>
-                        <p class="text-gray-600 dark:text-gray-300">{{ $season->start_date->format('d/m/Y') }}</p>
+                        <p class="detail-value">Ouverture des inscriptions</p>
+                        <p class="text-muted">{{ $season->start_date->format('d/m/Y') }}</p>
                     </div>
                 </div>
 
@@ -130,8 +130,8 @@
                     <div class="agenda-item">
                         <span class="text-orange-500 text-lg mt-0.5">⏰</span>
                         <div>
-                            <p class="font-semibold text-gray-800 dark:text-white">Clôture des inscriptions</p>
-                            <p class="text-gray-600 dark:text-gray-300">{{ $season->modification_deadline->format('d/m/Y') }}</p>
+                            <p class="detail-value">Clôture des inscriptions</p>
+                            <p class="text-muted">{{ $season->modification_deadline->format('d/m/Y') }}</p>
                         </div>
                     </div>
                 @endif
@@ -141,8 +141,8 @@
                         <div class="agenda-item mb-3">
                             <span class="text-lg mt-0.5">🎁</span>
                             <div>
-                                <p class="font-semibold text-gray-800 dark:text-white">Créneaux de récupération des cadeaux</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                <p class="detail-value">Créneaux de récupération des cadeaux</p>
+                                <p class="text-sm text-muted mt-1">
                                     Vous devrez être disponible lors de l'un de ces créneaux. Vous recevrez une invitation précisant le créneau auquel vous devrez vous présenter.
                                 </p>
                             </div>

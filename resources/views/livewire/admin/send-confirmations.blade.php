@@ -22,7 +22,7 @@
             <div class="text-4xl mb-4">📧</div>
             <h2 class="section-title"> {{ $familyCount }} famille(s) avec cadeaux reçus
             </h2>
-            <p class="text-gray-600 dark:text-gray-400"> Envoyez un e-mail de confirmation aux familles dont les cadeaux sont arrivés.
+            <p class="text-muted"> Envoyez un e-mail de confirmation aux familles dont les cadeaux sont arrivés.
             </p>
         </div>
 
@@ -33,10 +33,10 @@
                 <span wire:loading wire:target="sendEmails">Envoi en cours...</span>
             </button>
 
-            <button wire:click="showEmailPreview" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold"> 👁️ Prévisualiser l'e-mail
+            <button wire:click="showEmailPreview" class="btn-blue"> 👁️ Prévisualiser l'e-mail
             </button>
             @endif
-            <button wire:click="recalculateSlots" wire:confirm="Êtes-vous sûr de vouloir recalculer tous les créneaux ? Les assignations existantes seront réinitialisées." class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-semibold"> 🔄 Recalculer les créneaux
+            <button wire:click="recalculateSlots" wire:confirm="Êtes-vous sûr de vouloir recalculer tous les créneaux ? Les assignations existantes seront réinitialisées." class="btn-warning"> 🔄 Recalculer les créneaux
             </button>
         </div>
     </div>
@@ -56,38 +56,38 @@
     </div>
     @endif
     @if($families->isNotEmpty())
-    <div class="card !p-0">
+    <div class="table-container">
         <div class="p-4 border-b border-gray-200 dark:border-zinc-700">
             <h2 class="section-title">Liste des familles</h2>
         </div>
         <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
             <thead class="bg-gray-50 dark:bg-zinc-700">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Famille</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Enfants</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Date de récupération</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Créneau</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Dernier e-mail</th>
+                    <th class="table-header">Famille</th>
+                    <th class="table-header">Enfants</th>
+                    <th class="table-header">Date de récupération</th>
+                    <th class="table-header">Créneau</th>
+                    <th class="table-header">Dernier e-mail</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
                 @foreach($families as $family)
                 <tr>
-                    <td class="px-6 py-4 text-gray-900 dark:text-white">
+                    <td class="table-cell">
                         <div>{{ $family['family_name'] }}</div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ $family['family_email'] }}</div>
+                        <div class="text-sm text-muted">{{ $family['family_email'] }}</div>
                     </td>
-                    <td class="px-6 py-4 text-gray-900 dark:text-white">{{ $family['children_count'] }}</td>
-                    <td class="px-6 py-4 text-gray-600 dark:text-gray-300"> {{ $family['slot_date'] ?? '-' }}
+                    <td class="table-cell">{{ $family['children_count'] }}</td>
+                    <td class="table-cell-muted"> {{ $family['slot_date'] ?? '-' }}
                     </td>
-                    <td class="px-6 py-4 text-gray-600 dark:text-gray-300">
+                    <td class="table-cell-muted">
                         @if($family['slot_start'] && $family['slot_end'])
                         {{ $family['slot_start'] }} - {{ $family['slot_end'] }}
                         @else
                         <span class="text-orange-600 dark:text-orange-400">Non assigné</span>
                         @endif
                     </td>
-                    <td class="px-6 py-4 text-gray-600 dark:text-gray-300"> {{ $family['last_email'] ? \Carbon\Carbon::parse($family['last_email'])->format('d/m/Y H:i') : '-' }}
+                    <td class="table-cell-muted"> {{ $family['last_email'] ? \Carbon\Carbon::parse($family['last_email'])->format('d/m/Y H:i') : '-' }}
                     </td>
                 </tr>
                 @endforeach

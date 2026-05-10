@@ -1,29 +1,29 @@
 <div class="p-6 space-y-4">
     <div class="text-center mb-6">
-        <div class="text-4xl font-mono font-bold text-green-600">{{ $selectedChild->code }}</div>
+        <div class="label-value--success text-4xl font-mono">{{ $selectedChild->code }}</div>
     </div>
 
     <div class="grid grid-cols-2 gap-4">
         <div>
-            <span class="text-sm text-gray-500 dark:text-gray-400">Prénom</span>
-            <p class="font-medium text-gray-900 dark:text-white">{{ $selectedChild->first_name }}</p>
+            <span class="detail-label">Prénom</span>
+            <p class="detail-value">{{ $selectedChild->first_name }}</p>
         </div>
         <div>
-            <span class="text-sm text-gray-500 dark:text-gray-400">Âge</span>
-            <p class="font-medium text-gray-900 dark:text-white">{{ $selectedChild->formatted_age }}</p>
+            <span class="detail-label">Âge</span>
+            <p class="detail-value">{{ $selectedChild->formatted_age }}</p>
         </div>
         <div>
-            <span class="text-sm text-gray-500 dark:text-gray-400">Cadeau</span>
-            <p class="font-medium text-gray-900 dark:text-white">{{ $selectedChild->gift }}</p>
+            <span class="detail-label">Cadeau</span>
+            <p class="detail-value">{{ $selectedChild->gift }}</p>
         </div>
         <div>
-            <span class="text-sm text-gray-500 dark:text-gray-400">Taille</span>
-            <p class="font-medium text-gray-900 dark:text-white">{{ $selectedChild->height ? $selectedChild->height . ' cm' : '-' }}</p>
+            <span class="detail-label">Taille</span>
+            <p class="detail-value">{{ $selectedChild->height ? $selectedChild->height . ' cm' : '-' }}</p>
         </div>
         @if($selectedChild->shoe_size)
             <div>
-                <span class="text-sm text-gray-500 dark:text-gray-400">Pointure</span>
-                <p class="font-medium text-gray-900 dark:text-white">{{ $selectedChild->shoe_size }}</p>
+                <span class="detail-label">Pointure</span>
+                <p class="detail-value">{{ $selectedChild->shoe_size }}</p>
             </div>
         @endif
     </div>

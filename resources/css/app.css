@@ -172,4 +172,151 @@ select:focus[data-flux-control] {
     .table-cell-muted {
         @apply px-6 py-4 text-gray-600 dark:text-gray-300;
     }
+
+    /* Footer/hint card */
+    .card-footer {
+        @apply bg-white dark:bg-zinc-800 rounded-xl shadow-lg px-6 py-4 text-sm text-gray-600 dark:text-gray-400 text-center;
+    }
+
+    /* Inline hyperlink */
+    .link {
+        @apply text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300;
+    }
+
+    /* Muted / secondary text */
+    .text-muted {
+        @apply text-gray-500 dark:text-gray-400;
+    }
+
+    /* Detail field label (e.g. "Prénom :") */
+    .detail-label {
+        @apply text-sm text-gray-500 dark:text-gray-400;
+    }
+
+    /* Detail field value */
+    .detail-value {
+        @apply font-medium text-gray-900 dark:text-white;
+    }
+
+    /* Generic badge base */
+    .badge {
+        @apply px-2 py-1 text-xs font-semibold rounded-full;
+    }
+
+    .badge--pending {
+        @apply px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300;
+    }
+
+    .badge--validated {
+        @apply px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300;
+    }
+
+    .badge--rejected {
+        @apply px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300;
+    }
+
+    .badge--printed {
+        @apply px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300;
+    }
+
+    .badge--received {
+        @apply px-2 py-1 text-xs font-semibold rounded-full bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300;
+    }
+
+    .badge--given {
+        @apply px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300;
+    }
+
+    .badge--info {
+        @apply px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300;
+    }
+
+    .badge--neutral {
+        @apply px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-zinc-700 dark:text-gray-200;
+    }
+
+    .badge--warning {
+        @apply px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300;
+    }
+
+    /* Danger button (delete / reject) */
+    .btn-danger {
+        @apply bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200;
+    }
+
+    /* Warning button (ask correction) */
+    .btn-warning {
+        @apply bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200;
+    }
+
+    /* Blue / info button */
+    .btn-blue {
+        @apply bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200;
+    }
+
+    /* Neutral gray button */
+    .btn-gray {
+        @apply bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200;
+    }
+
+    /* Empty state cell / block */
+    .table-empty {
+        @apply px-6 py-4 text-center text-gray-500 dark:text-gray-400;
+    }
+
+    /* Modal overlay backdrop */
+    .modal-backdrop {
+        @apply fixed inset-0 bg-black/50;
+    }
+
+    /* Modal panel (white box) */
+    .modal-panel {
+        @apply relative bg-white dark:bg-zinc-800 rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto z-10;
+    }
+
+    /* Modal header row */
+    .modal-header {
+        @apply flex items-center justify-between p-4 border-b border-gray-200 dark:border-zinc-700;
+    }
+
+    /* Modal footer row */
+    .modal-footer {
+        @apply p-4 border-t border-gray-200 dark:border-zinc-700;
+    }
+
+    /* Section sub-label (uppercase tracking) */
+    .sub-label {
+        @apply text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1;
+    }
+
+    /* Stat label (above value) */
+    .label-title {
+        @apply text-sm text-gray-500 dark:text-gray-400;
+    }
+
+    /* Stat value (big number, neutral) */
+    .label-value {
+        @apply text-3xl font-bold text-gray-900 dark:text-white;
+    }
+
+    /* Stat value color variants */
+    .label-value--warning {
+        @apply text-3xl font-bold text-orange-600;
+    }
+
+    .label-value--info {
+        @apply text-2xl font-bold text-blue-600;
+    }
+
+    .label-value--purple {
+        @apply text-2xl font-bold text-purple-600;
+    }
+
+    .label-value--yellow {
+        @apply text-2xl font-bold text-yellow-600;
+    }
+
+    .label-value--success {
+        @apply text-2xl font-bold text-green-600;
+    }
 }

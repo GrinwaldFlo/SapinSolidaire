@@ -7,7 +7,7 @@
         </div>
     @else
         {{-- Search input --}}
-        <div class="card !p-4">
+        <div class="card-sm">
             <label class="field-label">Nom de famille</label>
             <div class="flex items-center gap-3">
                 <input
@@ -19,7 +19,7 @@
                     class="w-full md:w-64 field-input"
                 />
                 @if($searchName !== '')
-                    <button wire:click="clearFilter" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 shrink-0">
+                    <button wire:click="clearFilter" class="btn-secondary text-sm shrink-0">
                         Effacer
                     </button>
                 @endif
@@ -30,16 +30,16 @@
         @if($searchName !== '')
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {{-- Family list --}}
-                <div class="card !p-0">
+                <div class="table-container">
                     <div class="p-4 border-b border-gray-200 dark:border-zinc-700">
                         <h2 class="section-title">
                             Familles
-                            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">— {{ count($families) }} résultat(s)</span>
+                            <span class="text-sm font-normal text-muted">— {{ count($families) }} résultat(s)</span>
                         </h2>
                     </div>
 
                     @if(count($families) === 0)
-                        <div class="p-8 text-center text-gray-500 dark:text-gray-400">
+                        <div class="p-8 text-center text-muted">
                             Aucune famille trouvée avec des cadeaux à remettre.
                         </div>
                     @else
@@ -47,8 +47,8 @@
                             @foreach($families as $family)
                                 <li wire:click="selectFamily('{{ $family->id }}')" class="p-4 hover:bg-gray-50 dark:hover:bg-zinc-700 cursor-pointer {{ $selectedFamilyId === $family->id ? 'bg-blue-50 dark:bg-blue-900/20' : '' }}">
                                     <div class="flex justify-between items-center">
-                                        <span class="font-medium text-gray-900 dark:text-white">{{ $family->last_name }}</span>
-                                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $family->first_name }}</span>
+                                        <span class="detail-value">{{ $family->last_name }}</span>
+                                        <span class="text-sm text-muted">{{ $family->first_name }}</span>
                                     </div>
                                 </li>
                             @endforeach
@@ -57,7 +57,7 @@
                 </div>
 
                 {{-- Desktop detail panel --}}
-                <div class="hidden lg:block card !p-0">
+                <div class="hidden lg:block table-container">
                     <div class="p-4 border-b border-gray-200 dark:border-zinc-700">
                         <h2 class="section-title">Détails de la famille</h2>
                     </div>
@@ -65,8 +65,8 @@
                     @if($selectedFamily && $selectedChildren->count() > 0)
                         <div class="p-6 space-y-4">
                             <div class="text-center mb-4">
-                                <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $selectedFamily->last_name }}</div>
-                                <div class="text-sm text-gray-500 dark:text-gray-400">{{ $selectedChildren->count() }} enfant(s) à remettre</div>
+                                <div class="label-value">{{ $selectedFamily->last_name }}</div>
+                                <div class="label-title">{{ $selectedChildren->count() }} enfant(s) à remettre</div>
                             </div>
 
                             <div class="space-y-3">
@@ -75,10 +75,10 @@
                                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 w-full">
                                             <div class="space-y-1 min-w-0">
                                                 <div class="flex items-center gap-2 flex-wrap">
-                                                    <span class="font-semibold text-gray-900 dark:text-white">{{ $child->first_name }}</span>
-                                                    <span class="text-xs font-mono text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-zinc-700 px-2 py-0.5 rounded">{{ $child->code }}</span>
+                                                    <span class="detail-value">{{ $child->first_name }}</span>
+                                                    <span class="text-xs font-mono text-muted bg-gray-100 dark:bg-zinc-700 px-2 py-0.5 rounded">{{ $child->code }}</span>
                                                 </div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">
+                                                <div class="text-sm text-muted">
                                                     Né(e) en {{ $child->birth_year }} — {{ $child->gift }}
                                                 </div>
                                             </div>
@@ -99,11 +99,11 @@
                             @endif
                         </div>
                     @elseif($selectedFamily)
-                        <div class="p-8 text-center text-gray-500 dark:text-gray-400">
+                        <div class="p-8 text-center text-muted">
                             Aucun cadeau à remettre pour cette famille.
                         </div>
                     @else
-                        <div class="p-8 text-center text-gray-500 dark:text-gray-400">
+                        <div class="p-8 text-center text-muted">
                             Sélectionnez une famille dans la liste pour voir les détails.
                         </div>
                     @endif
@@ -127,10 +127,10 @@
                                     <div class="slot-pill">
                                         <div class="space-y-2">
                                             <div class="flex items-center gap-2 flex-wrap">
-                                                <span class="font-semibold text-gray-900 dark:text-white">{{ $child->first_name }}</span>
-                                                <span class="text-xs font-mono text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-zinc-700 px-2 py-0.5 rounded">{{ $child->code }}</span>
+                                                <span class="detail-value">{{ $child->first_name }}</span>
+                                                <span class="text-xs font-mono text-muted bg-gray-100 dark:bg-zinc-700 px-2 py-0.5 rounded">{{ $child->code }}</span>
                                             </div>
-                                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                            <div class="text-sm text-muted">
                                                 Né(e) en {{ $child->birth_year }} — {{ $child->gift }}
                                             </div>
                                             <button wire:click="markAsGiven('{{ $child->id }}')" class="w-full btn-confirm text-sm py-1 px-3 mt-1">
@@ -148,7 +148,7 @@
                                     </div>
                                 @endif
                             @else
-                                <div class="p-4 text-center text-gray-500 dark:text-gray-400">
+                                <div class="p-4 text-center text-muted">
                                     Aucun cadeau à remettre pour cette famille.
                                 </div>
                             @endif
@@ -157,7 +157,7 @@
                 </div>
             @endif
         @else
-        <div class="card !p-8 text-center text-gray-500 dark:text-gray-400">
+        <div class="card-sm text-center text-muted">
             Entrez un nom de famille pour rechercher les cadeaux à remettre.
         </div>
         @endif

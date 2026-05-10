@@ -13,51 +13,51 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="card !p-6">
-            <div class="text-sm text-gray-500 dark:text-gray-400">Familles</div>
-            <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ $totalFamilies }}</div>
+        <div class="stat-card">
+            <div class="label-title">Familles</div>
+            <div class="label-value">{{ $totalFamilies }}</div>
         </div>
 
-        <div class="card !p-6">
-            <div class="text-sm text-gray-500 dark:text-gray-400">Enfants</div>
-            <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ $totalChildren }}</div>
+        <div class="stat-card">
+            <div class="label-title">Enfants</div>
+            <div class="label-value">{{ $totalChildren }}</div>
         </div>
 
-        <div class="card !p-6">
-            <div class="text-sm text-gray-500 dark:text-gray-400">Familles en attente</div>
-            <div class="text-3xl font-bold text-orange-600">{{ $pendingFamilies }}</div>
+        <div class="stat-card">
+            <div class="label-title">Familles en attente</div>
+            <div class="label-value--warning">{{ $pendingFamilies }}</div>
         </div>
 
-        <div class="card !p-6">
-            <div class="text-sm text-gray-500 dark:text-gray-400">Enfants en attente</div>
-            <div class="text-3xl font-bold text-orange-600">{{ $pendingChildren }}</div>
+        <div class="stat-card">
+            <div class="label-title">Enfants en attente</div>
+            <div class="label-value--warning">{{ $pendingChildren }}</div>
         </div>
     </div>
 
-    <div class="card !p-6">
+    <div class="stat-card">
         <h2 class="section-title">Statut des cadeaux</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
             <div class="text-center">
-                <div class="text-2xl font-bold text-blue-600">{{ $validatedChildren }}</div>
-                <div class="text-sm text-gray-500 dark:text-gray-400">Validés</div>
+                <div class="label-value--info">{{ $validatedChildren }}</div>
+                <div class="label-title">Validés</div>
             </div>
             <div class="text-center">
-                <div class="text-2xl font-bold text-purple-600">{{ $printedChildren }}</div>
-                <div class="text-sm text-gray-500 dark:text-gray-400">Imprimés</div>
+                <div class="label-value--purple">{{ $printedChildren }}</div>
+                <div class="label-title">Imprimés</div>
             </div>
             <div class="text-center">
-                <div class="text-2xl font-bold text-yellow-600">{{ $receivedChildren }}</div>
-                <div class="text-sm text-gray-500 dark:text-gray-400">Reçus</div>
+                <div class="label-value--yellow">{{ $receivedChildren }}</div>
+                <div class="label-title">Reçus</div>
             </div>
             <div class="text-center">
-                <div class="text-2xl font-bold text-green-600">{{ $givenChildren }}</div>
-                <div class="text-sm text-gray-500 dark:text-gray-400">Donnés</div>
+                <div class="label-value--success">{{ $givenChildren }}</div>
+                <div class="label-title">Donnés</div>
             </div>
         </div>
     </div>
     @endif
-    <div class="card !p-4 text-sm text-gray-600 dark:text-gray-400 text-center">
+    <div class="card-footer">
         Un bug à signaler ou une fonctionnalité à proposer ?
-        <a href="https://github.com/GrinwaldFlo/SapinSolidaire/issues" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300">Ouvrir un ticket sur GitHub</a>
+        <a href="https://github.com/GrinwaldFlo/SapinSolidaire/issues" target="_blank" rel="noopener noreferrer" class="link">Ouvrir un ticket sur GitHub</a>
     </div>
 </div>

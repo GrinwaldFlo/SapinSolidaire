@@ -1,352 +1,277 @@
-# SapinSolidaire - Project Context for Copilot
+﻿# SapinSolidaire - Project Context for Copilot
 
 ## Project Overview
 
-SapinSolidaire is a Laravel 12 Livewire application for managing Christmas gift donations to families in need. It's a starter kit from Laravel's official Livewire template. The application allows families to request help, validators to verify eligibility, organizers to manage the overall process, and reception staff to track gift distribution.
+SapinSolidaire is a Laravel 12 Livewire application for managing Christmas gift donations to families in need. The application serves families requesting help, validators verifying eligibility, organizers managing the process, and reception staff tracking gift distribution.
 
 ## Tech Stack
 
-- **PHP 8.2+**
-- **Laravel 12** - Framework
-- **Livewire 4** - Full-stack framework (no traditional Blade components)
-- **Flux UI** - Laravel's modern UI component library
-- **Vite** - Asset bundling
-- **PostgreSQL/SQLite** - Database (UUIDs primary keys throughout)
-- **Pest PHP** - Testing framework
-- **Laravel Pint** - Code styling
+- **PHP 8.2+** / **Laravel 12**
+- **Livewire 4** - full-stack UI (class-based components only)
+- **Flux UI** - component library (`<flux.*>` tags)
+- **Tailwind CSS v4** - utility layer (via `app.css`)
+- **Vite** - asset bundling
+- **PostgreSQL/SQLite** - UUIDs as primary keys throughout
+- **Pest PHP** - testing framework
+- **Laravel Pint** - PSR-12 code styling
 - **barryvdh/laravel-dompdf** - PDF generation
-- **giggsey/libphonenumber-for-php** - Phone number validation
-- **Laravel Fortify** - Authentication + 2FA support
+- **giggsey/libphonenumber-for-php** - phone validation
+- **Laravel Fortify** - authentication + 2FA
 
-## Architecture Patterns
+## Directory Structure
 
-### Directory Structure
 ```
 app/
-  Actions/          - Reusable action classes (e.g., Logout)
-  Concerns/         - Reusable traits (e.g., WithSearch)
-  Console/          - Artisan commands
-  Http/
-    Controllers/    - Minimal controllers (only Controller base)
-    Middleware/     - Custom middleware (CheckRole, CheckAnyRole, SetLocale)
-  Livewire/
-    Admin/          - Admin panel components
-    Family/         - Public-facing family components
-  Mail/             - Mailable classes
-  Models/           - Eloquent models (all use UUIDs)
-  Services/         - Business logic services
-bootstrap/
-  app.php           - Application bootstrap
-  providers.php     - Service provider registration
-config/             - Configuration files
-database/
-  migrations/       - Database migrations (all use UUID primary keys)
-  factories/        - Model factories for testing
-  seeders/          - Database seeders
-resources/
-  views/
-    livewire/       - Livewire component Blade templates
-    components/     - Blade components
-    emails/         - Email templates
-    layouts/        - Main layout files
-    pdf/            - PDF template layouts
-    partials/       - Reusable partial views
+  Actions/        - Reusable action classes
+  Concerns/       - Shared traits (e.g. WithSearch)
+  Http/Middleware/ - CheckRole, CheckAnyRole, SetLocale
+  Livewire/Admin/ - Admin panel Livewire components
+  Livewire/Family/- Public-facing Livewire components
+  Mail/           - Mailable classes
+  Models/         - Eloquent models (all use HasUuids)
+  Services/       - Business logic services
+resources/views/
+  livewire/       - Blade views for Livewire components
+  components/     - Reusable Blade components
+  emails/         - Email templates
+  layouts/        - app / auth / family layouts
+  pdf/            - DomPDF templates
+  partials/       - Shared partials
 routes/
-  web.php           - Web routes
-  settings.php      - Settings-specific routes
-  console.php       - Artisan commands
-storage/views/      - Compiled Blade templates
-tests/              - Pest PHP test suite
+  web.php         - All routes (admin under /admin/* prefix)
+tests/            - Pest PHP test suite
 ```
 
-### Key Conventions
+## Key Conventions
 
-1. **UUIDs Everywhere**: All models use `HasUuids` trait. Primary keys and foreign keys are `uuid`. Never assume `id` columns exist.
-
-2. **Role-Based Access Control**: Custom role system (not Spatie Permission). Roles are constants on the `Role` model:
-   - `Role::ADMIN` ('admin')
-   - `Role::VALIDATOR` ('validator')
-   - `Role::FAMILY_VALIDATOR` ('validateFamily')
-   - `Role::ORGANIZER` ('organizer')
-   - `Role::RECEPTION` ('reception')
-   - `Role::VISITOR` ('visitor')
-
-3. **Middleware**: Use `CheckAnyRole` and `CheckRole` middleware for route protection:
-   ```php
-   ->middleware('any.role:'.Role::FAMILY_VALIDATOR.','.Role::VALIDATOR.','.Role::ADMIN)
-   ->middleware('role:'.Role::ADMIN)
-   ```
-
-4. **Livewire Components**: All UI is built with Livewire 4 class-based components. Each component has a corresponding Blade view in `resources/views/livewire/`.
-
-5. **Status Constants**: Models define status constants as public static properties:
-   ```php
-   public const STATUS_PENDING = 'pending';
-   public const STATUS_VALIDATED = 'validated';
-   ```
-
-6. **Season-based Data**: Most business logic revolves around `Seasons`. Always consider season context for queries.
-
-7. **Bilingual Support**: The app supports French (fr) and English (en). All user-facing text must be translatable via `__()` helper. French is the default/primary language.
-
-8. **Admin Panel**: All admin routes are under `/admin/*` prefix with role-based middleware.
+1. **UUIDs everywhere** - `HasUuids` on all models; never assume integer IDs.
+2. **Role constants** - use `Role::ADMIN`, `Role::VALIDATOR`, etc., never raw strings.
+3. **Middleware** - `role:` and `any.role:` for route protection.
+4. **Livewire 4** - class-based components; one Blade view per component under `resources/views/livewire/`.
+5. **Status constants** - `public const STATUS_PENDING = 'pending'` pattern on models.
+6. **Season-scoped queries** - always filter by active season.
+7. **French-first i18n** - all user-facing strings via `__()`. French in `lang/fr/`, English in `lang/en/`.
+8. **Named routes** - always use `route('name')` and `->name()`.
+9. **Thin components** - push business logic to `Services/`.
 
 ## Model Reference
 
-### Core Models
-- **User** - Auth user with roles (many-to-many), 2FA support, UUIDs
-- **Role** - Role definitions with constants, many-to-many with User
-- **Family** - Household/family unit
-- **Child** - Child associated with a family and season (gift recipient)
-- **GiftRequest** - Family's request for a specific season (has status workflow)
-- **Season** - A donation period (e.g., Christmas 2025)
-- **EmailToken** - Token-based email system
-- **Setting** - Application settings (key-value store)
-- **PickupSlot** - Gift pickup time slots
-- **GeneratedPdf** - Generated PDF document tracking
+| Model | Purpose |
+|---|---|
+| `User` | Auth user, many-to-many roles, 2FA |
+| `Role` | Role definitions with constants |
+| `Family` | Household unit |
+| `Child` | Gift recipient, linked to family + season |
+| `GiftRequest` | Family request for a season (status workflow) |
+| `Season` | Donation period (e.g. Christmas 2025) |
+| `EmailToken` | Token-based auth for families |
+| `Setting` | Key-value app settings |
+| `PickupSlot` | Gift pickup time slots |
+| `GeneratedPdf` | PDF generation tracking |
 
-### GiftRequest Status Workflow
-`pending` → `validated` → `rejected_final`
-                        ↓
-                    `rejected` (can be re-submitted)
+**GiftRequest workflow:** `pending` -> `validated` -> `rejected_final` / `rejected`
 
-### Child Status Workflow
-`pending` → `validated` → `printed` → `received` → `given`
+**Child workflow:** `pending` -> `validated` -> `printed` -> `received` -> `given`
 
 ## Database Patterns
 
-- All migrations use `uuid` primary keys
-- Foreign keys use `foreignUuid()->constrained()->cascadeOnDelete()`
-- Unique constraints for family/season combinations
-- Index on status fields for performance
-- Soft deletes not used by default
-- Timestamps enabled on all tables
+- UUID primary keys on all tables
+- `foreignUuid()->constrained()->cascadeOnDelete()`
+- No soft deletes by default; timestamps always enabled
 
-## Testing Conventions
+## Testing
 
-- Use **Pest PHP** for all tests
-- Tests go in `tests/` directory
-- Feature tests for HTTP/Livewire interactions
-- Use `pestphp/pest-plugin-laravel` helpers
-- Model factories in `database/factories/`
-- Run tests: `composer test` or `composer test:lint`
-- Code styling: `composer lint` (runs Pint)
+- **Pest PHP** - `composer test` / `composer test:lint`
+- **Pint** - `composer lint`
+- Feature tests for HTTP and Livewire interactions
+- Factories in `database/factories/`
 
-## Routing Patterns
+## Routing Pattern
 
 ```php
-// Public routes
-Route::get('/', Home::class)->name('home');
-Route::get('/cadeau/{token}', GiftRequestForm::class)->name('gift.form');
-
-// Admin routes with role middleware
 Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('/dashboard', Dashboard::class)
         ->middleware('any.role:'.Role::ADMIN.','.Role::VALIDATOR)
         ->name('admin.dashboard');
-    
-    // Admin-only routes
+
     Route::middleware('role:'.Role::ADMIN)->group(function () {
         Route::get('/settings', SettingsManagement::class)->name('admin.settings');
     });
 });
 ```
 
-## Livewire Patterns
+---
 
-### Component Structure
-```php
-<?php
+## CSS Styling - Complete Reference
 
-namespace App\Livewire\Admin;
+> **Rule**: Never write raw Tailwind color, size, or spacing utilities directly in Blade templates.
+> Always use the shared classes below. If no class fits, add one to `resources/css/app.css` under `@layer components` and document it here.
 
-use Livewire\Component;
+The live visual reference for all classes is: `/admin/css-showcase`
 
-class Dashboard extends Component
-{
-    // Public properties for wire:model binding
-    public ?Season $activeSeason = null;
-    public int $totalFamilies = 0;
+### Cards
 
-    // Mount is called on initial load
-    public function mount(): void
-    {
-        $this->activeSeason = Season::getActive();
-    }
+| Class | Usage |
+|---|---|
+| `.card` | Main content block - large padding, shadow |
+| `.card-sm` | Compact content block - reduced padding |
+| `.stat-card` | Dashboard stat tile |
+| `.card-footer` | Centered footer/hint below a card |
 
-    // Actions triggered by user interactions
-    public function save(): void
-    {
-        // Business logic
-    }
+### Typography
 
-    // Render method returns view path
-    public function render()
-    {
-        return view('livewire.admin.dashboard');
-    }
-}
-```
+| Class | Usage |
+|---|---|
+| `.section-title` | Section heading with bottom border |
+| `.sub-label` | Uppercase spaced annotation label |
+| `.field-label` | Form field label |
+| `.field-error` | Validation error message below a field |
+| `.text-muted` | Secondary / descriptive text |
+| `.detail-label` | Key in a key-value pair (e.g. "Prenom :") |
+| `.detail-value` | Value in a key-value pair |
+| `.link` | Inline hyperlink |
 
-### View Patterns
-- Views in `resources/views/livewire/{namespace}/{ComponentName}.blade.php`
-- Use Flux UI components for consistent styling
-- Use `wire:loading`, `wire:target` for loading states
-- Use `wire:confirm` for destructive actions
+### Stat Labels (dashboard numbers)
 
-## Email System
+| Class | Usage |
+|---|---|
+| `.label-title` | Small caption above a stat number |
+| `.label-value` | Large neutral stat number |
+| `.label-value--warning` | Orange stat number |
+| `.label-value--success` | Green stat number |
+| `.label-value--info` | Blue stat number |
+| `.label-value--yellow` | Yellow stat number |
+| `.label-value--purple` | Purple stat number |
 
-- Mailable classes in `app/Mail/`
-- Emails queued via Laravel queue system
-- Email tokens used for authentication-free access (family gift requests)
-- Template views in `resources/views/emails/`
+### Form Fields
 
-## PDF Generation
+| Class | Usage |
+|---|---|
+| `.field-input` | Text input, select, textarea - normal state |
+| `.field-input-error` | Same but with red border for validation errors |
 
-- Uses `barryvdh/laravel-dompdf`
-- PDF templates in `resources/views/pdf/`
-- Generated PDFs stored in `Storage::disk('local')` with tracking in `generated_pdfs` table
-- Admin route for downloading: `/admin/cartes/telecharg/{generatedPdf}`
+### Buttons
 
-## Service Configuration
+| Class | Color | Usage |
+|---|---|---|
+| `.btn-primary` | Green (full width) | Primary submit / save action |
+| `.btn-confirm` | Green (compact) | Inline confirm / accept |
+| `.btn-secondary` | Outline gray | Cancel / back |
+| `.btn-blue` | Blue | Info / generate / send actions |
+| `.btn-warning` | Yellow | Ask for correction |
+| `.btn-danger` | Red | Delete / reject |
+| `.btn-gray` | Gray | Neutral secondary action |
 
-### Queue
-- Email and heavy operations use Laravel queue
-- Run with: `php artisan queue:work`
+> `.btn-primary:disabled` applies `opacity-50 cursor-not-allowed` automatically.
 
-### Storage
-- Files stored via Laravel filesystem
-- Local disk for proofs, documents
-- Access via `Storage::disk('local')`
+### Badges (status pills)
 
-## Coding Standards
+| Class | Color | Status |
+|---|---|---|
+| `.badge--pending` | Yellow | A valider |
+| `.badge--validated` | Green | Valide |
+| `.badge--rejected` | Red | Rejete |
+| `.badge--printed` | Purple | Imprime |
+| `.badge--received` | Cyan | Recu |
+| `.badge--given` | Green | Remis |
+| `.badge--info` | Blue | Info / role |
+| `.badge--neutral` | Gray | Neutral state |
+| `.badge--warning` | Orange | Warning state |
 
-- Follow Laravel Pint PSR-12 style (see `pint.json`)
-- Type hint everything (return types + parameter types)
-- Use PHPDoc blocks for models and components
-- Keep Livewire components thin - push complex logic to Services
-- Use constants for status values and magic strings
-- French translations in `lang/fr/`, English in `lang/en/`
+### Notices / Banners
 
-## Important Notes
+| Class | Usage |
+|---|---|
+| `.notice-info` | General information banner |
+| `.notice-success` | Success / confirmation banner |
+| `.notice-warning` | Warning / caution banner |
+| `.notice-error` | Error / problem banner |
 
-1. **Never assume auto-increment IDs** - All IDs are UUIDs
-2. **Always check active season** when filtering data
-3. **Use role constants** (`Role::ADMIN`) not raw strings
-4. **All routes have names** - Always use `route()` and `->name()` helpers
-5. **Season-based queries** should always consider which season
-6. **French-first** - Default language is French, plan for i18n
-7. **Livewire 4** - Uses class-based components, not the old Blade component approach
-8. **Two-factor authentication** is enabled via Fortify
-9. **Family validation workflow** involves multiple roles and status transitions
+### Tables
 
-## CSS Styling Guidelines
+| Class | Usage |
+|---|---|
+| `.table-container` | Wraps the full `<table>` - white card, rounded, shadow |
+| `.table-header` | `<th>` - uppercase, muted, small |
+| `.table-divider` | `<tbody>` - adds row dividers |
+| `.table-cell` | `<td>` - primary text color |
+| `.table-cell-muted` | `<td>` - muted text color |
+| `.table-empty` | `<td colspan>` - centered empty state message |
 
-### CSS File Location
-- **Main CSS file**: `resources/css/app.css`
-- All custom styles are defined in the `@layer components` section of this file
-- Built via Vite and imported in your Blade layouts via `@vite(['resources/css/app.css', 'resources/js/app.js'])`
+### Modals
 
-### Reusable Component Classes
-Always use these predefined classes instead of writing inline Tailwind utilities. They unify the look of the application.
+| Class | Usage |
+|---|---|
+| `.modal-backdrop` | Fixed full-screen dark overlay |
+| `.modal-panel` | White/dark box, rounded, scrollable |
+| `.modal-header` | Top bar with title and close button |
+| `.modal-footer` | Bottom bar with action buttons |
 
-#### Cards
-| Class | Usage | Style |
-|-------|-------|-------|
-| `.card` | Container/wrapper for any content block | `bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-8` |
+### Layout Helpers
 
-#### Typography
-| Class | Usage | Style |
-|-------|-------|-------|
-| `.section-title` | Section headings with bottom border | `text-lg font-semibold text-gray-800 dark:text-white border-b border-gray-200 dark:border-zinc-600 pb-2` |
-
-#### Form Elements
-| Class | Usage | Style |
-|-------|-------|-------|
-| `.field-label` | Label for any form field | `block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1` |
-| `.field-input` | Text input, select, textarea (normal state) | `w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white` |
-| `.field-input-error` | Input with validation error state | Same as `.field-input` but with `border-red-500` |
-| `.field-error` | Error message text below field | `mt-1 text-sm text-red-600 dark:text-red-400` |
-
-#### Buttons
-| Class | Usage | Style |
-|-------|-------|-------|
-| `.btn-primary` | Main action button (full width) | `bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg` |
-| `.btn-primary:disabled` | Disabled state for primary button | `opacity-50 cursor-not-allowed` |
-| `.btn-secondary` | Secondary/outline button | `border border-gray-300 dark:border-zinc-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-700` |
-| `.btn-confirm` | Small inline confirm/accept button | `bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg` |
-
-#### Badges & Banners
-| Class | Usage | Style |
-|-------|-------|-------|
-| `.notice-success` | Success/accepted condition display | `rounded-lg px-4 py-3 bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-300` |
-| `.notice-info` | Info/notice banner | `rounded-lg px-4 py-3 bg-blue-50 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300` |
-| `.notice-error` | Error/issue banner | `rounded-lg px-4 py-3 bg-red-50 text-red-800 dark:bg-red-900/30 dark:text-red-300` |
-| `.notice-warning` | Warning banner | `rounded-lg px-4 py-3 bg-yellow-50 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300` |
-
-#### Layout Helpers
-| Class | Usage | Style |
-|-------|-------|-------|
-| `.agenda-item` | Timeline/list item with icon | `flex items-start gap-3` |
-| `.slot-pill` | Pickup slot badge/pill | `flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-zinc-700 rounded-lg px-3 py-2` |
+| Class | Usage |
+|---|---|
+| `.agenda-item` | Timeline row with icon + text |
+| `.slot-pill` | Pickup time slot badge |
 
 ### Styling Rules
 
-1. **Always reuse classes**: If a class already exists (e.g., `.card`), use it instead of re-typing the Tailwind utilities.
+1. **No raw utilities for color/size/spacing in Blade** - always use a shared class.
+2. **Dark mode included** - all shared classes have `dark:` variants; do not add them manually.
+3. **Adding a new class**:
+   - Add to `@layer components` in `resources/css/app.css`
+   - Use `kebab-case` naming; group with similar classes
+   - Include `dark:` variant if any color is set
+   - Add a row to the relevant table in this file
+4. **Flux UI** - use `<flux.*>` components for auth/settings pages. Use custom classes for application pages.
 
-2. **Dark mode**: All classes include `dark:` variants. Always test dark mode compatibility.
+### Blade Example
 
-3. **Adding new classes**: When a new reusable style is needed:
-   - Add it to the `@layer components` section in `resources/css/app.css`
-   - Follow the naming convention: `.element-name` (kebab-case with dot prefix)
-   - Group by type: cards, typography, form, buttons, badges, layout
-   - Include `dark:` variant if colors are affected
-   - Document the class in this file
+```blade
+<div class="card">
+    <h2 class="section-title">Informations famille</h2>
 
-4. **Color palette**: 
-   - Primary/accent color: Green (`green-600` / `green-700`)
-   - Backgrounds: White (light) / Zinc-800 (dark)
-   - Borders: Gray-300 (light) / Zinc-600 (dark)
-   - Text: Gray-700/800 (light) / White (dark)
-   - Errors: Red-500/600
-   - Info: Blue-50/200 / Blue-900/20
+    <div class="space-y-1 mb-4">
+        <span class="detail-label">Nom :</span>
+        <span class="detail-value">Dupont Marie</span>
+    </div>
 
-5. **Flux UI components**: Use Flux UI components (`<flux.*>`) for standard UI elements (inputs, buttons, modals, etc.). Only use custom CSS classes for application-specific styling.
+    <span class="badge--pending">A valider</span>
 
-6. **Example usage in Blade**:
-   ```blade
-   <div class="card">
-       <h2 class="section-title">Section Title</h2>
-       
-       <label class="field-label">{{ __('First Name') }}</label>
-       <input class="field-input" wire:model="firstName" />
-       
-       @error('firstName') <span class="field-error">{{ $message }}</span> @enderror
-       
-       <button class="btn-primary mt-4">
-           <span>Save</span>
-       </button>
-   </div>
-   ```
+    <div class="notice-warning mt-4">
+        Veuillez verifier le justificatif.
+    </div>
+
+    <label class="field-label">Commentaire</label>
+    <textarea class="field-input" wire:model="comment"></textarea>
+    @error('comment') <p class="field-error">{{ $message }}</p> @enderror
+
+    <div class="flex gap-2 mt-4">
+        <button class="btn-confirm" wire:click="validate">Valider</button>
+        <button class="btn-warning" wire:click="askCorrection">Demander correction</button>
+        <button class="btn-danger" wire:click="reject">Rejeter</button>
+        <button class="btn-secondary" wire:click="skip">Passer</button>
+    </div>
+</div>
+```
+
+---
 
 ## Common Tasks
 
 ### Adding a new admin page
-1. Create Livewire component in `app/Livewire/Admin/`
-2. Create view in `resources/views/livewire/admin/`
-3. Add route in `routes/web.php` with appropriate role middleware
-4. Add navigation link in sidebar layout
+1. `php artisan make:livewire Admin/MyPage`
+2. Add route in `routes/web.php` under `/admin` with role middleware
+3. Create Blade view in `resources/views/livewire/admin/`
+4. Add navigation link in `resources/views/layouts/app/sidebar.blade.php`
 
 ### Adding a new model
-1. Create model with `php artisan make:model Name`
-2. Use `HasUuids` trait
-3. Define status constants as public const
-4. Create migration with UUID primary key
-5. Create factory for testing
-6. Add to appropriate seed if needed
+1. `php artisan make:model Name -mf`
+2. Add `HasUuids` trait; use `$table->uuid('id')->primary()`
+3. Define status constants as `public const STATUS_* = '...'`
+4. Use `foreignUuid()->constrained()->cascadeOnDelete()` for relations
 
-### Adding a new role
-1. Add constant to `Role` model
-2. Update `CheckRole` middleware if needed
-3. Add middleware to routes
-4. Add user assignment UI in user management
+### Adding a new CSS class
+1. Open `resources/css/app.css` - add inside `@layer components`
+2. Use `@apply` with Tailwind utilities; include `dark:` variants
+3. Document the class in the relevant table in this file

@@ -100,7 +100,7 @@
                 <hr class="my-4 border-gray-300 dark:border-zinc-600">
                 <div class="flex items-center justify-between">
                     <h3 class="section-title">Plages horaires de récupération</h3>
-                    <button type="button" wire:click="addPickupEntry" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-sm">
+                    <button type="button" wire:click="addPickupEntry" class="btn-blue !py-1 !px-3 text-sm">
                         + Ajouter une plage
                     </button>
                 </div>
@@ -118,7 +118,7 @@
                             @error("pickupEntries.{$index}.end_datetime") <p class="field-error">{{ $message }}</p> @enderror
                         </div>
                         <div>
-                            <button type="button" wire:click="removePickupEntry({{ $index }})" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm w-full">
+                            <button type="button" wire:click="removePickupEntry({{ $index }})" class="btn-danger !px-3 !py-2 text-sm w-full">
                                 Supprimer
                             </button>
                         </div>
@@ -137,40 +137,40 @@
         </div>
     @endif
 
-    <div class="card !p-0">
+    <div class="table-container">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
             <thead class="bg-gray-50 dark:bg-zinc-700">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Nom</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Période</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Statut</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Actions</th>
+                    <th class="table-header">Nom</th>
+                    <th class="table-header">Période</th>
+                    <th class="table-header">Statut</th>
+                    <th class="table-header text-right">Actions</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
                 @forelse($this->seasons as $season)
                     <tr wire:key="season-{{ $season->id }}">
-                        <td class="px-6 py-4 text-gray-900 dark:text-white">{{ $season->name }}</td>
-                        <td class="px-6 py-4 text-gray-600 dark:text-gray-300">
+                        <td class="table-cell">{{ $season->name }}</td>
+                        <td class="table-cell-muted">
                             {{ $season->start_date->format('d/m/Y') }} - {{ $season->end_date->format('d/m/Y') }}
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="table-cell">
                             @if($season->isActive())
-                                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Active</span>
+                                <span class="badge--validated">Active</span>
                             @elseif($season->isFuture())
-                                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">À venir</span>
+                                <span class="badge--info">À venir</span>
                             @else
-                                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">Terminée</span>
+                                <span class="badge--neutral">Terminée</span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 text-right space-x-2">
-                            <button wire:click="edit('{{ $season->id }}')" class="text-blue-600 hover:text-blue-800">Modifier</button>
-                            <button wire:click="delete('{{ $season->id }}')" wire:confirm="Êtes-vous sûr de vouloir supprimer cette saison ?" class="text-red-600 hover:text-red-800">Supprimer</button>
+                        <td class="table-cell text-right space-x-2">
+                            <button wire:click="edit('{{ $season->id }}')" class="link font-medium">Modifier</button>
+                            <button wire:click="delete('{{ $season->id }}')" wire:confirm="Êtes-vous sûr de vouloir supprimer cette saison ?" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium">Supprimer</button>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Aucune saison</td>
+                        <td colspan="4" class="table-empty">Aucune saison</td>
                     </tr>
                 @endforelse
             </tbody>
