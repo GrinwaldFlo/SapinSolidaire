@@ -239,6 +239,8 @@ class GiftRequestForm extends Component
         $this->cityConfirmed = true;
         $this->showCityConfirmation = false;
         $this->resetErrorBag('city');
+        unset($this->fieldErrors['city']);
+        $this->validateAddress();
     }
 
     public function cancelCityChange(): void

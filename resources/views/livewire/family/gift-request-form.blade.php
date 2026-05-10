@@ -136,6 +136,7 @@
                         <div>
                             <label for="firstName" class="field-label">Prénom *</label>
                             <input type="text" id="firstName" wire:model="firstName" wire:blur="validateFamilyFields"
+                                autocomplete="given-name"
                                 class="{{ isset($fieldErrors['firstName']) && in_array('firstName', $touchedFields) ? 'field-input-error' : 'field-input' }}">
                             @if(isset($fieldErrors['firstName']) && in_array('firstName', $touchedFields))
                                 <p class="field-error">{{ collect($fieldErrors['firstName'])->first() }}</p>
@@ -147,6 +148,7 @@
                         <div>
                             <label for="lastName" class="field-label">Nom *</label>
                             <input type="text" id="lastName" wire:model="lastName" wire:blur="validateFamilyFields"
+                                autocomplete="family-name"
                                 class="{{ isset($fieldErrors['lastName']) && in_array('lastName', $touchedFields) ? 'field-input-error' : 'field-input' }}">
                             @if(isset($fieldErrors['lastName']) && in_array('lastName', $touchedFields))
                                 <p class="field-error">{{ collect($fieldErrors['lastName'])->first() }}</p>
@@ -160,12 +162,14 @@
                         <div class="md:col-span-2">
                             <label for="streetName" class="field-label">Rue *</label>
                             <input type="text" id="streetName" wire:model="streetName" wire:blur="validateAddress"
+                                autocomplete="address-line1"
                                 class="{{ isset($fieldErrors['address']) && in_array('streetName', $touchedFields) ? 'field-input-error' : 'field-input' }}">
                         </div>
 
                         <div>
                             <label for="houseNo" class="field-label">N° *</label>
                             <input type="text" id="houseNo" wire:model="houseNo" wire:blur="validateAddress"
+                                autocomplete="address-line2"
                                 class="{{ isset($fieldErrors['address']) && in_array('houseNo', $touchedFields) ? 'field-input-error' : 'field-input' }}">
                         </div>
                     </div>
@@ -174,6 +178,7 @@
                         <div>
                             <label for="postalCode" class="field-label">Code postal *</label>
                             <input type="text" id="postalCode" wire:model="postalCode" wire:blur="validateAddress"
+                                autocomplete="postal-code"
                                 class="{{ isset($fieldErrors['address']) && in_array('postalCode', $touchedFields) ? 'field-input-error' : 'field-input' }}">
                         </div>
 
@@ -184,8 +189,8 @@
                                     <select
                                         id="city"
                                         wire:model="city"
-                                        wire:blur="validateCity"
-                                        wire:change="requestCityChange"
+                                            wire:blur="validateCity"
+                                            wire:change="requestCityChange"
                                         class="{{ isset($fieldErrors['city']) && in_array('city', $touchedFields) ? 'field-input-error' : 'field-input' }}"
                                     >
                                         <option value="">-- Sélectionnez votre commune --</option>
@@ -201,7 +206,7 @@
                                     <p class="field-error">{{ collect($fieldErrors['city'])->first() }}</p>
                                 @endif
                             @else
-                                <input type="text" id="city" wire:model="city" wire:blur="validateFamilyFields" class="field-input">
+                                <input type="text" id="city" wire:model="city" wire:blur.debounce="validateAddress" autocomplete="address-level2" class="field-input">
                                 @error('city') <p class="field-error">{{ $message }}</p> @enderror
                             @endif
                         </div>
@@ -214,6 +219,7 @@
                     <div>
                         <label for="phone" class="field-label">Téléphone *</label>
                         <input type="tel" id="phone" wire:model="phone" wire:blur="validatePhone" placeholder="079 123 45 67"
+                            autocomplete="tel"
                             class="{{ isset($fieldErrors['phone']) && in_array('phone', $touchedFields) ? 'field-input-error' : 'field-input' }}">
                         @if(isset($fieldErrors['phone']) && in_array('phone', $touchedFields))
                             <p class="field-error">{{ collect($fieldErrors['phone'])->first() }}</p>
