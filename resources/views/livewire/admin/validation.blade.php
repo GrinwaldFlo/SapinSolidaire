@@ -128,7 +128,7 @@
                     Passer au suivant
                 </button>
                 <button wire:click="submitValidation" 
-                        class="{{ $this->has_pending_decisions ? 'bg-gray-400 cursor-not-allowed' : 'btn-confirm' }}"
+                        class="btn-confirm {{ $this->has_pending_decisions ? 'bg-gray-400 opacity-50 cursor-not-allowed' : '' }}"
                         @if($this->has_pending_decisions) disabled @endif>
                     Soumettre la validation
                 </button>
