@@ -48,7 +48,7 @@
             <div class="text-center mb-8">
                 <span class="text-6xl mb-4 block">📋</span>
                 <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Conditions d'éligibilité</h2>
-                <p class="text-gray-600 dark:text-gray-300">
+                <p class="text-muted">
                     Veuillez confirmer que vous remplissez les conditions suivantes.
                 </p>
             </div>
@@ -56,8 +56,8 @@
             <div class="space-y-6">
                 @if(!$consecutiveYearsAccepted)
                     <div class="border border-gray-200 dark:border-zinc-600 rounded-lg p-6">
-                        <h3 class="font-semibold text-gray-800 dark:text-white mb-2">Nombre d'années consécutives</h3>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4">
+                        <h3 class="section-title mb-2">Nombre d'années consécutives</h3>
+                        <p class="text-muted mb-4">
                             Je confirme ne pas avoir demandé de cadeau plus de {{ $maxConsecutiveYears - 1 }} années consécutives.
                         </p>
                         <button wire:click="acceptConsecutiveYears" class="btn-confirm">
@@ -75,9 +75,9 @@
 
                 @if($consecutiveYearsAccepted && !$cityAccepted)
                     <div class="border border-gray-200 dark:border-zinc-600 rounded-lg p-6">
-                        <h3 class="font-semibold text-gray-800 dark:text-white mb-2">Zone géographique</h3>
+                        <h3 class="section-title mb-2">Zone géographique</h3>
                         @if(!empty($allowedCities))
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                            <p class="text-muted mb-4">
                                 Je confirme habiter dans la commune :
                             </p>
                             <select wire:model="selectedCity" class="field-input mb-4">
@@ -88,7 +88,7 @@
                             </select>
                             @error('selectedCity') <p class="field-error mt-1">{{ $message }}</p> @enderror
                         @else
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                            <p class="text-muted mb-4">
                                 <span class="italic">Toutes les communes sont acceptées</span>
                             </p>
                         @endif
@@ -124,8 +124,8 @@
             <form wire:submit="submit" class="space-y-8">
                 {{-- Email display --}}
                 <div class="bg-gray-50 dark:bg-zinc-700 rounded-lg p-4">
-                    <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Adresse e-mail</label>
-                    <p class="text-gray-800 dark:text-white font-medium">{{ $email }}</p>
+                    <label class="detail-label">Adresse e-mail</label>
+                    <p class="detail-value">{{ $email }}</p>
                 </div>
 
                 {{-- Family information --}}
@@ -299,7 +299,7 @@
                                 Demande anonyme (les prénoms des enfants ne seront pas affichés sur les étiquettes des cadeaux)
                             </span>
                         </label>
-                        <p class="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
+                        <p class="mt-1 ml-6 text-xs text-muted">
                             Si coché, les personnes qui achèteront les cadeaux ne verront pas les prénoms des enfants de la famille.
                         </p>
                     </div>
@@ -403,7 +403,7 @@
                                         min="{{ date('Y') - $maxChildAge }}" max="{{ date('Y') }}"
                                         class="{{ (isset($fieldErrors[$birthYearKey]) && in_array("children.{$index}.birth_year", $touchedFields)) || $errors->has($birthYearKey) ? 'field-input-error' : 'field-input' }}"
                                         {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
-                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                    <p class="mt-1 text-xs text-muted">
                                         Année minimale : <strong>{{ date('Y') - $maxChildAge }}</strong> — les enfants doivent avoir au maximum {{ $maxChildAge }} ans au 31.12.{{ date('Y') }}.
                                     </p>
                                     @if(isset($fieldErrors[$birthYearKey]) && in_array("children.{$index}.birth_year", $touchedFields))
@@ -477,13 +477,13 @@
                         <span wire:loading>Enregistrement...</span>
                     </button>
                     @if($submitDisabled)
-                        <p class="mt-2 text-sm text-center text-gray-500 dark:text-gray-400">
+                        <p class="mt-2 text-sm text-center text-muted">
                             Veuillez sélectionner et confirmer votre commune de résidence pour pouvoir envoyer votre demande.
                         </p>
                     @endif
 
                     @if($errors->any())
-                        <div class="mt-4 rounded-lg border border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20 p-4">
+                        <div class="notice-error mt-4">
                             <p class="text-sm font-semibold text-red-700 dark:text-red-300 mb-2">
                                 Veuillez corriger les erreurs suivantes :
                             </p>
@@ -496,7 +496,7 @@
                     @endif
 
                     @if($hasAttemptedSubmit && !empty($fieldErrors))
-                        <div class="mt-4 rounded-lg border border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20 p-4 flex items-start gap-3">
+                        <div class="notice-error mt-4 flex items-start gap-3">
                             <span class="text-red-500 dark:text-red-400 text-lg leading-none mt-0.5">⚠️</span>
                             <p class="text-sm text-red-700 dark:text-red-300">
                                 Le formulaire contient des erreurs. Veuillez les corriger avant de soumettre votre demande.

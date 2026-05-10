@@ -7,7 +7,7 @@
         </div>
     @else
         {{-- Filter input: desktop uses native number field, mobile uses custom keypad --}}
-        <div class="card !p-4">
+        <div class="card-sm">
             <label class="field-label">Numéro de famille</label>
 
             {{-- Desktop: simple numeric input --}}
@@ -21,7 +21,7 @@
                         class="w-64 field-input font-mono [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                 @if($familyNumber !== '')
-                    <button wire:click="clearFilter" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <button wire:click="clearFilter" class="btn-secondary text-sm">
                         Effacer
                     </button>
                 @endif
@@ -35,7 +35,7 @@
                         <span class="animate-pulse text-green-500 ml-0.5">|</span>
                     </div>
                     @if($familyNumber !== '')
-                        <button wire:click="clearFilter" class="px-3 py-3 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 border border-gray-300 dark:border-zinc-600 rounded-lg">
+                        <button wire:click="clearFilter" class="btn-secondary text-sm px-3 py-3">
                             Effacer
                         </button>
                     @endif
@@ -60,16 +60,16 @@
         @if($familyNumber !== '')
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {{-- Children list --}}
-                <div class="card !p-0">
+                <div class="table-container">
                     <div class="p-4 border-b border-gray-200 dark:border-zinc-700">
                         <h2 class="section-title">
                             Famille n°{{ $familyNumber }}
-                            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">— {{ count($children) }} enfant(s)</span>
+                            <span class="text-sm font-normal text-muted">— {{ count($children) }} enfant(s)</span>
                         </h2>
                     </div>
 
                     @if(count($children) === 0)
-                        <div class="p-8 text-center text-gray-500 dark:text-gray-400">
+                        <div class="p-8 text-center text-muted">
                             Aucun cadeau imprimé pour cette famille.
                         </div>
                     @else
@@ -78,10 +78,10 @@
                                 <li wire:click="selectChild('{{ $child->id }}')" class="p-4 hover:bg-gray-50 dark:hover:bg-zinc-700 cursor-pointer {{ $selectedChild?->id === $child->id ? 'bg-blue-50 dark:bg-blue-900/20' : '' }}">
                                     <div class="flex justify-between items-center">
                                         <div>
-                                            <span class="font-medium text-gray-900 dark:text-white">{{ $child->first_name }}</span>
-                                            <span class="ml-2 font-mono text-sm text-gray-500 dark:text-gray-400">{{ $child->code }}</span>
+                                            <span class="detail-value">{{ $child->first_name }}</span>
+                                            <span class="ml-2 font-mono text-sm text-muted">{{ $child->code }}</span>
                                         </div>
-                                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $child->gift }}</span>
+                                        <span class="text-sm text-muted">{{ $child->gift }}</span>
                                     </div>
                                 </li>
                             @endforeach
@@ -90,7 +90,7 @@
                 </div>
 
                 {{-- Desktop detail panel --}}
-                <div class="hidden lg:block card !p-0">
+                <div class="hidden lg:block table-container">
                     <div class="p-4 border-b border-gray-200 dark:border-zinc-700">
                         <h2 class="section-title">Détails du cadeau</h2>
                     </div>
@@ -100,7 +100,7 @@
                             @include('livewire.admin.partials.gift-reception-detail')
                         </div>
                     @else
-                        <div class="p-8 text-center text-gray-500 dark:text-gray-400">
+                        <div class="p-8 text-center text-muted">
                             Sélectionnez un enfant dans la liste pour voir les détails.
                         </div>
                     @endif
@@ -123,7 +123,7 @@
                 </div>
             @endif
         @else
-            <div class="card !p-8 text-center text-gray-500 dark:text-gray-400">
+            <div class="card-sm text-center text-muted">
                 Entrez un numéro de famille pour rechercher les cadeaux.
             </div>
         @endif

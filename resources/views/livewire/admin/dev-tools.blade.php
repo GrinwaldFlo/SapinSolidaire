@@ -19,32 +19,32 @@
 
     {{-- Stats --}}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-4">
-            <div class="text-sm text-gray-500 dark:text-gray-400">Familles</div>
-            <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['totalFamilies'] ?? 0 }}</div>
+        <div class="stat-card">
+            <div class="label-title">Familles</div>
+            <div class="label-value">{{ $stats['totalFamilies'] ?? 0 }}</div>
         </div>
-        <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-4">
-            <div class="text-sm text-gray-500 dark:text-gray-400">Familles en attente</div>
-            <div class="text-2xl font-bold text-yellow-600">{{ $stats['pendingFamilies'] ?? 0 }}</div>
+        <div class="stat-card">
+            <div class="label-title">Familles en attente</div>
+            <div class="label-value--warning">{{ $stats['pendingFamilies'] ?? 0 }}</div>
         </div>
-        <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-4">
-            <div class="text-sm text-gray-500 dark:text-gray-400">Enfants</div>
-            <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['totalChildren'] ?? 0 }}</div>
+        <div class="stat-card">
+            <div class="label-title">Enfants</div>
+            <div class="label-value">{{ $stats['totalChildren'] ?? 0 }}</div>
         </div>
-        <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-4">
-            <div class="text-sm text-gray-500 dark:text-gray-400">Enfants en attente</div>
-            <div class="text-2xl font-bold text-yellow-600">{{ $stats['pendingChildren'] ?? 0 }}</div>
+        <div class="stat-card">
+            <div class="label-title">Enfants en attente</div>
+            <div class="label-value--warning">{{ $stats['pendingChildren'] ?? 0 }}</div>
         </div>
-        <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-4">
-            <div class="text-sm text-gray-500 dark:text-gray-400">Enfants imprimés</div>
-            <div class="text-2xl font-bold text-purple-600">{{ $stats['printedChildren'] ?? 0 }}</div>
+        <div class="stat-card">
+            <div class="label-title">Enfants imprimés</div>
+            <div class="label-value">{{ $stats['printedChildren'] ?? 0 }}</div>
         </div>
     </div>
 
     {{-- Family Access Link --}}
-    <div class="card !p-6">
+    <div class="card">
         <h2 class="section-title">Récupérer un lien de connexion famille</h2>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4"> Génère un lien d'accès identique à celui envoyé par e-mail depuis la page d'accueil.
+        <p class="text-muted mb-4"> Génère un lien d'accès identique à celui envoyé par e-mail depuis la page d'accueil.
         </p>
 
         <form wire:submit="generateFamilyAccessLink" class="space-y-4">
@@ -58,8 +58,7 @@
                     <p class="field-error">{{ $message }}</p>
                     @enderror
                 </div>
-                <button type="submit" wire:loading.attr="disabled"
-                    class="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm">
+                <button type="submit" wire:loading.attr="disabled" class="btn-blue disabled:opacity-50">
                     <span wire:loading.remove wire:target="generateFamilyAccessLink">🔗 Générer le lien</span>
                     <span wire:loading wire:target="generateFamilyAccessLink">Génération...</span>
                 </button>
@@ -67,19 +66,19 @@
         </form>
 
         @if($familyAccessLink)
-        <div class="mt-4 border border-indigo-200 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-900/20 p-3">
-            <p class="text-sm text-indigo-800 dark:text-indigo-200 mb-2">Lien de connexion :</p>
-            <a href="{{ $familyAccessLink }}" target="_blank" rel="noopener"
-                class="text-sm text-indigo-700 dark:text-indigo-300 break-all hover:underline"> {{ $familyAccessLink }}
+        <div class="notice-info mt-4">
+            <p class="text-sm mb-2">Lien de connexion :</p>
+            <a href="{{ $familyAccessLink }}" target="_blank" rel="noopener" class="link text-sm break-all">
+                {{ $familyAccessLink }}
             </a>
         </div>
         @endif
     </div>
 
     {{-- Seed Families --}}
-    <div class="card !p-6">
+    <div class="card">
         <h2 class="section-title">Générer des familles de test</h2>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4"> Crée des familles fictives avec 1 à 5 enfants chacune. Certaines peuvent être des familles existantes qui reviennent pour cette saison.
+        <p class="text-muted mb-4"> Crée des familles fictives avec 1 à 5 enfants chacune. Certaines peuvent être des familles existantes qui reviennent pour cette saison.
         </p>
         <div class="flex items-end gap-4">
             <div>
@@ -90,8 +89,7 @@
                 <p class="field-error">{{ $message }}</p>
                 @enderror
             </div>
-            <button wire:click="seedFamilies" wire:loading.attr="disabled"
-                class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm">
+            <button wire:click="seedFamilies" wire:loading.attr="disabled" class="btn-blue disabled:opacity-50">
                 <span wire:loading.remove wire:target="seedFamilies">🌱 Générer</span>
                 <span wire:loading wire:target="seedFamilies">Génération...</span>
             </button>
@@ -99,12 +97,11 @@
     </div>
 
     {{-- Batch Validate --}}
-    <div class="card !p-6">
+    <div class="card">
         <h2 class="section-title">Validation en masse</h2>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4"> Valide toutes les familles et enfants en attente pour la saison active.
+        <p class="text-muted mb-4"> Valide toutes les familles et enfants en attente pour la saison active.
         </p>
-        <button wire:click="batchValidate" wire:loading.attr="disabled"
-            class="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm"
+        <button wire:click="batchValidate" wire:loading.attr="disabled" class="btn-primary disabled:opacity-50"
             wire:confirm="Voulez-vous vraiment valider toutes les familles et enfants en attente ?">
             <span wire:loading.remove wire:target="batchValidate">✓ Tout valider</span>
             <span wire:loading wire:target="batchValidate">Validation...</span>
@@ -112,12 +109,11 @@
     </div>
 
     {{-- Batch Receive --}}
-    <div class="card !p-6">
+    <div class="card">
         <h2 class="section-title">Réception en masse</h2>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4"> Marque tous les cadeaux imprimés comme reçus pour la saison active.
+        <p class="text-muted mb-4"> Marque tous les cadeaux imprimés comme reçus pour la saison active.
         </p>
-        <button wire:click="batchReceive" wire:loading.attr="disabled"
-            class="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm"
+        <button wire:click="batchReceive" wire:loading.attr="disabled" class="btn-blue disabled:opacity-50"
             wire:confirm="Voulez-vous vraiment marquer tous les cadeaux imprimés comme reçus ?">
             <span wire:loading.remove wire:target="batchReceive">📦 Tout marquer reçu</span>
             <span wire:loading wire:target="batchReceive">Réception...</span>

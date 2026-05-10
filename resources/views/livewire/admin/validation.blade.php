@@ -1,7 +1,7 @@
 <div class="space-y-6" x-data="{ showImageModal: false, imageUrl: '', imageAlt: '' }">
     <div class="flex items-center justify-between">
         <h1 class="section-title">Validation des demandes</h1>
-        <div class="text-sm text-gray-600 dark:text-gray-400">
+        <div class="text-sm text-muted">
             {{ $pendingFamiliesCount }} famille(s) · {{ $pendingChildrenCount }} enfant(s) en attente
         </div>
     </div>
@@ -15,7 +15,7 @@
             🎉 Toutes les demandes ont été traitées !
         </div>
     @else
-        <div class="card !p-6">
+        <div class="card">
             <div class="mb-6 pb-6 border-b border-gray-200 dark:border-zinc-700">
                 <x-validation.family-info :request="$currentRequest">
                     @if($currentRequest->status === 'pending')
@@ -55,40 +55,40 @@
                     <div class="border border-gray-200 dark:border-zinc-700 rounded-lg p-4">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">Prénom :</span>
-                                <span class="ml-2 text-gray-900 dark:text-white font-medium">{{ $child->first_name }}</span>
+                                <span class="detail-label">Prénom :</span>
+                                <span class="ml-2 detail-value">{{ $child->first_name }}</span>
                                 @if($child->anonymous)
                                     <span class="ml-2 text-xs text-orange-600 dark:text-orange-400">(Anonyme)</span>
                                 @endif
                             </div>
                             <div>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">Genre :</span>
-                                <span class="ml-2 text-gray-900 dark:text-white">{{ $child->gender_label }}</span>
+                                <span class="detail-label">Genre :</span>
+                                <span class="ml-2 detail-value">{{ $child->gender_label }}</span>
                             </div>
                             <div>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">Âge :</span>
-                                <span class="ml-2 text-gray-900 dark:text-white">{{ $child->formatted_age }} ({{ $child->birth_year }})</span>
+                                <span class="detail-label">Âge :</span>
+                                <span class="ml-2 detail-value">{{ $child->formatted_age }} ({{ $child->birth_year }})</span>
                             </div>
                             <div>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">Taille :</span>
-                                <span class="ml-2 text-gray-900 dark:text-white">{{ $child->height ? $child->height . ' cm' : '-' }}</span>
+                                <span class="detail-label">Taille :</span>
+                                <span class="ml-2 detail-value">{{ $child->height ? $child->height . ' cm' : '-' }}</span>
                             </div>
                             <div>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">Cadeau :</span>
-                                <span class="ml-2 text-gray-900 dark:text-white font-medium">{{ $child->gift }}</span>
+                                <span class="detail-label">Cadeau :</span>
+                                <span class="ml-2 detail-value">{{ $child->gift }}</span>
                             </div>
                             <div>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">Pointure :</span>
-                                <span class="ml-2 text-gray-900 dark:text-white">{{ $child->shoe_size ?? '-' }}</span>
+                                <span class="detail-label">Pointure :</span>
+                                <span class="ml-2 detail-value">{{ $child->shoe_size ?? '-' }}</span>
                             </div>
                             <div>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">Code :</span>
-                                <span class="ml-2 text-gray-900 dark:text-white font-mono font-bold">{{ $child->code ?? '—' }}</span>
+                                <span class="detail-label">Code :</span>
+                                <span class="ml-2 detail-value font-mono font-bold">{{ $child->code ?? '—' }}</span>
                             </div>
                         </div>
 
                         <div class="flex items-center gap-4">
-                            <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $child->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
+                            <span class="{{ $child->status === 'pending' ? 'badge--pending' : 'badge--validated' }}">
                                 {{ $child->status_label }}
                             </span>
 

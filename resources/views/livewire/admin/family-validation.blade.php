@@ -1,7 +1,7 @@
 <div class="space-y-6" x-data="{ showImageModal: false, imageUrl: '', imageAlt: '' }">
     <div class="flex items-center justify-between">
         <h1 class="section-title">Validation des familles</h1>
-        <div class="text-sm text-gray-600 dark:text-gray-400">
+        <div class="text-sm text-muted">
             {{ $pendingFamiliesCount }} famille(s) en attente
         </div>
     </div>
@@ -15,20 +15,20 @@
             🎉 Toutes les familles ont été traitées !
         </div>
     @else
-        <div class="card !p-6">
+        <div class="card">
             <div class="mb-6">
                 <x-validation.family-info :request="$currentRequest">
                     <div class="flex flex-wrap gap-2">
                         <button wire:click="validateFamily" class="btn-confirm text-sm">
                             ✓ Valider la famille
                         </button>
-                        <button wire:click="openRejectionModal('{{ $currentRequest->id }}', false)" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition duration-200">
+                        <button wire:click="openRejectionModal('{{ $currentRequest->id }}', false)" class="btn-warning text-sm">
                             Demander correction
                         </button>
-                        <button wire:click="openRejectionModal('{{ $currentRequest->id }}', true)" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition duration-200">
+                        <button wire:click="openRejectionModal('{{ $currentRequest->id }}', true)" class="btn-danger text-sm">
                             Refuser définitivement
                         </button>
-                        <button wire:click="skip" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition duration-200 ml-auto">
+                        <button wire:click="skip" class="btn-gray text-sm ml-auto">
                             Passer au suivant
                         </button>
                     </div>
