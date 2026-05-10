@@ -1,4 +1,4 @@
-﻿# SapinSolidaire - Project Context for Copilot
+# SapinSolidaire - Project Context for Copilot
 
 ## Project Overview
 
