@@ -11,15 +11,6 @@
             Aucune saison n'est actuellement active.
         </div>
     @elseif(!$currentRequest)
-        <div class="notice-error">
-            🎉 Toutes les demandes ont été traitées !
-        </div>
-        <div class="notice-info">
-            🎉 Toutes les demandes ont été traitées !
-        </div>
-        <div class="notice-warning">
-            🎉 Toutes les demandes ont été traitées !
-        </div>
         <div class="notice-success">
             🎉 Toutes les demandes ont été traitées !
         </div>
