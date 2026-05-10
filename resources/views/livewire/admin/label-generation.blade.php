@@ -1,12 +1,12 @@
 <div class="space-y-6">
-    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Génération des cartes</h1>
+    <h1 class="section-title text-2xl !border-0 !mb-0">Génération des cartes</h1>
 
     @if(!$activeSeason)
-        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
+        <div class="notice-info !bg-yellow-50 !dark:!bg-yellow-900/20 !border-yellow-200 !dark:!border-yellow-700 !p-4">
             <p class="text-yellow-800 dark:text-yellow-200">Aucune saison n'est actuellement active.</p>
         </div>
     @else
-        <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
+        <div class="card">
             <div class="text-center">
                 <div class="text-6xl mb-4">🏷️</div>
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
@@ -17,7 +17,7 @@
                 </p>
 
                 @if($validatedCount > 0)
-                    <button wire:click="generatePdf" wire:loading.attr="disabled" wire:target="generatePdf" class="bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold">
+                    <button wire:click="generatePdf" wire:loading.attr="disabled" wire:target="generatePdf" class="btn-primary inline-block !py-3 !px-6 !w-auto">
                         <span wire:loading.remove wire:target="generatePdf">📄 Générer le PDF des cartes</span>
                         <span wire:loading wire:target="generatePdf">⏳ Génération en cours…</span>
                     </button>
@@ -32,7 +32,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
+        <div class="card">
             <div class="text-center">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                     🔄 Réinitialiser les cartes imprimées
@@ -53,7 +53,7 @@
         </div>
 
         @if($generatedPdfs->count() > 0)
-        <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
+        <div class="card">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 📋 Historique des PDF générés
             </h3>

@@ -1,13 +1,13 @@
 <div class="space-y-6">
-    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Gestion des utilisateurs</h1>
+    <h1 class="section-title text-2xl !border-0 !mb-0">Gestion des utilisateurs</h1>
 
     @if(session()->has('message'))
-        <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-4">
+        <div class="badge-success">
             <p class="text-green-800 dark:text-green-200">{{ session('message') }}</p>
         </div>
     @endif
 
-    <div class="bg-white dark:bg-zinc-800 rounded-lg shadow overflow-hidden">
+    <div class="card !p-0">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
             <thead class="bg-gray-50 dark:bg-zinc-700">
                 <tr>
@@ -46,8 +46,8 @@
                         </td>
                         <td class="px-6 py-4 text-right">
                             @if($editingUserId === $user->id)
-                                <button wire:click="saveRoles" class="text-green-600 hover:text-green-800 mr-2">Enregistrer</button>
-                                <button wire:click="cancelEdit" class="text-gray-600 hover:text-gray-800">Annuler</button>
+                                <button wire:click="saveRoles" class="btn-confirm mr-2">Enregistrer</button>
+                                <button wire:click="cancelEdit" class="btn-secondary">Annuler</button>
                             @else
                                 <button wire:click="editRoles('{{ $user->id }}')" class="text-blue-600 hover:text-blue-800">Modifier les rôles</button>
                             @endif
