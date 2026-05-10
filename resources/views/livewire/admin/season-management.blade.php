@@ -100,7 +100,7 @@
                 <hr class="my-4 border-gray-300 dark:border-zinc-600">
                 <div class="flex items-center justify-between">
                     <h3 class="section-title">Plages horaires de récupération</h3>
-                    <button type="button" wire:click="addPickupEntry" class="btn-blue !py-1 !px-3 text-sm">
+                    <button type="button" wire:click="addPickupEntry" class="btn-blue">
                         + Ajouter une plage
                     </button>
                 </div>
