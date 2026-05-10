@@ -2,8 +2,8 @@
     <h1 class="section-title text-2xl !border-0 !mb-0">Réception des cadeaux</h1>
 
     @if(!$activeSeason)
-        <div class="notice-info !bg-yellow-50 !dark:!bg-yellow-900/20 !border-yellow-200 !dark:!border-yellow-700 !p-4">
-            <p class="text-yellow-800 dark:text-yellow-200">Aucune saison n'est actuellement active.</p>
+        <div class="notice-info">
+            Aucune saison n'est actuellement active.
         </div>
     @else
         {{-- Filter input: desktop uses native number field, mobile uses custom keypad --}}

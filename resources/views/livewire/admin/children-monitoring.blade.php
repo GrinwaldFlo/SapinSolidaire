@@ -243,7 +243,7 @@
             {{ $children->links() }}
         </div>
     @else
-        <div class="notice-info !p-8 text-center text-gray-500 dark:text-gray-400">
+        <div class="notice-info">
             Sélectionnez une saison pour voir les enfants.
         </div>
     @endif

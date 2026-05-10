@@ -6,7 +6,7 @@
             <p class="text-gray-600 dark:text-gray-300 mb-6">
                 Ce lien n'est plus valide. Les liens expirent après 48 heures.
             </p>
-            <a href="/" class="btn-primary !w-auto inline-block">
+            <a href="/" class="btn-primary !w-auto">
                 Retourner à l'accueil
             </a>
         </div>
@@ -31,7 +31,7 @@
 
             @if($giftRequest)
                 <div class="mt-6 text-left bg-gray-50 dark:bg-zinc-700 rounded-lg p-6">
-                    <h3 class="section-title text-base !border-0 !mb-0 mb-4">Résumé de votre demande</h3>
+                    <h3 class="section-title text-base !border-0">Résumé de votre demande</h3>
                     <p><strong>Famille :</strong> {{ $firstName }} {{ $lastName }}</p>
                     <p><strong>Enfants :</strong></p>
                     <ul class="list-disc list-inside mt-2">

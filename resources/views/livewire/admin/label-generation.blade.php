@@ -2,8 +2,8 @@
     <h1 class="section-title text-2xl !border-0 !mb-0">Génération des cartes</h1>
 
     @if(!$activeSeason)
-        <div class="notice-info !bg-yellow-50 !dark:!bg-yellow-900/20 !border-yellow-200 !dark:!border-yellow-700 !p-4">
-            <p class="text-yellow-800 dark:text-yellow-200">Aucune saison n'est actuellement active.</p>
+        <div class="notice-info">
+            <p>Aucune saison n'est actuellement active.</p>
         </div>
     @else
         <div class="card">
@@ -17,7 +17,7 @@
                 </p>
 
                 @if($validatedCount > 0)
-                    <button wire:click="generatePdf" wire:loading.attr="disabled" wire:target="generatePdf" class="btn-primary inline-block !py-3 !px-6 !w-auto">
+                    <button wire:click="generatePdf" wire:loading.attr="disabled" wire:target="generatePdf" class="btn-primary inline-block !w-auto">
                         <span wire:loading.remove wire:target="generatePdf">📄 Générer le PDF des cartes</span>
                         <span wire:loading wire:target="generatePdf">⏳ Génération en cours…</span>
                     </button>

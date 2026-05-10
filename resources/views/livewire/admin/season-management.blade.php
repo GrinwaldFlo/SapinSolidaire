@@ -10,13 +10,13 @@
 
     @if(session()->has('message'))
         <div class="badge-success">
-            <p class="text-green-800 dark:text-green-200">{{ session('message') }}</p>
+            {{ session('message') }}
         </div>
     @endif
 
     @if(session()->has('error'))
-        <div class="notice-info !bg-red-50 !dark:!bg-red-900/20 !border-red-200 !dark:!border-red-700 !p-4">
-            <p class="text-red-800 dark:text-red-200">{{ session('error') }}</p>
+        <div class="notice-info">
+            {{ session('error') }}
         </div>
     @endif
 

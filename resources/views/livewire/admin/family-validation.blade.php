@@ -7,12 +7,12 @@
     </div>
 
     @if(!$activeSeason)
-        <div class="notice-info !bg-yellow-50 !dark:!bg-yellow-900/20 !border-yellow-200 !dark:!border-yellow-700 !p-4">
-            <p class="text-yellow-800 dark:text-yellow-200">Aucune saison n'est actuellement active.</p>
+        <div class="notice-info">
+            Aucune saison n'est actuellement active.
         </div>
     @elseif(!$currentRequest)
-        <div class="badge-success !bg-green-50 !dark:!bg-green-900/20 !border-green-200 !dark:!border-green-700 !p-4">
-            <p class="text-green-800 dark:text-green-200">🎉 Toutes les familles ont été traitées !</p>
+        <div class="badge-success">
+            🎉 Toutes les familles ont été traitées !
         </div>
     @else
         <div class="card !p-6">
