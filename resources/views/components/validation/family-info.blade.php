@@ -42,7 +42,7 @@
         <span class="detail-label">Justificatif de domicile :</span>
         <div class="mt-2">
             @if($isPdfProof)
-                <div class="card p-4 max-w-2xl">
+                <div class="card-sm max-w-2xl">
                     <p class="text-sm text-muted mb-3">Document PDF reçu.</p>
                     <div class="flex flex-wrap gap-2">
                         <a href="{{ $proofUrl }}" target="_blank" rel="noopener noreferrer" class="btn-blue inline-flex items-center text-sm">
