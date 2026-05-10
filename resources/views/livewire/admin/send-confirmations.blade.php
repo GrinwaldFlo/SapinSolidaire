@@ -2,16 +2,16 @@
     <h1 class="section-title text-2xl !border-0 !mb-0">Envoi des confirmations</h1>
 
     @if(session()->has('message'))
-    <div class="badge-success">
-        <p class="text-green-800 dark:text-green-200">{{ session('message') }}</p>
+    <div class="notice-success">
+        {{ session('message') }}
     </div>
     @endif
     @if(!$activeSeason)
-    <div class="notice-info"> Aucune saison n'est actuellement active.
+    <div class="notice-warning"> Aucune saison n'est actuellement active.
     </div>
     @else
     @if(!$hasEnoughSlots)
-    <div class="notice-info">
+    <div class="notice-error">
         ⚠️ <strong>Attention :</strong> Il n'y a pas assez de créneaux pour toutes les familles.
         Capacité totale : {{ $totalCapacity }} — Familles à planifier : {{ $familiesNeeded }}.
         Veuillez ajouter des plages horaires dans la gestion des saisons.

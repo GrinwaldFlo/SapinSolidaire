@@ -65,8 +65,8 @@
                         </button>
                     </div>
                 @else
-                    <div class="badge-success">
-                        <div class="flex items-center gap-2 text-green-600 dark:text-green-400">
+                    <div class="notice-success">
+                        <div class="flex items-center gap-2">
                             <span>✓</span>
                             <span class="font-semibold">Condition sur les années consécutives acceptée</span>
                         </div>
@@ -97,8 +97,8 @@
                         </button>
                     </div>
                 @elseif($cityAccepted)
-                    <div class="badge-success">
-                        <div class="flex items-center gap-2 text-green-600 dark:text-green-400">
+                    <div class="notice-success">
+                        <div class="flex items-center gap-2">
                             <span>✓</span>
                             <span class="font-semibold">Condition sur la zone géographique acceptée</span>
                         </div>

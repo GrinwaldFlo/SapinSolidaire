@@ -7,11 +7,11 @@
     </div>
 
     @if(!$activeSeason)
-        <div class="notice-info">
+        <div class="notice-warning">
             Aucune saison n'est actuellement active.
         </div>
     @elseif(!$currentRequest)
-        <div class="badge-success">
+        <div class="notice-success">
             🎉 Toutes les familles ont été traitées !
         </div>
     @else

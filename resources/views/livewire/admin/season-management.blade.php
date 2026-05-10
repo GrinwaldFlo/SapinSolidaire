@@ -9,7 +9,7 @@
     </div>
 
     @if(session()->has('message'))
-        <div class="badge-success">
+        <div class="notice-success">
             {{ session('message') }}
         </div>
     @endif

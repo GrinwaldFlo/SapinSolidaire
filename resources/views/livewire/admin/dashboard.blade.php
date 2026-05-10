@@ -4,10 +4,10 @@
     </div>
 
     @if(!$activeSeason)
-    <div class="notice-info"> Aucune saison n'est actuellement active.
+    <div class="notice-warning"> Aucune saison n'est actuellement active.
     </div>
     @else
-    <div class="badge-success">
+    <div class="notice-success">
         <strong>Saison active :</strong> {{ $activeSeason->name }}
         ({{ $activeSeason->start_date->format('d/m/Y') }} - {{ $activeSeason->end_date->format('d/m/Y') }})
     </div>

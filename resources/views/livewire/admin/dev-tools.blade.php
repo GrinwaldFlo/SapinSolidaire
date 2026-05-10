@@ -4,12 +4,12 @@
     </div>
 
     @if($flashMessage)
-    <div class="{{ $flashType === 'success' ? 'badge-success' : 'notice-info' }}">
+    <div class="{{ $flashType === 'success' ? 'notice-success' : 'notice-info' }}">
         <p>{{ $flashMessage }}</p>
     </div>
     @endif
     @if(!$activeSeason)
-    <div class="notice-info"> Aucune saison n'est actuellement active.
+    <div class="notice-warning"> Aucune saison n'est actuellement active.
     </div>
     @else
     <div class="notice-info">

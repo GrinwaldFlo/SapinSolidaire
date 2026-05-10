@@ -2,8 +2,8 @@
     <h1 class="section-title text-2xl !border-0 !mb-0">Paramètres du site</h1>
 
     @if(session()->has('message'))
-        <div class="badge-success">
-            <p class="text-green-800 dark:text-green-200">{{ session('message') }}</p>
+        <div class="notice-success">
+            {{ session('message') }}
         </div>
     @endif
 

@@ -2,7 +2,7 @@
     <h1 class="section-title text-2xl !border-0 !mb-0">Remise des cadeaux</h1>
 
     @if(!$activeSeason)
-        <div class="notice-info">
+        <div class="notice-warning">
             Aucune saison n'est actuellement active.
         </div>
     @else
