@@ -67,7 +67,7 @@
                 <label class="field-label">Préfixe code enfant</label>
                 <input type="text" wire:model="codePrefix" placeholder="Y" class="field-input">
                 <p class="mt-1 text-sm text-gray-500">Préfixe de région utilisé dans le code enfant (ex: Y pour le format Y0001/1).</p>
-                @error('codePrefix') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                @error('codePrefix') <p class="field-error">{{ $message }}</p> @enderror
             </div>
 
             <div>
