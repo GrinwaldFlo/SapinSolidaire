@@ -236,7 +236,7 @@ The live visual reference for all classes is: `/admin/css-showcase`
         <span class="detail-value">Dupont Marie</span>
     </div>
 
-    <span class="badge--pending">A valider</span>
+    <span class="badge--pending">À valider</span>
 
     <div class="notice-warning mt-4">
         Veuillez verifier le justificatif.
