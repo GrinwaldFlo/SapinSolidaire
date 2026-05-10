@@ -17,7 +17,7 @@
                 </p>
 
                 @if($validatedCount > 0)
-                    <button wire:click="generatePdf" wire:loading.attr="disabled" wire:target="generatePdf" class="btn-primary inline-block !w-auto">
+                    <button wire:click="generatePdf" wire:loading.attr="disabled" wire:target="generatePdf" class="btn-primary inline-flex !w-auto">
                         <span wire:loading.remove wire:target="generatePdf">📄 Générer le PDF des cartes</span>
                         <span wire:loading wire:target="generatePdf">⏳ Génération en cours…</span>
                     </button>

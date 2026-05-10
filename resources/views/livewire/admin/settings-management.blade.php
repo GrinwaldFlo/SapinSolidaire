@@ -74,7 +74,7 @@
                 <label class="field-label">Nombre de chiffres du numéro de famille *</label>
                 <input type="number" wire:model="codeFamilyPadding" min="1" max="10" class="field-input">
                 <p class="mt-1 text-sm text-gray-500">Nombre de chiffres pour le numéro de famille dans le code (ex: 4 donne Y0001/1).</p>
-                @error('codeFamilyPadding') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                @error('codeFamilyPadding') <p class="field-error">{{ $message }}</p> @enderror
             </div>
 
             <div>

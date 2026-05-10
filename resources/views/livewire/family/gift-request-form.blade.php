@@ -6,7 +6,7 @@
             <p class="text-gray-600 dark:text-gray-300 mb-6">
                 Ce lien n'est plus valide. Les liens expirent après 48 heures.
             </p>
-            <a href="/" class="btn-primary !w-auto">
+             <a href="/" class="btn-primary">
                 Retourner à l'accueil
             </a>
         </div>
