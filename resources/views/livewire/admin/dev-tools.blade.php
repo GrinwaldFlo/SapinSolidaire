@@ -4,7 +4,7 @@
     </div>
 
     @if($flashMessage)
-    <div class="{{ $flashType === 'success' ? 'notice-success' : 'notice-info' }}">
+    <div class="{{ $flashType === 'success' ? 'notice-success' : 'notice-error' }}">
         <p>{{ $flashMessage }}</p>
     </div>
     @endif
