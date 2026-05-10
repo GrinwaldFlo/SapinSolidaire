@@ -231,14 +231,14 @@ The live visual reference for all classes is: `/admin/css-showcase`
 <div class="card">
     <h2 class="section-title">Informations famille</h2>
 
-    <div class="space-y-1 mb-4">
+    <p>
         <span class="detail-label">Nom :</span>
         <span class="detail-value">Dupont Marie</span>
-    </div>
+    </p>
 
     <span class="badge--pending">À valider</span>
 
-    <div class="notice-warning mt-4">
+    <div class="notice-warning">
         Veuillez vérifier le justificatif.
     </div>
 
@@ -246,7 +246,7 @@ The live visual reference for all classes is: `/admin/css-showcase`
     <textarea class="field-input" wire:model="comment"></textarea>
     @error('comment') <p class="field-error">{{ $message }}</p> @enderror
 
-    <div class="flex gap-2 mt-4">
+    <div>
         <button class="btn-confirm" wire:click="validate">Valider</button>
         <button class="btn-warning" wire:click="askCorrection">Demander correction</button>
         <button class="btn-danger" wire:click="reject">Rejeter</button>
