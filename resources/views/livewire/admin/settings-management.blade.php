@@ -17,7 +17,7 @@
 
             <div>
                 <label class="field-label">Communes autorisées</label>
-                <textarea wire:model="allowedCities" rows="3" placeholder="Lausanne, Morges, Renos" class="field-input"></textarea>
+                <textarea wire:model="allowedCities" rows="3" placeholder="Lausanne, Morges, Renens" class="field-input"></textarea>
                 <p class="mt-1 text-sm text-gray-500">Séparez les communes par des virgules. Laissez vide pour autoriser toutes les communes.</p>
                 @error('allowedCities') <p class="field-error">{{ $message }}</p> @enderror
             </div>
