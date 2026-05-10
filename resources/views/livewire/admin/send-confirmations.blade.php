@@ -1,5 +1,5 @@
 <div class="space-y-6">
-    <h1 class="section-title text-2xl !border-0 !mb-0">Envoi des confirmations</h1>
+    <h1 class="section-title">Envoi des confirmations</h1>
 
     @if(session()->has('message'))
     <div class="notice-success">
@@ -20,7 +20,7 @@
     <div class="card !p-6">
         <div class="text-center mb-6">
             <div class="text-4xl mb-4">📧</div>
-            <h2 class="section-title text-xl !border-0 !mb-2 !text-center"> {{ $familyCount }} famille(s) avec cadeaux reçus
+            <h2 class="section-title"> {{ $familyCount }} famille(s) avec cadeaux reçus
             </h2>
             <p class="text-gray-600 dark:text-gray-400"> Envoyez un e-mail de confirmation aux familles dont les cadeaux sont arrivés.
             </p>
@@ -58,7 +58,7 @@
     @if($families->isNotEmpty())
     <div class="card !p-0">
         <div class="p-4 border-b border-gray-200 dark:border-zinc-700">
-            <h2 class="section-title text-lg !border-0 !mb-0">Liste des familles</h2>
+            <h2 class="section-title">Liste des familles</h2>
         </div>
         <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
             <thead class="bg-gray-50 dark:bg-zinc-700">

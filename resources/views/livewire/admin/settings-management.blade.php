@@ -1,5 +1,5 @@
 <div class="space-y-6">
-    <h1 class="section-title text-2xl !border-0 !mb-0">Paramètres du site</h1>
+    <h1 class="section-title">Paramètres du site</h1>
 
     @if(session()->has('message'))
         <div class="notice-success">

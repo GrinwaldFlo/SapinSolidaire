@@ -68,7 +68,7 @@
             </div>
         </div>
     @endif
-    <h1 class="section-title text-2xl !border-0 !mb-0">Suivi des enfants</h1>
+    <h1 class="section-title">Suivi des enfants</h1>
 
     <div class="card !p-4">
         <div class="flex flex-wrap gap-4 items-end">

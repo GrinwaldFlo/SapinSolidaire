@@ -1,6 +1,6 @@
 <div class="space-y-6" x-data="{ showImageModal: false, imageUrl: '', imageAlt: '' }">
     <div class="flex items-center justify-between">
-        <h1 class="section-title text-2xl !border-0 !mb-0">Validation des demandes</h1>
+        <h1 class="section-title">Validation des demandes</h1>
         <div class="text-sm text-gray-600 dark:text-gray-400">
             {{ $pendingFamiliesCount }} famille(s) · {{ $pendingChildrenCount }} enfant(s) en attente
         </div>
@@ -20,7 +20,7 @@
                 <x-validation.family-info :request="$currentRequest">
                     @if($currentRequest->status === 'pending')
                     <div class="mt-4 p-4 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg">
-                        <h3 class="section-title text-sm !border-0 !mb-3">Décision pour la famille :</h3>
+                        <h3 class="section-title">Décision pour la famille :</h3>
                         <div class="flex flex-wrap gap-4 mb-3">
                             <label class="flex items-center space-x-2">
                                 <input type="radio" wire:model.live="familyDecision" value="pending" class="form-radio text-blue-600">
@@ -48,7 +48,7 @@
                 </x-validation.family-info>
             </div>
 
-            <h2 class="section-title text-lg !border-0 !mb-4">Enfants ({{ $currentRequest->children->count() }})</h2>
+            <h2 class="section-title">Enfants ({{ $currentRequest->children->count() }})</h2>
 
             <div class="space-y-4">
                 @foreach($currentRequest->children as $child)

@@ -1,5 +1,5 @@
 <div class="space-y-6">
-    <h1 class="section-title text-2xl !border-0 !mb-0">Réception des cadeaux</h1>
+    <h1 class="section-title">Réception des cadeaux</h1>
 
     @if(!$activeSeason)
         <div class="notice-info">
@@ -62,7 +62,7 @@
                 {{-- Children list --}}
                 <div class="card !p-0">
                     <div class="p-4 border-b border-gray-200 dark:border-zinc-700">
-                        <h2 class="section-title text-lg !border-0 !mb-0">
+                        <h2 class="section-title">
                             Famille n°{{ $familyNumber }}
                             <span class="text-sm font-normal text-gray-500 dark:text-gray-400">— {{ count($children) }} enfant(s)</span>
                         </h2>
@@ -92,7 +92,7 @@
                 {{-- Desktop detail panel --}}
                 <div class="hidden lg:block card !p-0">
                     <div class="p-4 border-b border-gray-200 dark:border-zinc-700">
-                        <h2 class="section-title text-lg !border-0 !mb-0">Détails du cadeau</h2>
+                        <h2 class="section-title">Détails du cadeau</h2>
                     </div>
 
                     @if($selectedChild)
@@ -113,7 +113,7 @@
                     <div class="fixed inset-0 bg-black/50" wire:click="closeMobileDetail"></div>
                     <div class="relative card w-full sm:max-w-md sm:rounded-lg rounded-t-2xl shadow-xl max-h-[90vh] overflow-y-auto">
                         <div class="p-4 border-b border-gray-200 dark:border-zinc-700 flex justify-between items-center">
-                            <h2 class="section-title text-lg !border-0 !mb-0">Détails du cadeau</h2>
+                            <h2 class="section-title">Détails du cadeau</h2>
                             <button wire:click="closeMobileDetail" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>

@@ -1,6 +1,6 @@
 <div class="space-y-6">
     <div class="flex items-center justify-between">
-        <h1 class="section-title text-2xl !border-0 !mb-0">Gestion des saisons</h1>
+        <h1 class="section-title">Gestion des saisons</h1>
         @if(!$showForm)
             <button wire:click="create" class="btn-confirm">
                 Nouvelle saison
@@ -22,7 +22,7 @@
 
     @if($showForm)
         <div class="card">
-            <h2 class="section-title text-lg !border-0 !mb-4">
+            <h2 class="section-title">
                 {{ $editing ? 'Modifier la saison' : 'Nouvelle saison' }}
             </h2>
 
@@ -58,7 +58,7 @@
                 </div>
 
                 <hr class="my-4 border-gray-300 dark:border-zinc-600">
-                <h3 class="section-title text-md !border-0 !mb-0">Planification des créneaux</h3>
+                <h3 class="section-title">Planification des créneaux</h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -75,7 +75,7 @@
                 </div>
 
                 <hr class="my-4 border-gray-300 dark:border-zinc-600">
-                <h3 class="section-title text-md !border-0 !mb-0">Responsable</h3>
+                <h3 class="section-title">Responsable</h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
@@ -99,7 +99,7 @@
 
                 <hr class="my-4 border-gray-300 dark:border-zinc-600">
                 <div class="flex items-center justify-between">
-                    <h3 class="section-title text-md !border-0 !mb-0">Plages horaires de récupération</h3>
+                    <h3 class="section-title">Plages horaires de récupération</h3>
                     <button type="button" wire:click="addPickupEntry" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-sm">
                         + Ajouter une plage
                     </button>

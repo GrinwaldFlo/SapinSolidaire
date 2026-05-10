@@ -1,6 +1,6 @@
 <div class="space-y-6">
     <div class="flex items-center justify-between">
-        <h1 class="section-title text-2xl !border-0 !mb-0">Tableau de bord</h1>
+        <h1 class="section-title">Tableau de bord</h1>
     </div>
 
     @if(!$activeSeason)
@@ -35,7 +35,7 @@
     </div>
 
     <div class="card !p-6">
-        <h2 class="section-title !border-0">Statut des cadeaux</h2>
+        <h2 class="section-title">Statut des cadeaux</h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div class="text-center">
                 <div class="text-2xl font-bold text-blue-600">{{ $validatedChildren }}</div>

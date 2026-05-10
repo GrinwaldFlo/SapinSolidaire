@@ -1,6 +1,6 @@
 <div class="space-y-6" x-data="{ showImageModal: false, imageUrl: '', imageAlt: '' }">
     <div class="flex items-center justify-between">
-        <h1 class="section-title text-2xl !border-0 !mb-0">Validation des familles</h1>
+        <h1 class="section-title">Validation des familles</h1>
         <div class="text-sm text-gray-600 dark:text-gray-400">
             {{ $pendingFamiliesCount }} famille(s) en attente
         </div>

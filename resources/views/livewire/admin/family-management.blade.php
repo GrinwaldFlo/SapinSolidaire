@@ -1,5 +1,5 @@
 <div class="space-y-6">
-    <h1 class="section-title text-2xl !border-0 !mb-0">Gestion des familles</h1>
+    <h1 class="section-title">Gestion des familles</h1>
 
     <div class="card !p-4">
         <input type="text" wire:model.live.debounce.300ms="search" placeholder="Rechercher par nom ou email..." class="field-input">

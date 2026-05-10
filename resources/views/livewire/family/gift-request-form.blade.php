@@ -2,8 +2,8 @@
     @if(!$tokenValid)
         <div class="card text-center">
             <span class="text-6xl mb-4 block">⚠️</span>
-            <h2 class="section-title text-2xl !border-0 text-red-600 dark:text-red-400 mb-4">Lien invalide ou expiré</h2>
-            <p class="text-gray-600 dark:text-gray-300 mb-6">
+            <h2 class="section-title">Lien invalide ou expiré</h2>
+            <p class="notice-error">
                 Ce lien n'est plus valide. Les liens expirent après 48 heures.
             </p>
              <a href="/" class="btn-primary">
@@ -13,8 +13,8 @@
     @elseif($submitted)
         <div class="card text-center">
             <span class="text-6xl mb-4 block">✅</span>
-            <h2 class="section-title text-2xl !border-0 text-green-600 dark:text-green-400 mb-4">Demande {{ $isModifying ? 'modifiée' : 'enregistrée' }} !</h2>
-            <p class="text-gray-600 dark:text-gray-300 mb-4">
+            <h2 class="section-title">Demande {{ $isModifying ? 'modifiée' : 'enregistrée' }} !</h2>
+            <p class="notice-success">
                 Votre demande a bien été {{ $isModifying ? 'mise à jour' : 'enregistrée' }}.
             </p>
             <p class="text-gray-500 dark:text-gray-400 text-sm">
@@ -24,14 +24,14 @@
     @elseif(!$canModify)
         <div class="card text-center">
             <span class="text-6xl mb-4 block">🔒</span>
-            <h2 class="section-title text-2xl !border-0 text-orange-600 dark:text-orange-400 mb-4">Modification impossible</h2>
-            <p class="text-gray-600 dark:text-gray-300 mb-4">
+            <h2 class="section-title">Modification impossible</h2>
+            <p class="notice-warning">
                 La date limite de modification est dépassée. Vous ne pouvez plus modifier votre demande.
             </p>
 
             @if($giftRequest)
                 <div class="mt-6 text-left bg-gray-50 dark:bg-zinc-700 rounded-lg p-6">
-                    <h3 class="section-title text-base !border-0">Résumé de votre demande</h3>
+                    <h3 class="section-title">Résumé de votre demande</h3>
                     <p><strong>Famille :</strong> {{ $firstName }} {{ $lastName }}</p>
                     <p><strong>Enfants :</strong></p>
                     <ul class="list-disc list-inside mt-2">

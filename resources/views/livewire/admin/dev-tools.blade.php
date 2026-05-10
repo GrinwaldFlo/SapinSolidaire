@@ -1,6 +1,6 @@
 <div class="space-y-6">
     <div class="flex items-center justify-between">
-        <h1 class="section-title text-2xl !border-0 !mb-0">🛠️ Outils développeur</h1>
+        <h1 class="section-title">🛠️ Outils développeur</h1>
     </div>
 
     @if($flashMessage)
@@ -43,7 +43,7 @@
 
     {{-- Family Access Link --}}
     <div class="card !p-6">
-        <h2 class="section-title text-lg !border-0 !mb-4">Récupérer un lien de connexion famille</h2>
+        <h2 class="section-title">Récupérer un lien de connexion famille</h2>
         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4"> Génère un lien d'accès identique à celui envoyé par e-mail depuis la page d'accueil.
         </p>
 
@@ -78,7 +78,7 @@
 
     {{-- Seed Families --}}
     <div class="card !p-6">
-        <h2 class="section-title text-lg !border-0 !mb-4">Générer des familles de test</h2>
+        <h2 class="section-title">Générer des familles de test</h2>
         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4"> Crée des familles fictives avec 1 à 5 enfants chacune. Certaines peuvent être des familles existantes qui reviennent pour cette saison.
         </p>
         <div class="flex items-end gap-4">
@@ -100,7 +100,7 @@
 
     {{-- Batch Validate --}}
     <div class="card !p-6">
-        <h2 class="section-title text-lg !border-0 !mb-4">Validation en masse</h2>
+        <h2 class="section-title">Validation en masse</h2>
         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4"> Valide toutes les familles et enfants en attente pour la saison active.
         </p>
         <button wire:click="batchValidate" wire:loading.attr="disabled"
@@ -113,7 +113,7 @@
 
     {{-- Batch Receive --}}
     <div class="card !p-6">
-        <h2 class="section-title text-lg !border-0 !mb-4">Réception en masse</h2>
+        <h2 class="section-title">Réception en masse</h2>
         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4"> Marque tous les cadeaux imprimés comme reçus pour la saison active.
         </p>
         <button wire:click="batchReceive" wire:loading.attr="disabled"

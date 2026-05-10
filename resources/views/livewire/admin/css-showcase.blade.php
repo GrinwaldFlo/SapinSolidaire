@@ -1,7 +1,7 @@
 <div class="space-y-10">
 
     <div class="flex items-center justify-between">
-        <h1 class="section-title text-2xl !border-0 !mb-0">🎨 CSS Showcase</h1>
+        <h1 class="section-title">🎨 CSS Showcase</h1>
         <p class="text-sm text-gray-500 dark:text-gray-400">Aperçu de toutes les classes CSS disponibles</p>
     </div>
 

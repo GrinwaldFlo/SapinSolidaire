@@ -1,5 +1,5 @@
 <div class="space-y-6">
-    <h1 class="section-title text-2xl !border-0 !mb-0">Génération des cartes</h1>
+    <h1 class="section-title">Génération des cartes</h1>
 
     @if(!$activeSeason)
         <div class="notice-info">
