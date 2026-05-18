@@ -16,89 +16,33 @@ class FamilyDuplicateService
      */
     public function findDuplicates(float $threshold = 40.0): Collection
     {
-        // Pre-load all families eagerly
-        $families = Family::with(['giftRequests.children', 'giftRequests.season'])->get()->keyBy('id');
+        // Raise time limit for this expensive operation — it only runs on explicit admin request
+        // and results are cached server-side by the Livewire component.
+        set_time_limit(300);
 
-        // Build candidate pairs using SQL to avoid O(n²) PHP comparisons.
-        // Two families are candidates if they share the same postal_code
-        // OR the same first letter of last_name (case-insensitive).
-        $candidatePairs = $this->buildCandidatePairs($families);
+        $families = Family::with(['giftRequests.children', 'giftRequests.season'])->get();
+        $list     = $families->values();
+        $count    = $list->count();
+        $pairs    = collect();
 
-        $pairs = collect();
+        for ($i = 0; $i < $count; $i++) {
+            for ($j = $i + 1; $j < $count; $j++) {
+                $a      = $list[$i];
+                $b      = $list[$j];
+                $result = $this->score($a, $b);
 
-        foreach ($candidatePairs as [$idA, $idB]) {
-            $a = $families->get($idA);
-            $b = $families->get($idB);
-
-            if (! $a || ! $b) {
-                continue;
-            }
-
-            $result = $this->score($a, $b);
-
-            if ($result['score'] >= $threshold) {
-                $pairs->push([
-                    'familyA' => $a,
-                    'familyB' => $b,
-                    'score'   => $result['score'],
-                    'details' => $result['details'],
-                ]);
+                if ($result['score'] >= $threshold) {
+                    $pairs->push([
+                        'familyA' => $a,
+                        'familyB' => $b,
+                        'score'   => $result['score'],
+                        'details' => $result['details'],
+                    ]);
+                }
             }
         }
 
         return $pairs->sortByDesc('score')->values();
-    }
-
-    /**
-     * Build a deduplicated list of [idA, idB] candidate pairs using SQL grouping.
-     * Only families sharing postal_code or the first letter of last_name are paired.
-     *
-     * @return array<int, array{string, string}>
-     */
-    private function buildCandidatePairs(Collection $families): array
-    {
-        $seen  = [];
-        $pairs = [];
-
-        $addPair = function (string $idA, string $idB) use (&$seen, &$pairs): void {
-            if ($idA === $idB) {
-                return;
-            }
-            // Normalise order so (A,B) and (B,A) produce the same key
-            $key = $idA < $idB ? "{$idA}|{$idB}" : "{$idB}|{$idA}";
-            if (! isset($seen[$key])) {
-                $seen[$key] = true;
-                $pairs[]    = [$idA < $idB ? $idA : $idB, $idA < $idB ? $idB : $idA];
-            }
-        };
-
-        // Group 1 – same postal_code
-        $byPostal = $families->filter(fn ($f) => ! empty($f->postal_code))
-            ->groupBy('postal_code');
-
-        foreach ($byPostal as $group) {
-            $ids = $group->pluck('id')->values();
-            for ($i = 0; $i < $ids->count(); $i++) {
-                for ($j = $i + 1; $j < $ids->count(); $j++) {
-                    $addPair($ids[$i], $ids[$j]);
-                }
-            }
-        }
-
-        // Group 2 – same first letter of last_name (lowercased)
-        $byLetter = $families->filter(fn ($f) => ! empty($f->last_name))
-            ->groupBy(fn ($f) => mb_strtolower(mb_substr(trim($f->last_name), 0, 1)));
-
-        foreach ($byLetter as $group) {
-            $ids = $group->pluck('id')->values();
-            for ($i = 0; $i < $ids->count(); $i++) {
-                for ($j = $i + 1; $j < $ids->count(); $j++) {
-                    $addPair($ids[$i], $ids[$j]);
-                }
-            }
-        }
-
-        return $pairs;
     }
 
     /**
