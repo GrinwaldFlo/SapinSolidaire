@@ -4,6 +4,7 @@ use App\Livewire\Admin\ChildrenMonitoring;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\CssShowcase;
 use App\Livewire\Admin\DevTools;
+use App\Livewire\Admin\FamilyDuplicates;
 use App\Livewire\Admin\FamilyManagement;
 use App\Livewire\Admin\FamilyValidation;
 use App\Livewire\Admin\GiftDelivery;
@@ -94,6 +95,11 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     })
         ->middleware('any.role:'.Role::ORGANIZER.','.Role::ADMIN)
         ->name('admin.labels.download');
+
+    // Family duplicates - Admin only
+    Route::get('/doublons', FamilyDuplicates::class)
+        ->middleware('role:'.Role::ADMIN)
+        ->name('admin.family-duplicates');
 
     // Admin only routes
     Route::middleware('role:'.Role::ADMIN)->group(function () {

@@ -75,6 +75,10 @@
                         Saisons
                     </flux:sidebar.item>
 
+                    <flux:sidebar.item icon="document-duplicate" :href="route('admin.family-duplicates')" :current="request()->routeIs('admin.family-duplicates')" wire:navigate>
+                        Doublons familles
+                    </flux:sidebar.item>
+
                     <flux:sidebar.item icon="users" :href="route('admin.users')" :current="request()->routeIs('admin.users')" wire:navigate>
                         Utilisateurs
                     </flux:sidebar.item>

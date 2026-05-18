@@ -266,12 +266,12 @@ select:focus[data-flux-control] {
 
     /* Modal overlay backdrop */
     .modal-backdrop {
-        @apply fixed inset-0 bg-black/50;
+        @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4;
     }
 
     /* Modal panel (white box) */
     .modal-panel {
-        @apply relative bg-white dark:bg-zinc-800 rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto z-10;
+        @apply relative bg-white dark:bg-zinc-800 rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto;
     }
 
     /* Modal header row */
