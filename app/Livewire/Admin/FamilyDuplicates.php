@@ -92,15 +92,15 @@ class FamilyDuplicates extends Component
             'familyB' => $this->serializeFamilyLight($familyB),
         ];
 
-        // Default: keep the family that participated in the oldest season (most history).
-        $oldestA = $familyA->giftRequests->filter(fn ($r) => $r->season)->min(fn ($r) => $r->season->start_date);
-        $oldestB = $familyB->giftRequests->filter(fn ($r) => $r->season)->min(fn ($r) => $r->season->start_date);
+        // Default: keep the family that participated in the most recent season.
+        $newestA = $familyA->giftRequests->filter(fn ($r) => $r->season)->max(fn ($r) => $r->season->start_date);
+        $newestB = $familyB->giftRequests->filter(fn ($r) => $r->season)->max(fn ($r) => $r->season->start_date);
 
-        if ($oldestA !== null && $oldestB !== null) {
-            $this->keepSide = $oldestA <= $oldestB ? 'A' : 'B';
-        } elseif ($oldestA !== null) {
+        if ($newestA !== null && $newestB !== null) {
+            $this->keepSide = $newestA >= $newestB ? 'A' : 'B';
+        } elseif ($newestA !== null) {
             $this->keepSide = 'A';
-        } elseif ($oldestB !== null) {
+        } elseif ($newestB !== null) {
             $this->keepSide = 'B';
         } else {
             $this->keepSide = 'A';
