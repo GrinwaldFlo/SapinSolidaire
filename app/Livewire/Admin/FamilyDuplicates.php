@@ -63,8 +63,8 @@ class FamilyDuplicates extends Component
         $this->familyAId = $familyAId;
         $this->familyBId = $familyBId;
 
-        $familyA = Family::findOrFail($familyAId);
-        $familyB = Family::findOrFail($familyBId);
+        $familyA = Family::with('giftRequests.season')->findOrFail($familyAId);
+        $familyB = Family::with('giftRequests.season')->findOrFail($familyBId);
 
         // Store only scalar fields — no nested requests/children — to stay under payload limits.
         $this->currentPair = [
@@ -72,7 +72,20 @@ class FamilyDuplicates extends Component
             'familyB' => $this->serializeFamilyLight($familyB),
         ];
 
-        $this->keepSide = 'A';
+        // Default: keep the family that participated in the oldest season (most history).
+        $oldestA = $familyA->giftRequests->filter(fn ($r) => $r->season)->min(fn ($r) => $r->season->start_date);
+        $oldestB = $familyB->giftRequests->filter(fn ($r) => $r->season)->min(fn ($r) => $r->season->start_date);
+
+        if ($oldestA !== null && $oldestB !== null) {
+            $this->keepSide = $oldestA <= $oldestB ? 'A' : 'B';
+        } elseif ($oldestA !== null) {
+            $this->keepSide = 'A';
+        } elseif ($oldestB !== null) {
+            $this->keepSide = 'B';
+        } else {
+            $this->keepSide = 'A';
+        }
+
         $this->overrideFields = [];
         $this->showMergeModal = true;
     }
@@ -134,6 +147,19 @@ class FamilyDuplicates extends Component
     /** Minimal data stored in $pairs to keep Livewire payload small. */
     private function serializeFamilyLight(Family $family): array
     {
+        // Load seasons if not already eager-loaded
+        if (! $family->relationLoaded('giftRequests')) {
+            $family->load('giftRequests.season');
+        }
+
+        $seasons = $family->giftRequests
+            ->filter(fn ($r) => $r->season !== null)
+            ->sortBy(fn ($r) => $r->season->start_date)
+            ->map(fn ($r) => $r->season->name)
+            ->unique()
+            ->values()
+            ->toArray();
+
         return [
             'id'          => $family->id,
             'first_name'  => $family->first_name,
@@ -144,13 +170,21 @@ class FamilyDuplicates extends Component
             'house_no'    => $family->house_no,
             'postal_code' => $family->postal_code,
             'city'        => $family->city,
-            'requests'    => [],
+            'seasons'     => $seasons,
         ];
     }
 
     /** Full data used only inside the merge modal (loaded on demand). */
     private function serializeFamilyFull(Family $family): array
     {
+        $seasons = $family->giftRequests
+            ->filter(fn ($r) => $r->season !== null)
+            ->sortBy(fn ($r) => $r->season->start_date)
+            ->map(fn ($r) => $r->season->name)
+            ->unique()
+            ->values()
+            ->toArray();
+
         return [
             'id'          => $family->id,
             'email'       => $family->email,
@@ -161,11 +195,13 @@ class FamilyDuplicates extends Component
             'house_no'    => $family->house_no,
             'postal_code' => $family->postal_code,
             'city'        => $family->city,
-            'requests'    => $family->giftRequests->map(fn ($r) => [
-                'id'       => $r->id,
-                'season'   => $r->season?->name ?? '—',
-                'status'   => $r->status,
-                'children' => $r->children->map(fn ($c) => [
+            'seasons'     => $seasons,
+            'requests'    => $family->giftRequests->sortBy(fn ($r) => $r->season?->start_date)->map(fn ($r) => [
+                'id'         => $r->id,
+                'season'     => $r->season?->name ?? '—',
+                'start_date' => $r->season?->start_date,
+                'status'     => $r->status,
+                'children'   => $r->children->map(fn ($c) => [
                     'first_name' => $c->first_name,
                     'birth_year' => $c->birth_year,
                     'gender'     => $c->gender,

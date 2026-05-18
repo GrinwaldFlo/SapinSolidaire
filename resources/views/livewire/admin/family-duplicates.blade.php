@@ -71,15 +71,10 @@
                                 <p class="text-muted text-sm">
                                     {{ implode(', ', array_filter([$f['street_name'], $f['house_no'], $f['postal_code'], $f['city']])) }}
                                 </p>
-                                @if(!empty($f['requests']))
-                                    <div class="mt-1 space-y-1">
-                                        @foreach($f['requests'] as $req)
-                                            <p class="text-sm">
-                                                <span class="detail-label">{{ $req['season'] }}</span>
-                                                @if(!empty($req['children']))
-                                                    — {{ implode(', ', array_map(fn($c) => $c['first_name'].' ('.($c['birth_year'] ?? '?').')', $req['children'])) }}
-                                                @endif
-                                            </p>
+                                @if(!empty($f['seasons']))
+                                    <div class="mt-1 flex flex-wrap gap-1">
+                                        @foreach($f['seasons'] as $season)
+                                            <span class="badge--info text-xs">{{ $season }}</span>
                                         @endforeach
                                     </div>
                                 @endif
@@ -115,6 +110,13 @@
                                     <p class="detail-value font-semibold">{{ $f['first_name'] }} {{ $f['last_name'] }}</p>
                                     <p class="text-muted text-sm break-all">{{ $f['email'] }}</p>
                                     @if($f['phone'])<p class="text-muted text-sm">{{ $f['phone'] }}</p>@endif
+                                    @if(!empty($f['seasons']))
+                                        <div class="mt-1 flex flex-wrap gap-1">
+                                            @foreach($f['seasons'] as $season)
+                                                <span class="badge--info text-xs">{{ $season }}</span>
+                                            @endforeach
+                                        </div>
+                                    @endif
                                 </button>
                             @endforeach
                         </div>

@@ -17,7 +17,7 @@ class FamilyDuplicateService
     public function findDuplicates(float $threshold = 40.0): Collection
     {
         // Pre-load all families eagerly
-        $families = Family::with(['giftRequests.children'])->get()->keyBy('id');
+        $families = Family::with(['giftRequests.children', 'giftRequests.season'])->get()->keyBy('id');
 
         // Build candidate pairs using SQL to avoid O(n²) PHP comparisons.
         // Two families are candidates if they share the same postal_code
