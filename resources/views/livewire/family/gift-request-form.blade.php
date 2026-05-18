@@ -423,10 +423,13 @@
                                 <div>
                                     <label class="field-label">Cadeau souhaité *</label>
                                     @php $giftKey = "children.{$index}.gift"; @endphp
-                                    <input type="text" wire:model="children.{{ $index }}.gift" wire:blur="validateChild({{ $index }})"
-                                        list="gift-suggestions"
-                                        class="{{ (isset($fieldErrors[$giftKey]) && in_array("children.{$index}.gift", $touchedFields)) || $errors->has($giftKey) ? 'field-input-error' : 'field-input' }}"
-                                        {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
+                                    <x-combobox
+                                        :suggestions="$giftSuggestions"
+                                        model="children.{{ $index }}.gift"
+                                        blur="validateChild({{ $index }})"
+                                        :has-error="(isset($fieldErrors[$giftKey]) && in_array($giftKey, $touchedFields)) || $errors->has($giftKey)"
+                                        :disabled="!($child['can_modify'] ?? true)"
+                                    />
                                     @if(isset($fieldErrors[$giftKey]) && in_array("children.{$index}.gift", $touchedFields))
                                         <p class="field-error">{{ collect($fieldErrors[$giftKey])->first() }}</p>
                                     @elseif($errors->has($giftKey))
@@ -454,12 +457,6 @@
                         <span>+</span> Ajouter un enfant
                     </button>
                 </div>
-
-                <datalist id="gift-suggestions">
-                    @foreach($giftSuggestions as $suggestion)
-                        <option value="{{ $suggestion }}">
-                    @endforeach
-                </datalist>
 
                 {{-- Submit --}}
                 <div class="pt-4">
