@@ -17,6 +17,12 @@
             <div class="notice-error">
                 Votre famille a été définitivement refusée lors d'une saison précédente. Vous ne pouvez plus effectuer de demande de cadeau.
             </div>
+            @if($rejectionComment)
+                <div class="notice-warning mt-4 text-left">
+                    <p class="text-sm font-semibold mb-1">Motif du refus :</p>
+                    <p class="text-sm">{{ $rejectionComment }}</p>
+                </div>
+            @endif
             @if($organizerEmail)
                 <p class="text-muted mt-4 text-sm">
                     Pour toute question, veuillez contacter l'organisateur à l'adresse :

@@ -38,6 +38,7 @@ class GiftRequestForm extends Component
     public bool $submitted = false;
     public bool $isPermanentlyRejected = false;
     public string $organizerEmail = '';
+    public ?string $rejectionComment = null;
 
     // Family data
     public string $firstName = '';
@@ -125,6 +126,11 @@ class GiftRequestForm extends Component
 
                 if ($permanentlyRejected) {
                     $this->isPermanentlyRejected = true;
+                    $rejectedRequest = GiftRequest::where('family_id', $this->family->id)
+                        ->where('status', GiftRequest::STATUS_REJECTED_FINAL)
+                        ->latest()
+                        ->first();
+                    $this->rejectionComment = $rejectedRequest?->rejection_comment;
 
                     return;
                 }
