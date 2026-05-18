@@ -5,14 +5,18 @@ namespace App\Livewire\Admin;
 use App\Models\Family;
 use App\Services\FamilyDuplicateService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 
 class FamilyDuplicates extends Component
 {
     public bool $loading = false;
 
-    /** @var Collection|null */
-    public ?Collection $pairs = null;
+    /**
+     * Keys of pairs the user dismissed: ["aId_bId", ...]
+     * Small array of strings — the only pair-related data kept in Livewire state.
+     */
+    public array $dismissedKeys = [];
 
     // Merge modal state
     public bool $showMergeModal = false;
@@ -20,9 +24,7 @@ class FamilyDuplicates extends Component
     public ?string $familyBId = null;
     public ?array $currentPair = null;
 
-    /**
-     * Which family to keep: 'A' or 'B'
-     */
+    /** Which family to keep: 'A' or 'B' */
     public string $keepSide = 'A';
 
     /**
@@ -38,23 +40,35 @@ class FamilyDuplicates extends Component
         // Do not auto-run to avoid slow page load
     }
 
+    private function pairsCacheKey(): string
+    {
+        return 'family_pairs_' . $this->getId();
+    }
+
+    private function modalCacheKey(): string
+    {
+        return 'merge_modal_' . $this->getId();
+    }
+
     public function scan(): void
     {
         $this->loading = true;
         $service = app(FamilyDuplicateService::class);
         $rawPairs = $service->findDuplicates($this->threshold);
 
-        // Store only lightweight data in Livewire state to stay under payload limits.
-        // Full family details are loaded from DB when the merge modal opens.
-        $this->pairs = $rawPairs->map(function ($pair) {
+        // Cache the full pairs collection server-side.
+        // Livewire state only holds small dismissed-key bookkeeping.
+        $pairs = $rawPairs->map(function ($pair) {
             return [
-                'familyA'  => $this->serializeFamilyLight($pair['familyA']),
-                'familyB'  => $this->serializeFamilyLight($pair['familyB']),
-                'score'    => $pair['score'],
-                'details'  => $pair['details'],
+                'familyA' => $this->serializeFamilyLight($pair['familyA']),
+                'familyB' => $this->serializeFamilyLight($pair['familyB']),
+                'score'   => $pair['score'],
+                'details' => $pair['details'],
             ];
-        });
+        })->values()->all();
 
+        Cache::put($this->pairsCacheKey(), $pairs, now()->addHours(2));
+        $this->dismissedKeys = [];
         $this->loading = false;
     }
 
@@ -63,10 +77,16 @@ class FamilyDuplicates extends Component
         $this->familyAId = $familyAId;
         $this->familyBId = $familyBId;
 
-        $familyA = Family::with('giftRequests.season')->findOrFail($familyAId);
-        $familyB = Family::with('giftRequests.season')->findOrFail($familyBId);
+        $familyA = Family::with(['giftRequests.children', 'giftRequests.season'])->findOrFail($familyAId);
+        $familyB = Family::with(['giftRequests.children', 'giftRequests.season'])->findOrFail($familyBId);
 
-        // Store only scalar fields — no nested requests/children — to stay under payload limits.
+        // Cache the full family data for the modal so render() does not re-query on every interaction.
+        Cache::put($this->modalCacheKey(), [
+            'familyA' => $this->serializeFamilyFull($familyA),
+            'familyB' => $this->serializeFamilyFull($familyB),
+        ], now()->addMinutes(30));
+
+        // Store only scalar fields in Livewire state to stay under payload limits.
         $this->currentPair = [
             'familyA' => $this->serializeFamilyLight($familyA),
             'familyB' => $this->serializeFamilyLight($familyB),
@@ -92,6 +112,7 @@ class FamilyDuplicates extends Component
 
     public function closeMerge(): void
     {
+        Cache::forget($this->modalCacheKey());
         $this->showMergeModal = false;
         $this->currentPair = null;
         $this->familyAId = null;
@@ -111,37 +132,25 @@ class FamilyDuplicates extends Component
         $service = app(FamilyDuplicateService::class);
         $service->merge($keepFamily, $removeFamily, $this->overrideFields);
 
+        // Remove all pairs involving either merged family from the cache.
+        $keepId   = $keepFamily->id;
+        $removeId = $removeFamily->id;
+        $pairs = Cache::get($this->pairsCacheKey(), []);
+        $pairs = array_values(array_filter($pairs, function ($pair) use ($keepId, $removeId) {
+            $ids = [$pair['familyA']['id'], $pair['familyB']['id']];
+
+            return ! in_array($keepId, $ids) && ! in_array($removeId, $ids);
+        }));
+        Cache::put($this->pairsCacheKey(), $pairs, now()->addHours(2));
+
         $this->closeMerge();
-
-        // Remove the merged pair from results
-        if ($this->pairs !== null) {
-            $keepId   = $keepFamily->id;
-            $removeId = $removeFamily->id;
-            $this->pairs = $this->pairs->filter(function ($pair) use ($keepId, $removeId) {
-                $ids = [$pair['familyA']['id'], $pair['familyB']['id']];
-
-                return ! in_array($keepId, $ids) && ! in_array($removeId, $ids);
-            })->values();
-        }
-
-        // Re-scan to reflect changes
-        $this->scan();
 
         session()->flash('success', 'Les deux familles ont été fusionnées avec succès.');
     }
 
     public function dismissPair(string $familyAId, string $familyBId): void
     {
-        if ($this->pairs === null) {
-            return;
-        }
-
-        $this->pairs = $this->pairs->filter(function ($pair) use ($familyAId, $familyBId) {
-            return ! (
-                ($pair['familyA']['id'] === $familyAId && $pair['familyB']['id'] === $familyBId) ||
-                ($pair['familyA']['id'] === $familyBId && $pair['familyB']['id'] === $familyAId)
-            );
-        })->values();
+        $this->dismissedKeys[] = $familyAId . '_' . $familyBId;
     }
 
     /** Minimal data stored in $pairs to keep Livewire payload small. */
@@ -212,18 +221,24 @@ class FamilyDuplicates extends Component
 
     public function render()
     {
-        // Load full family details from DB for the merge modal only when needed.
-        // This data is passed directly to the view and never stored in public state.
-        $modalPair = null;
-        if ($this->showMergeModal && $this->familyAId && $this->familyBId) {
-            $familyA = Family::with(['giftRequests.children', 'giftRequests.season'])->findOrFail($this->familyAId);
-            $familyB = Family::with(['giftRequests.children', 'giftRequests.season'])->findOrFail($this->familyBId);
-            $modalPair = [
-                'familyA' => $this->serializeFamilyFull($familyA),
-                'familyB' => $this->serializeFamilyFull($familyB),
-            ];
+        $cachedPairs = Cache::get($this->pairsCacheKey());
+
+        if ($cachedPairs === null) {
+            $pairs = null;
+        } else {
+            $dismissed = $this->dismissedKeys;
+            $pairs = collect($cachedPairs)->filter(function ($pair) use ($dismissed) {
+                $key = $pair['familyA']['id'] . '_' . $pair['familyB']['id'];
+
+                return ! in_array($key, $dismissed);
+            })->values();
         }
 
-        return view('livewire.admin.family-duplicates', compact('modalPair'));
+        // Retrieve cached full family data — loaded once in openMerge(), not re-queried on every render.
+        $modalPair = $this->showMergeModal
+            ? Cache::get($this->modalCacheKey())
+            : null;
+
+        return view('livewire.admin.family-duplicates', compact('pairs', 'modalPair'));
     }
 }
