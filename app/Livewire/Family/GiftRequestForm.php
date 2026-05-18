@@ -36,6 +36,8 @@ class GiftRequestForm extends Component
     public bool $isModifying = false;
     public bool $canModify = true;
     public bool $submitted = false;
+    public bool $isPermanentlyRejected = false;
+    public string $organizerEmail = '';
 
     // Family data
     public string $firstName = '';
@@ -102,6 +104,7 @@ class GiftRequestForm extends Component
             }
 
             $this->season = $status['season'];
+            $this->organizerEmail = $this->season->responsible_email ?? '';
 
             // Load settings
             $this->maxConsecutiveYears = Setting::getMaxConsecutiveYears();
@@ -115,6 +118,17 @@ class GiftRequestForm extends Component
             $this->family = Family::where('email', $this->email)->first();
 
             if ($this->family) {
+                // Check if permanently rejected on any previous season
+                $permanentlyRejected = GiftRequest::where('family_id', $this->family->id)
+                    ->where('status', GiftRequest::STATUS_REJECTED_FINAL)
+                    ->exists();
+
+                if ($permanentlyRejected) {
+                    $this->isPermanentlyRejected = true;
+
+                    return;
+                }
+
                 // Load family data
                 $this->firstName = $this->family->first_name ?? '';
                 $this->lastName = $this->family->last_name ?? '';
