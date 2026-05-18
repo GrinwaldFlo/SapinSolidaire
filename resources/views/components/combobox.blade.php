@@ -99,6 +99,9 @@
         role="combobox"
         :aria-expanded="open.toString()"
         aria-haspopup="listbox"
+        aria-autocomplete="list"
+        :aria-controls="$id('combobox-list')"
+        :aria-activedescendant="open && activeIndex >= 0 ? $id('combobox-option', activeIndex) : null"
         class="{{ $hasError ? 'field-input-error' : 'field-input' }}"
         @if($disabled) disabled @endif
     />
@@ -112,11 +115,13 @@
         x-transition:leave="transition ease-in duration-75"
         x-transition:leave-start="opacity-100 translate-y-0"
         x-transition:leave-end="opacity-0 -translate-y-1"
+        :id="$id('combobox-list')"
         class="absolute z-30 left-0 right-0 mt-1 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-600 rounded-lg shadow-lg max-h-52 overflow-y-auto"
         role="listbox"
     >
         <template x-for="(s, i) in filtered" :key="s">
             <li
+                :id="$id('combobox-option', i)"
                 x-text="s"
                 x-on:mousedown.prevent="select(s)"
                 :class="i === activeIndex
@@ -124,7 +129,7 @@
                     : 'text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-700'"
                 class="px-4 py-2.5 cursor-pointer text-sm transition-colors"
                 role="option"
-                :aria-selected="i === activeIndex"
+                :aria-selected="(i === activeIndex).toString()"
             ></li>
         </template>
     </ul>
