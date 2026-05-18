@@ -51,7 +51,7 @@ class UserManagement extends Component
     public function render()
     {
         return view('livewire.admin.user-management', [
-            'users' => User::with('roles')->paginate(20),
+            'users' => User::with('roles')->paginate(200),
         ]);
     }
 }

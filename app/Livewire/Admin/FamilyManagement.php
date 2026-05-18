@@ -37,7 +37,7 @@ class FamilyManagement extends Component
         }
 
         return view('livewire.admin.family-management', [
-            'families' => $query->orderBy('last_name')->paginate(20),
+            'families' => $query->orderBy('last_name')->paginate(200),
         ]);
     }
 }

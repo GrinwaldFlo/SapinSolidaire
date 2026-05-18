@@ -221,7 +221,7 @@ class ChildrenMonitoring extends Component
                 $query->orderBy($this->sortBy, $this->sortDirection);
             }
 
-            $children = $query->paginate(100);
+            $children = $query->paginate(200);
         }
 
         return view('livewire.admin.children-monitoring', [
