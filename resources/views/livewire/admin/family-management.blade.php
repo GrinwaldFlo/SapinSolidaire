@@ -10,16 +10,16 @@
         <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
             <thead class="bg-gray-50 dark:bg-zinc-700">
                 <tr>
-                    <th wire:click="sort('first_name')" class="table-header cursor-pointer hover:text-gray-700 dark:hover:text-white select-none">
+                    <th wire:click="sort('first_name')" class="table-header--sortable">
                         Prénom @if($sortBy === 'first_name') <span>{{ $sortDirection === 'asc' ? '▲' : '▼' }}</span> @else <span class="opacity-30">▲</span> @endif
                     </th>
-                    <th wire:click="sort('last_name')" class="table-header cursor-pointer hover:text-gray-700 dark:hover:text-white select-none">
+                    <th wire:click="sort('last_name')" class="table-header--sortable">
                         Nom @if($sortBy === 'last_name') <span>{{ $sortDirection === 'asc' ? '▲' : '▼' }}</span> @else <span class="opacity-30">▲</span> @endif
                     </th>
-                    <th wire:click="sort('email')" class="table-header cursor-pointer hover:text-gray-700 dark:hover:text-white select-none">
+                    <th wire:click="sort('email')" class="table-header--sortable">
                         Email @if($sortBy === 'email') <span>{{ $sortDirection === 'asc' ? '▲' : '▼' }}</span> @else <span class="opacity-30">▲</span> @endif
                     </th>
-                    <th wire:click="sort('phone')" class="table-header cursor-pointer hover:text-gray-700 dark:hover:text-white select-none">
+                    <th wire:click="sort('phone')" class="table-header--sortable">
                         Téléphone @if($sortBy === 'phone') <span>{{ $sortDirection === 'asc' ? '▲' : '▼' }}</span> @else <span class="opacity-30">▲</span> @endif
                     </th>
                     <th class="table-header">Adresse</th>
