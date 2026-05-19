@@ -3,8 +3,10 @@
 namespace App\Livewire\Admin;
 
 use App\Livewire\Admin\Concerns\HandlesFamilyValidation;
+use App\Models\Family;
 use App\Models\GiftRequest;
 use App\Models\Season;
+use App\Services\FamilyDuplicateService;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 
@@ -17,6 +19,7 @@ class FamilyValidation extends Component
     public ?Season $activeSeason = null;
     public ?GiftRequest $currentRequest = null;
     public int $pendingFamiliesCount = 0;
+    public array $potentialDuplicates = [];
 
     public function mount(): void
     {
@@ -53,6 +56,41 @@ class FamilyValidation extends Component
                 break;
             }
         }
+
+        $this->checkForDuplicates();
+    }
+
+    protected function checkForDuplicates(): void
+    {
+        $this->potentialDuplicates = [];
+
+        if (! $this->currentRequest) {
+            return;
+        }
+
+        $currentFamily = $this->currentRequest->family;
+        $service = new FamilyDuplicateService;
+        $threshold = 52.0;
+
+        $otherFamilies = Family::with(['giftRequests.children', 'giftRequests.season'])
+            ->where('id', '!=', $currentFamily->id)
+            ->get();
+
+        $currentFamily->load(['giftRequests.children', 'giftRequests.season']);
+
+        foreach ($otherFamilies as $other) {
+            $result = $service->score($currentFamily, $other);
+            if ($result['score'] >= $threshold) {
+                $this->potentialDuplicates[] = [
+                    'id'         => $other->id,
+                    'first_name' => $other->first_name,
+                    'last_name'  => $other->last_name,
+                    'score'      => $result['score'],
+                ];
+            }
+        }
+
+        usort($this->potentialDuplicates, fn ($a, $b) => $b['score'] <=> $a['score']);
     }
 
     protected function releaseReservation(string $adminId): void

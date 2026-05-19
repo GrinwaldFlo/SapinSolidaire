@@ -15,6 +15,18 @@
             🎉 Toutes les familles ont été traitées !
         </div>
     @else
+        @if(!empty($potentialDuplicates))
+            <div class="notice-warning">
+                <strong>⚠ {{ __('Doublon potentiel détecté') }}</strong> —
+                {{ __('Cette famille ressemble à') }} {{ count($potentialDuplicates) }} {{ __('famille(s) existante(s)') }} :
+                <ul class="mt-1 list-disc list-inside">
+                    @foreach($potentialDuplicates as $dup)
+                        <li>{{ $dup['last_name'] }} {{ $dup['first_name'] }} — {{ __('score') }} : {{ $dup['score'] }}%</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <div class="card">
             <div class="mb-6">
                 <x-validation.family-info :request="$currentRequest">
