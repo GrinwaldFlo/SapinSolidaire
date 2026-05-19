@@ -26,7 +26,7 @@
 
             <div class="flex-1 min-w-[200px]">
                 <label class="field-label">Recherche</label>
-                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Code, prénom, nom, cadeau…" class="field-input" />
+                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Code, prénom, nom, cadeau…" class="field-input" autocomplete="off" data-bwignore="true" data-1p-ignore data-lpignore="true" />
             </div>
 
             @if($selectedSeasonId)
