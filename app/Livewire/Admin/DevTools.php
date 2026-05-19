@@ -197,28 +197,47 @@ class DevTools extends Component
 
     public function nukeDangerZone(): void
     {
-        // Delete proof of habitation files
+        // Collect file paths before deleting DB rows that reference them
         $proofPaths = GiftRequest::whereNotNull('proof_of_habitation_path')
             ->pluck('proof_of_habitation_path');
 
-        foreach ($proofPaths as $path) {
-            Storage::disk('local')->delete($path);
-        }
-
-        // Delete generated PDF files
         $pdfPaths = \App\Models\GeneratedPdf::pluck('path');
 
-        foreach ($pdfPaths as $path) {
-            Storage::disk('local')->delete($path);
+        try {
+            DB::transaction(function (): void {
+                // Delete rows in FK-safe order
+                DB::table('children')->delete();
+                DB::table('email_tokens')->delete();
+                DB::table('generated_pdfs')->delete();
+                DB::table('gift_requests')->delete();
+                DB::table('pickup_slots')->delete();
+                DB::table('families')->delete();
+            });
+        } catch (\Throwable $e) {
+            $this->flash('La suppression a échoué avant d\'être finalisée. Aucune suppression partielle en base de données n\'a été conservée.', 'error');
+
+            return;
         }
 
-        // Truncate tables (order matters for FK constraints)
-        DB::table('children')->delete();
-        DB::table('email_tokens')->delete();
-        DB::table('generated_pdfs')->delete();
-        DB::table('gift_requests')->delete();
-        DB::table('pickup_slots')->delete();
-        DB::table('families')->delete();
+        $failedDeletions = [];
+
+        foreach ($proofPaths as $path) {
+            if (! Storage::disk('local')->delete($path)) {
+                $failedDeletions[] = $path;
+            }
+        }
+
+        foreach ($pdfPaths as $path) {
+            if (! Storage::disk('local')->delete($path)) {
+                $failedDeletions[] = $path;
+            }
+        }
+
+        if ($failedDeletions !== []) {
+            $this->flash('Toutes les données ont été supprimées de la base, mais certains fichiers n\'ont pas pu être supprimés : '.implode(', ', $failedDeletions), 'warning');
+
+            return;
+        }
 
         $this->flash('Toutes les familles, enfants, cadeaux et fichiers ont été supprimés.', 'success');
     }
