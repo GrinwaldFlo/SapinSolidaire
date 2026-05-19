@@ -213,8 +213,8 @@
                                             <span class="badge--info ml-1 text-xs">Famille {{ $req['side'] }}</span>
                                         </p>
                                         @if(!empty($req['children']))
-                                            <ul class="list-disc list-inside text-muted">
-                                                @foreach($req['children'] as $child)
+                                                            <ul class="list-disc list-inside text-muted">
+                                                                @foreach(collect($req['children'])->sortBy('birth_year') as $child)
                                                     <li>{{ $child['first_name'] }} ({{ $child['birth_year'] ?? '?' }}) — {{ $genderLabels[$child['gender']] ?? 'Non précisé' }}</li>
                                                 @endforeach
                                             </ul>

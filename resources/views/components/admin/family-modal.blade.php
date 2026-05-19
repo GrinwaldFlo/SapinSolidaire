@@ -8,55 +8,71 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
-            <div class="p-4 space-y-4">
-                {{-- Parent --}}
-                <div>
-                    <h3 class="sub-label">Parent</h3>
-                    <p class="detail-value">{{ $selectedFamily['first_name'] }} {{ $selectedFamily['last_name'] }}</p>
+            <div class="p-4 md:p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {{-- Left column: contact info --}}
+                    <div class="space-y-4">
+                        {{-- Parent --}}
+                        <div>
+                            <h3 class="sub-label">Parent</h3>
+                            <p class="detail-value">{{ $selectedFamily['first_name'] }} {{ $selectedFamily['last_name'] }}</p>
+                        </div>
+
+                        {{-- Email --}}
+                        @if($selectedFamily['email'])
+                            <div>
+                                <h3 class="sub-label">Email</h3>
+                                <a href="mailto:{{ $selectedFamily['email'] }}" class="link break-all">{{ $selectedFamily['email'] }}</a>
+                            </div>
+                        @endif
+
+                        {{-- Phone --}}
+                        @if($selectedFamily['phone'])
+                            <div>
+                                <h3 class="sub-label">Téléphone</h3>
+                                <a href="tel:{{ $selectedFamily['tel_phone'] }}" class="link">{{ $selectedFamily['formatted_phone'] }}</a>
+                            </div>
+                        @endif
+
+                        {{-- Address --}}
+                        @if($selectedFamily['full_address'])
+                            <div>
+                                <h3 class="sub-label">Adresse</h3>
+                                <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($selectedFamily['full_address']) }}" target="_blank" rel="noopener" class="link">{{ $selectedFamily['full_address'] }}</a>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Right column: seasons & children --}}
+                    @if(count($selectedFamily['seasons']) > 0)
+                        <div>
+                            <h3 class="sub-label mb-2">{{ __('Saisons') }}</h3>
+                            <div class="space-y-4">
+                                @foreach($selectedFamily['seasons'] as $season)
+                                    <div>
+                                        <p class="detail-label mb-1">{{ $season['season_name'] }}</p>
+                                        @if(count($season['children']) > 0)
+                                            <ul class="space-y-2">
+                                                @foreach($season['children'] as $familyChild)
+                                                    <li class="bg-gray-50 dark:bg-zinc-700 rounded-lg p-3">
+                                                        <p class="detail-value">{{ $familyChild['first_name'] }}</p>
+                                                        <p class="text-sm text-muted">
+                                                            {{ $familyChild['formatted_age'] }}
+                                                            @if($familyChild['gender_label']) — {{ $familyChild['gender_label'] }} @endif
+                                                            @if($familyChild['gift']) — {{ $familyChild['gift'] }} @endif
+                                                        </p>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <p class="text-muted text-sm">{{ __('Aucun enfant') }}</p>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </div>
-
-                {{-- Email --}}
-                @if($selectedFamily['email'])
-                    <div>
-                        <h3 class="sub-label">Email</h3>
-                        <a href="mailto:{{ $selectedFamily['email'] }}" class="link break-all">{{ $selectedFamily['email'] }}</a>
-                    </div>
-                @endif
-
-                {{-- Phone --}}
-                @if($selectedFamily['phone'])
-                    <div>
-                        <h3 class="sub-label">Téléphone</h3>
-                        <a href="tel:{{ $selectedFamily['tel_phone'] }}" class="link">{{ $selectedFamily['formatted_phone'] }}</a>
-                    </div>
-                @endif
-
-                {{-- Address --}}
-                @if($selectedFamily['full_address'])
-                    <div>
-                        <h3 class="sub-label">Adresse</h3>
-                        <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($selectedFamily['full_address']) }}" target="_blank" rel="noopener" class="link">{{ $selectedFamily['full_address'] }}</a>
-                    </div>
-                @endif
-
-                {{-- Children --}}
-                @if(count($selectedFamily['children']) > 0)
-                    <div>
-                        <h3 class="sub-label mb-2">Enfants</h3>
-                        <ul class="space-y-2">
-                            @foreach($selectedFamily['children'] as $familyChild)
-                                <li class="bg-gray-50 dark:bg-zinc-700 rounded-lg p-3">
-                                    <p class="detail-value">{{ $familyChild['first_name'] }}</p>
-                                    <p class="text-sm text-muted">
-                                        {{ $familyChild['formatted_age'] }}
-                                        @if($familyChild['gender_label']) — {{ $familyChild['gender_label'] }} @endif
-                                        @if($familyChild['gift']) — {{ $familyChild['gift'] }} @endif
-                                    </p>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
             </div>
             <div class="modal-footer">
                 <button wire:click="closeFamilyModal" class="w-full btn-secondary">
