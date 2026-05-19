@@ -1,4 +1,5 @@
 <div class="space-y-6" x-data="{ showImageModal: false, imageUrl: '', imageAlt: '' }">
+    <x-admin.family-modal :showFamilyModal="$showFamilyModal" :selectedFamily="$selectedFamily" />
     <div class="flex items-center justify-between">
         <h1 class="section-title">Validation des demandes</h1>
         <div class="text-sm text-muted">
@@ -15,6 +16,23 @@
             🎉 Toutes les demandes ont été traitées !
         </div>
     @else
+        @if(!empty($potentialDuplicates))
+            <div class="notice-warning">
+                <strong>⚠ {{ __('Doublon potentiel détecté') }}</strong> —
+                {{ __('Cette famille ressemble à') }} {{ count($potentialDuplicates) }} {{ __('famille(s) existante(s)') }} :
+                <ul class="mt-1 list-disc list-inside">
+                    @foreach($potentialDuplicates as $dup)
+                        <li>
+                            <button wire:click="showFamilyDetails('{{ $dup['id'] }}')" class="link">
+                                {{ $dup['last_name'] }} {{ $dup['first_name'] }}
+                            </button>
+                            — {{ __('score') }} : {{ $dup['score'] }}%
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <div class="card">
             <div class="mb-6 pb-6 border-b border-gray-200 dark:border-zinc-700">
                 <x-validation.family-info :request="$currentRequest">
@@ -40,8 +58,8 @@
                             </label>
                         </div>
                         @if(in_array($familyDecision, ['correction', 'rejected']))
-                            <textarea wire:model="familyComment" class="w-full mt-2 border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 rounded-md shadow-sm" rows="2" placeholder="Commentaire..."></textarea>
-                            @error('familyComment') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
+                            <textarea wire:model="familyComment" class="field-input mt-2" rows="2" placeholder="Commentaire..."></textarea>
+                            @error('familyComment') <p class="field-error mt-1">{{ $message }}</p> @enderror
                         @endif
                     </div>
                     @endif
@@ -113,8 +131,8 @@
                                     </label>
                                 </div>
                                 @if(in_array($childDecisions[$child->id] ?? '', ['correction', 'rejected']))
-                                    <textarea wire:model="childComments.{{ $child->id }}" class="w-full mt-2 border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 rounded-md shadow-sm text-sm" rows="2" placeholder="Commentaire..."></textarea>
-                                    @error('childComments.'.$child->id) <span class="text-red-500 text-sm mt-1 mb-2 block">{{ $message }}</span> @enderror
+                                    <textarea wire:model="childComments.{{ $child->id }}" class="field-input mt-2 text-sm" rows="2" placeholder="Commentaire..."></textarea>
+                                    @error('childComments.'.$child->id) <p class="field-error mt-1 mb-2">{{ $message }}</p> @enderror
                                 @endif
                             </div>
                             @endif

@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Admin\Concerns\ChecksDuplicateFamily;
 use App\Livewire\Admin\Concerns\HandlesFamilyValidation;
+use App\Livewire\Admin\Concerns\ShowsFamilyModal;
 use App\Models\GiftRequest;
 use App\Models\Season;
 use Illuminate\Support\Facades\Cache;
@@ -10,7 +12,7 @@ use Livewire\Component;
 
 class FamilyValidation extends Component
 {
-    use HandlesFamilyValidation;
+    use ChecksDuplicateFamily, HandlesFamilyValidation, ShowsFamilyModal;
 
     private const LOCK_TTL_SECONDS = 300;
 
@@ -53,6 +55,8 @@ class FamilyValidation extends Component
                 break;
             }
         }
+
+        $this->checkForDuplicates();
     }
 
     protected function releaseReservation(string $adminId): void

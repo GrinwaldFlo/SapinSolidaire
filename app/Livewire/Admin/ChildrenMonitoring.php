@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Admin\Concerns\ShowsFamilyModal;
 use App\Models\Child;
 use App\Models\Season;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -11,7 +12,7 @@ use Livewire\WithPagination;
 
 class ChildrenMonitoring extends Component
 {
-    use WithPagination;
+    use ShowsFamilyModal, WithPagination;
 
     private const SORTABLE_COLUMNS = [
         'first_name',
@@ -27,9 +28,6 @@ class ChildrenMonitoring extends Component
     public string $search = '';
     public string $sortBy = 'first_name';
     public string $sortDirection = 'asc';
-
-    public bool $showFamilyModal = false;
-    public ?array $selectedFamily = null;
 
     public function mount(): void
     {
@@ -67,48 +65,6 @@ class ChildrenMonitoring extends Component
         }
 
         $this->resetPage();
-    }
-
-    public function showFamilyDetails(string $familyId): void
-    {
-        $family = \App\Models\Family::find($familyId);
-
-        if (! $family) {
-            return;
-        }
-
-        $children = collect();
-        if ($this->selectedSeasonId) {
-            $giftRequest = $family->giftRequests()->where('season_id', $this->selectedSeasonId)->first();
-            if ($giftRequest) {
-                $children = $giftRequest->children()->orderBy('first_name')->get()
-                    ->map(fn ($child) => [
-                        'first_name' => $child->first_name,
-                        'formatted_age' => $child->formatted_age,
-                        'gender_label' => $child->gender !== 'unspecified' ? $child->gender_label : null,
-                        'gift' => $child->gift,
-                    ]);
-            }
-        }
-
-        $this->selectedFamily = [
-            'last_name' => $family->last_name,
-            'first_name' => $family->first_name,
-            'email' => $family->email,
-            'phone' => $family->phone,
-            'formatted_phone' => $family->formatted_phone,
-            'tel_phone' => $family->tel_phone,
-            'full_address' => $family->full_address,
-            'children' => $children->toArray(),
-        ];
-
-        $this->showFamilyModal = true;
-    }
-
-    public function closeFamilyModal(): void
-    {
-        $this->showFamilyModal = false;
-        $this->selectedFamily = null;
     }
 
     public function exportPdf()
@@ -221,7 +177,7 @@ class ChildrenMonitoring extends Component
                 $query->orderBy($this->sortBy, $this->sortDirection);
             }
 
-            $children = $query->paginate(100);
+            $children = $query->paginate(200);
         }
 
         return view('livewire.admin.children-monitoring', [

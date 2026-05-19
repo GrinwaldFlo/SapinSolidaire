@@ -24,3 +24,5 @@ yarn-error.log
 /.vs
 /_doc/OldExcelMacro.vbs
 /_doc/Extra
+/_extra/SapinImport/bin/Debug/net10.0
+/_extra/SapinImport/obj

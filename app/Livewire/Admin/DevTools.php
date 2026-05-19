@@ -8,6 +8,7 @@ use App\Models\Family;
 use App\Models\GiftRequest;
 use App\Models\Season;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Component;
 
@@ -192,6 +193,53 @@ class DevTools extends Component
         ]);
 
         $this->flash("{$childrenReceived} cadeau(x) marqué(s) comme reçu(s).", 'success');
+    }
+
+    public function nukeDangerZone(): void
+    {
+        // Collect file paths before deleting DB rows that reference them
+        $proofPaths = GiftRequest::whereNotNull('proof_of_habitation_path')
+            ->pluck('proof_of_habitation_path');
+
+        $pdfPaths = \App\Models\GeneratedPdf::pluck('path');
+
+        try {
+            DB::transaction(function (): void {
+                // Delete rows in FK-safe order
+                DB::table('children')->delete();
+                DB::table('email_tokens')->delete();
+                DB::table('generated_pdfs')->delete();
+                DB::table('gift_requests')->delete();
+                DB::table('pickup_slots')->delete();
+                DB::table('families')->delete();
+            });
+        } catch (\Throwable $e) {
+            $this->flash('La suppression a échoué avant d\'être finalisée. Aucune suppression partielle en base de données n\'a été conservée.', 'error');
+
+            return;
+        }
+
+        $failedDeletions = [];
+
+        foreach ($proofPaths as $path) {
+            if (! Storage::disk('local')->delete($path)) {
+                $failedDeletions[] = $path;
+            }
+        }
+
+        foreach ($pdfPaths as $path) {
+            if (! Storage::disk('local')->delete($path)) {
+                $failedDeletions[] = $path;
+            }
+        }
+
+        if ($failedDeletions !== []) {
+            $this->flash('Toutes les données ont été supprimées de la base, mais certains fichiers n\'ont pas pu être supprimés : '.implode(', ', $failedDeletions), 'warning');
+
+            return;
+        }
+
+        $this->flash('Toutes les familles, enfants, cadeaux et fichiers ont été supprimés.', 'success');
     }
 
     protected function flash(string $message, string $type): void

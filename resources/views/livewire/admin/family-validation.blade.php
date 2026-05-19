@@ -1,4 +1,5 @@
 <div class="space-y-6" x-data="{ showImageModal: false, imageUrl: '', imageAlt: '' }">
+    <x-admin.family-modal :showFamilyModal="$showFamilyModal" :selectedFamily="$selectedFamily" />
     <div class="flex items-center justify-between">
         <h1 class="section-title">Validation des familles</h1>
         <div class="text-sm text-muted">
@@ -15,6 +16,23 @@
             🎉 Toutes les familles ont été traitées !
         </div>
     @else
+        @if(!empty($potentialDuplicates))
+            <div class="notice-warning">
+                <strong>⚠ {{ __('Doublon potentiel détecté') }}</strong> —
+                {{ __('Cette famille ressemble à') }} {{ count($potentialDuplicates) }} {{ __('famille(s) existante(s)') }} :
+                <ul class="mt-1 list-disc list-inside">
+                    @foreach($potentialDuplicates as $dup)
+                        <li>
+                            <button wire:click="showFamilyDetails('{{ $dup['id'] }}')" class="link">
+                                {{ $dup['last_name'] }} {{ $dup['first_name'] }}
+                            </button>
+                            — {{ __('score') }} : {{ $dup['score'] }}%
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <div class="card">
             <div class="mb-6">
                 <x-validation.family-info :request="$currentRequest">

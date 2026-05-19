@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Admin\Concerns\ChecksDuplicateFamily;
 use App\Livewire\Admin\Concerns\HandlesFamilyValidation;
+use App\Livewire\Admin\Concerns\ShowsFamilyModal;
 use App\Models\Child;
 use App\Models\GiftRequest;
 use App\Models\Season;
@@ -12,7 +14,7 @@ use Livewire\Component;
 
 class Validation extends Component
 {
-    use HandlesFamilyValidation;
+    use ChecksDuplicateFamily, HandlesFamilyValidation, ShowsFamilyModal;
 
     private const LOCK_TTL_SECONDS = 300;
 
@@ -84,6 +86,7 @@ class Validation extends Component
                 Cache::put("validation_admin:{$adminId}", $candidateId, self::LOCK_TTL_SECONDS);
                 $this->currentRequest = GiftRequest::with(['family', 'children'])->find($candidateId);
                 $this->initFormState();
+                $this->checkForDuplicates();
                 break;
             }
         }
