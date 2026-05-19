@@ -8,6 +8,7 @@ use App\Models\Family;
 use App\Models\GiftRequest;
 use App\Models\Season;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Component;
 
@@ -192,6 +193,34 @@ class DevTools extends Component
         ]);
 
         $this->flash("{$childrenReceived} cadeau(x) marqué(s) comme reçu(s).", 'success');
+    }
+
+    public function nukeDangerZone(): void
+    {
+        // Delete proof of habitation files
+        $proofPaths = GiftRequest::whereNotNull('proof_of_habitation_path')
+            ->pluck('proof_of_habitation_path');
+
+        foreach ($proofPaths as $path) {
+            Storage::disk('local')->delete($path);
+        }
+
+        // Delete generated PDF files
+        $pdfPaths = \App\Models\GeneratedPdf::pluck('path');
+
+        foreach ($pdfPaths as $path) {
+            Storage::disk('local')->delete($path);
+        }
+
+        // Truncate tables (order matters for FK constraints)
+        DB::table('children')->delete();
+        DB::table('email_tokens')->delete();
+        DB::table('generated_pdfs')->delete();
+        DB::table('gift_requests')->delete();
+        DB::table('pickup_slots')->delete();
+        DB::table('families')->delete();
+
+        $this->flash('Toutes les familles, enfants, cadeaux et fichiers ont été supprimés.', 'success');
     }
 
     protected function flash(string $message, string $type): void

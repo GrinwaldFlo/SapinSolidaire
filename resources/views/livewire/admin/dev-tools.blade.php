@@ -119,5 +119,17 @@
             <span wire:loading wire:target="batchReceive">Réception...</span>
         </button>
     </div>
+    {{-- Danger Zone --}}
+    <div class="card border-2 border-red-500 dark:border-red-600">
+        <h2 class="section-title text-red-600 dark:text-red-400">⚠️ Zone de danger</h2>
+        <p class="text-muted mb-4">
+            Supprime <strong>toutes</strong> les familles, enfants, demandes de cadeaux, créneaux, jetons e-mail, PDFs générés et fichiers associés (justificatifs, PDFs). Les utilisateurs et paramètres sont conservés.
+        </p>
+        <button wire:click="nukeDangerZone" wire:loading.attr="disabled" class="btn-danger disabled:opacity-50"
+            wire:confirm="⚠️ ATTENTION : Cette action est irréversible. Toutes les familles, enfants et fichiers seront définitivement supprimés. Continuer ?">
+            <span wire:loading.remove wire:target="nukeDangerZone">🗑️ Tout supprimer</span>
+            <span wire:loading wire:target="nukeDangerZone">Suppression...</span>
+        </button>
+    </div>
     @endif
 </div>
