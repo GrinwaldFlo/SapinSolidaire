@@ -11,8 +11,17 @@ class FamilyManagement extends Component
 {
     use WithPagination;
 
+    private const SORTABLE_COLUMNS = [
+        'first_name',
+        'last_name',
+        'email',
+        'phone',
+    ];
+
     public ?Season $activeSeason = null;
     public string $search = '';
+    public string $sortBy = 'last_name';
+    public string $sortDirection = 'asc';
 
     public function mount(): void
     {
@@ -21,6 +30,22 @@ class FamilyManagement extends Component
 
     public function updatedSearch(): void
     {
+        $this->resetPage();
+    }
+
+    public function sort(string $column): void
+    {
+        if (! in_array($column, self::SORTABLE_COLUMNS, true)) {
+            return;
+        }
+
+        if ($this->sortBy === $column) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortBy = $column;
+            $this->sortDirection = 'asc';
+        }
+
         $this->resetPage();
     }
 
@@ -37,7 +62,7 @@ class FamilyManagement extends Component
         }
 
         return view('livewire.admin.family-management', [
-            'families' => $query->orderBy('last_name')->paginate(200),
+            'families' => $query->orderBy($this->sortBy, $this->sortDirection)->paginate(200),
         ]);
     }
 }
