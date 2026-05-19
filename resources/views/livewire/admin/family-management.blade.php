@@ -2,7 +2,7 @@
     <h1 class="section-title">Gestion des familles</h1>
 
     <div class="card-sm">
-        <input type="text" wire:model.live.debounce.300ms="search" placeholder="Rechercher par nom ou email..." class="field-input">
+        <input type="text" wire:model.live.debounce.300ms="search" placeholder="Rechercher par nom, email, téléphone, adresse ou prénom d'enfant..." class="field-input">
     </div>
 
     {{-- Desktop table --}}
