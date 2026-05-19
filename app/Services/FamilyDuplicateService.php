@@ -56,30 +56,21 @@ class FamilyDuplicateService
 
         // Last name (30 pts)
         $max += 30;
-        $s = $this->similarityRatio(
-            mb_strtolower(trim($a->last_name ?? '')),
-            mb_strtolower(trim($b->last_name ?? ''))
-        );
+        $s = $this->similarityRatioSwap($a->last_name, $b->last_name, $b->first_name);
         $pts = round($s * 30, 1);
         $details['last_name'] = $pts;
         $total += $pts;
 
         // First name (15 pts)
         $max += 15;
-        $s = $this->similarityRatio(
-            mb_strtolower(trim($a->first_name ?? '')),
-            mb_strtolower(trim($b->first_name ?? ''))
-        );
+        $s = $this->similarityRatioSwap($a->first_name, $b->first_name, $b->last_name);
         $pts = round($s * 15, 1);
         $details['first_name'] = $pts;
         $total += $pts;
 
         // Street name (10 pts)
         $max += 10;
-        $s = $this->similarityRatio(
-            mb_strtolower(trim($a->street_name ?? '')),
-            mb_strtolower(trim($b->street_name ?? ''))
-        );
+        $s = $this->similarityRatio($a->street_name, $b->street_name);
         $pts = round($s * 10, 1);
         $details['street_name'] = $pts;
         $total += $pts;
@@ -92,10 +83,7 @@ class FamilyDuplicateService
 
         // City (5 pts)
         $max += 5;
-        $s = $this->similarityRatio(
-            mb_strtolower(trim($a->city ?? '')),
-            mb_strtolower(trim($b->city ?? ''))
-        );
+        $s = $this->similarityRatio($a->city, $b->city);
         $pts = round($s * 5, 1);
         $details['city'] = $pts;
         $total += $pts;
@@ -170,10 +158,7 @@ class FamilyDuplicateService
         $score = 0.0;
 
         // First name (60%)
-        $score += 0.6 * $this->similarityRatio(
-            mb_strtolower(trim($a->first_name ?? '')),
-            mb_strtolower(trim($b->first_name ?? ''))
-        );
+        $score += 0.6 * $this->similarityRatio($a->first_name, $b->first_name);
 
         // Birth year (30%)
         if ($a->birth_year && $b->birth_year) {
@@ -189,11 +174,22 @@ class FamilyDuplicateService
         return $score;
     }
 
+    private function similarityRatioSwap(?string $a1, ?string $b1, ?string $b2): float
+    {
+        return max($this->similarityRatio($a1, $b1), $this->similarityRatio($a1, $b2));
+    }
+
     /**
      * Similarity ratio between two strings (0–1) using similar_text.
+     * Inputs are trimmed and lowercased before comparison.
      */
-    private function similarityRatio(string $a, string $b): float
+    private function similarityRatio(?string $a, ?string $b): float
     {
+        $a = mb_strtolower(trim($a ?? ''));
+        $b = mb_strtolower(trim($b ?? ''));
+        $a = preg_replace('/\p{M}/u', '', \Normalizer::normalize($a, \Normalizer::FORM_D));
+        $b = preg_replace('/\p{M}/u', '', \Normalizer::normalize($b, \Normalizer::FORM_D));
+
         if ($a === '' && $b === '') {
             return 1.0;
         }

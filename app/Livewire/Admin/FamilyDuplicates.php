@@ -33,7 +33,7 @@ class FamilyDuplicates extends Component
      */
     public array $overrideFields = [];
 
-    public float $threshold = 40.0;
+    public float $threshold = 50.0;
 
     public function mount(): void
     {
