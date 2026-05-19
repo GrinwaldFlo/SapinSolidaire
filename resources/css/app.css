@@ -271,7 +271,7 @@ select:focus[data-flux-control] {
 
     /* Modal panel (white box) */
     .modal-panel {
-        @apply relative bg-white dark:bg-zinc-800 rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto;
+        @apply relative bg-white dark:bg-zinc-800 rounded-xl shadow-2xl w-full max-w-md md:max-w-2xl max-h-[90vh] overflow-y-auto;
     }
 
     /* Modal header row */
