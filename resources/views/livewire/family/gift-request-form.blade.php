@@ -37,7 +37,7 @@
             <p class="notice-success">
                 Votre demande a bien été {{ $isModifying ? 'mise à jour' : 'enregistrée' }}.
             </p>
-            <p class="text-gray-500 dark:text-gray-400 text-sm">
+            <p class="text-muted text-sm">
                 Nous examinerons votre demande et vous contacterons par e-mail.
             </p>
         </div>
@@ -68,7 +68,7 @@
             <div class="text-center mb-8">
                 <span class="text-6xl mb-4 block">📋</span>
                 <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Conditions d'éligibilité</h2>
-                <p class="text-muted">
+                <p class="text-muted text-sm">
                     Veuillez confirmer que vous remplissez les conditions suivantes.
                 </p>
             </div>
@@ -370,11 +370,11 @@
                                     <span class="text-sm text-orange-600 dark:text-orange-400">Non modifiable ({{ $statusLabel }})</span>
                                 @elseif(isset($child['status']))
                                     @if($child['status'] === 'rejected')
-                                        <span class="text-sm font-semibold text-red-600 dark:text-red-400 px-2 py-1 bg-red-100 dark:bg-red-900/30 rounded-md">
-                                            À corriger
-                                        </span>
-                                    @elseif($child['status'] === 'validated')
-                                        <span class="text-sm font-semibold text-green-600 dark:text-green-400 px-2 py-1 bg-green-100 dark:bg-green-900/30 rounded-md flex items-center gap-1">
+                                                        <span class="badge--rejected">
+                                                            À corriger
+                                                        </span>
+                                                    @elseif($child['status'] === 'validated')
+                                                        <span class="badge--validated flex items-center gap-1">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                                             </svg>
@@ -527,17 +527,17 @@
 
     {{-- City confirmation modal --}}
     @if($showCityConfirmation)
-        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-2xl max-w-md w-full p-6">
+        <div class="modal-backdrop">
+            <div class="modal-panel p-6">
                 <div class="text-center mb-4">
                     <span class="text-4xl mb-2 block">📍</span>
-                    <h3 class="text-lg font-bold text-gray-800 dark:text-white">Confirmation de résidence</h3>
+                    <h3 class="section-title border-0 pb-0">Confirmation de résidence</h3>
                 </div>
-                <p class="text-gray-600 dark:text-gray-300 text-center mb-6">
+                <p class="text-muted text-center mb-6">
                     Confirmez-vous habiter dans la commune de
-                    <strong class="text-gray-800 dark:text-white">{{ $city }}</strong> ?
+                    <strong class="detail-value">{{ $city }}</strong>
                     <br><br>
-                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                    <span class="text-muted text-sm">
                         Il est obligatoire de résider dans une commune éligible pour pouvoir faire une demande de cadeau.
                     </span>
                 </p>

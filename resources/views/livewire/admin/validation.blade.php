@@ -58,8 +58,8 @@
                             </label>
                         </div>
                         @if(in_array($familyDecision, ['correction', 'rejected']))
-                            <textarea wire:model="familyComment" class="w-full mt-2 border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 rounded-md shadow-sm" rows="2" placeholder="Commentaire..."></textarea>
-                            @error('familyComment') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
+                            <textarea wire:model="familyComment" class="field-input mt-2" rows="2" placeholder="Commentaire..."></textarea>
+                            @error('familyComment') <p class="field-error mt-1">{{ $message }}</p> @enderror
                         @endif
                     </div>
                     @endif
@@ -131,8 +131,8 @@
                                     </label>
                                 </div>
                                 @if(in_array($childDecisions[$child->id] ?? '', ['correction', 'rejected']))
-                                    <textarea wire:model="childComments.{{ $child->id }}" class="w-full mt-2 border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 rounded-md shadow-sm text-sm" rows="2" placeholder="Commentaire..."></textarea>
-                                    @error('childComments.'.$child->id) <span class="text-red-500 text-sm mt-1 mb-2 block">{{ $message }}</span> @enderror
+                                    <textarea wire:model="childComments.{{ $child->id }}" class="field-input mt-2 text-sm" rows="2" placeholder="Commentaire..."></textarea>
+                                    @error('childComments.'.$child->id) <p class="field-error mt-1 mb-2">{{ $message }}</p> @enderror
                                 @endif
                             </div>
                             @endif
