@@ -116,7 +116,7 @@ class FamilyDuplicateService
         $childrenB = $b->giftRequests->flatMap(fn ($r) => $r->children)->values();
 
         if ($childrenA->isEmpty() && $childrenB->isEmpty()) {
-            return 0.0; // both have no children – neutral
+            return 0.0; // both have no children, treat it as like full different
         }
 
         if ($childrenA->isEmpty() || $childrenB->isEmpty()) {

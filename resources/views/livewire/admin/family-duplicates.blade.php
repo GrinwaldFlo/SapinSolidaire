@@ -11,15 +11,27 @@
             <label class="field-label">Seuil de similarité minimum : {{ $threshold }}%</label>
             <input type="range" min="10" max="90" step="5" wire:model.live="threshold" class="w-full accent-green-600">
         </div>
-        <button wire:click="scan" wire:loading.attr="disabled" class="btn-blue">
+        <button wire:click="scan" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-not-allowed" class="btn-blue flex items-center gap-2">
+            <svg wire:loading wire:target="scan" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
             <span wire:loading.remove wire:target="scan">Analyser les familles</span>
             <span wire:loading wire:target="scan">Analyse en cours…</span>
         </button>
     </div>
 
     {{-- Results --}}
+    <div wire:loading wire:target="scan" class="notice-info flex items-center gap-3">
+        <svg class="animate-spin h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+        <span>Analyse en cours, veuillez patienter…</span>
+    </div>
+
     @if($pairs === null)
-        <div class="notice-info">Cliquez sur « Analyser les familles » pour détecter les potentiels doublons.</div>
+        <div wire:loading.remove wire:target="scan" class="notice-info">Cliquez sur « Analyser les familles » pour détecter les potentiels doublons.</div>
     @elseif($pairs->isEmpty())
         <div class="notice-success">Aucun doublon détecté avec un seuil de {{ $threshold }}%.</div>
     @else
