@@ -14,6 +14,7 @@ use App\Services\SeasonService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -184,6 +185,13 @@ class GiftRequestForm extends Component
             ]);
             $this->tokenValid = false;
         }
+    }
+
+    #[Computed]
+    public function years(): array
+    {
+        $currentYear = date('Y');
+        return range($currentYear - $this->maxConsecutiveYears + 1, $currentYear - 1);
     }
 
     protected function loadChildrenFromRequest(): void

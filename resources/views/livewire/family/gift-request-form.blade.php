@@ -67,7 +67,7 @@
         <div class="card">
             <div class="text-center mb-8">
                 <span class="text-6xl mb-4 block">📋</span>
-                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Conditions d'éligibilité</h2>
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Conditions</h2>
                 <p class="text-muted text-sm">
                     Veuillez confirmer que vous remplissez les conditions suivantes.
                 </p>
@@ -78,10 +78,10 @@
                     <div class="border border-gray-200 dark:border-zinc-600 rounded-lg p-6">
                         <h3 class="section-title mb-2">Nombre d'années consécutives</h3>
                         <p class="text-muted mb-4">
-                            Je confirme ne pas avoir demandé de cadeau plus de {{ $maxConsecutiveYears - 1 }} années consécutives.
+                            Si j'ai demandé un cadeau en {{ implode(' et en ', $this->years) }}, je ne peux pas faire de demande cette année.
                         </p>
                         <button wire:click="acceptConsecutiveYears" class="btn-confirm">
-                            Je confirme
+                            J'ai compris
                         </button>
                     </div>
                 @else
