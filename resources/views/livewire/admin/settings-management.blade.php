@@ -24,8 +24,12 @@
 
             <div>
                 <label class="field-label">Nombre maximal d'années consécutives *</label>
-                <input type="number" wire:model="maxConsecutiveYears" min="1" max="10" class="field-input">
+                <input type="number" wire:model.live="maxConsecutiveYears" min="2" max="10" class="field-input">
                 @error('maxConsecutiveYears') <p class="field-error">{{ $message }}</p> @enderror
+                @php $consecutivesYears = range(date('Y') - $maxConsecutiveYears + 1, date('Y') - 1); @endphp
+                <p class="mt-1 text-sm text-muted">
+                    — "Si j'ai demandé un cadeau en {{ implode(' et en ', $consecutivesYears) }}, je ne peux pas faire de demande cette année."
+                </p>
             </div>
 
             <div>
