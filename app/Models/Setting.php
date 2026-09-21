@@ -12,6 +12,7 @@ class Setting extends Model
     use HasFactory, HasUuids;
 
     public const SITE_NAME = 'site_name';
+    public const LOGO_PATH = 'logo_path';
     public const ALLOWED_CITIES = 'allowed_cities';
     public const MAX_CONSECUTIVE_YEARS = 'max_consecutive_years';
     public const GIFT_SUGGESTIONS = 'gift_suggestions';
@@ -66,6 +67,14 @@ class Setting extends Model
     public static function getSiteName(): string
     {
         return self::getValue(self::SITE_NAME, 'Sapin Solidaire');
+    }
+
+    /**
+     * Get logo path.
+     */
+    public static function getLogoPath(): string
+    {
+        return self::getValue(self::LOGO_PATH, '/logo.svg');
     }
 
     /**

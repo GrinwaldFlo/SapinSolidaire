@@ -325,3 +325,12 @@ select:focus[data-flux-control] {
         @apply text-2xl font-bold text-green-600;
     }
 }
+
+.bg-header
+{
+    background-color: #3a5ba7;
+}
+.bg-footer
+{
+    background-color: #3a5ba7;
+}
