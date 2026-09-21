@@ -8,6 +8,7 @@ use App\Livewire\Admin\Concerns\ShowsFamilyModal;
 use App\Models\Child;
 use App\Models\GiftRequest;
 use App\Models\Season;
+use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -30,6 +31,9 @@ class Validation extends Component
     public string $familyComment = '';
     public array $childDecisions = []; // child_id => 'pending', 'validated', 'correction', 'rejected'
     public array $childComments = []; // child_id => text
+    public array $predefinedRejectionMessages = []; // index => message
+    public string $selectedFamilyMessageKey = '';
+    public array $selectedChildMessageKeys = []; // child_id => message index
 
     public function getHasPendingDecisionsProperty(): bool
     {
@@ -49,6 +53,7 @@ class Validation extends Component
     public function mount(): void
     {
         $this->activeSeason = Season::getActive();
+        $this->predefinedRejectionMessages = Setting::getValidationCommentTemplates();
         $this->loadNextRequest();
         $this->loadCounts();
     }
@@ -98,11 +103,71 @@ class Validation extends Component
         $this->familyComment = '';
         $this->childDecisions = [];
         $this->childComments = [];
+        $this->selectedFamilyMessageKey = '';
+        $this->selectedChildMessageKeys = [];
 
         foreach ($this->currentRequest->children as $child) {
             $this->childDecisions[$child->id] = $child->status === Child::STATUS_PENDING ? 'pending' : 'validated';
             $this->childComments[$child->id] = '';
+            $this->selectedChildMessageKeys[$child->id] = '';
         }
+    }
+
+    public function applyFamilyMessage(): void
+    {
+        $message = $this->resolveTemplateMessage($this->selectedFamilyMessageKey);
+
+        if ($message === '') {
+            return;
+        }
+
+        $this->familyComment = $this->appendTemplateMessage($this->familyComment, $message);
+        $this->resetErrorBag('familyComment');
+    }
+
+    public function applyChildMessage(string $childId): void
+    {
+        $messageKey = $this->selectedChildMessageKeys[$childId] ?? '';
+        $message = $this->resolveTemplateMessage((string) $messageKey);
+
+        if ($message === '') {
+            return;
+        }
+
+        $currentComment = $this->childComments[$childId] ?? '';
+        $this->childComments[$childId] = $this->appendTemplateMessage($currentComment, $message);
+        $this->resetErrorBag("childComments.$childId");
+    }
+
+    protected function resolveTemplateMessage(string $messageKey): string
+    {
+        if ($messageKey === '' || ! ctype_digit($messageKey)) {
+            return '';
+        }
+
+        $index = (int) $messageKey;
+
+        if (! array_key_exists($index, $this->predefinedRejectionMessages)) {
+            return '';
+        }
+
+        return trim((string) $this->predefinedRejectionMessages[$index]);
+    }
+
+    protected function appendTemplateMessage(string $existing, string $template): string
+    {
+        $existing = trim($existing);
+        $template = trim($template);
+
+        if ($template === '') {
+            return $existing;
+        }
+
+        if ($existing === '') {
+            return $template;
+        }
+
+        return $existing."\n\n".$template;
     }
 
     protected function releaseReservation(string $adminId): void

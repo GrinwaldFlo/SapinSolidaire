@@ -58,6 +58,17 @@
                             </label>
                         </div>
                         @if(in_array($familyDecision, ['correction', 'rejected']))
+                            @if(!empty($predefinedRejectionMessages))
+                                <div class="mb-2 flex flex-wrap items-center gap-2">
+                                    <select wire:model="selectedFamilyMessageKey" class="field-input">
+                                        <option value="">Message prédéfini...</option>
+                                        @foreach($predefinedRejectionMessages as $index => $message)
+                                            <option value="{{ $index }}">{{ \Illuminate\Support\Str::limit($message, 100) }}</option>
+                                        @endforeach
+                                    </select>
+                                    <button type="button" wire:click="applyFamilyMessage" class="btn-secondary">Insérer</button>
+                                </div>
+                            @endif
                             <textarea wire:model="familyComment" class="field-input mt-2" rows="2" placeholder="Commentaire..."></textarea>
                             @error('familyComment') <p class="field-error mt-1">{{ $message }}</p> @enderror
                         @endif
@@ -131,6 +142,17 @@
                                     </label>
                                 </div>
                                 @if(in_array($childDecisions[$child->id] ?? '', ['correction', 'rejected']))
+                                    @if(!empty($predefinedRejectionMessages))
+                                        <div class="mb-2 flex flex-wrap items-center gap-2">
+                                            <select wire:model="selectedChildMessageKeys.{{ $child->id }}" class="field-input">
+                                                <option value="">Message prédéfini...</option>
+                                                @foreach($predefinedRejectionMessages as $index => $message)
+                                                    <option value="{{ $index }}">{{ \Illuminate\Support\Str::limit($message, 100) }}</option>
+                                                @endforeach
+                                            </select>
+                                            <button type="button" wire:click="applyChildMessage('{{ $child->id }}')" class="btn-secondary">Insérer</button>
+                                        </div>
+                                    @endif
                                     <textarea wire:model="childComments.{{ $child->id }}" class="field-input mt-2 text-sm" rows="2" placeholder="Commentaire..."></textarea>
                                     @error('childComments.'.$child->id) <p class="field-error mt-1 mb-2">{{ $message }}</p> @enderror
                                 @endif

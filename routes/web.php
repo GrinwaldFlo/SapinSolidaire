@@ -15,6 +15,7 @@ use App\Livewire\Admin\SendConfirmations;
 use App\Livewire\Admin\SettingsManagement;
 use App\Livewire\Admin\UserManagement;
 use App\Livewire\Admin\Validation;
+use App\Livewire\Admin\ValidationMessageTemplates;
 use App\Livewire\Family\GiftRequestForm;
 use App\Livewire\Family\Home;
 use App\Models\GeneratedPdf;
@@ -106,6 +107,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::get('/saisons', SeasonManagement::class)->name('admin.seasons');
         Route::get('/utilisateurs', UserManagement::class)->name('admin.users');
         Route::get('/parametres', SettingsManagement::class)->name('admin.settings');
+        Route::get('/messages-validation', ValidationMessageTemplates::class)->name('admin.validation-messages');
         Route::get('/dev-tools', DevTools::class)->name('admin.dev-tools');
         Route::get('/css-showcase', CssShowcase::class)->name('admin.css-showcase');
     });

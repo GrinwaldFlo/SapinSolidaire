@@ -1,4 +1,4 @@
-@props(['showRejectionModal', 'isFinalRejection'])
+@props(['showRejectionModal', 'isFinalRejection', 'predefinedRejectionMessages' => [], 'selectedRejectionMessageKey' => ''])
 
 @if($showRejectionModal)
     <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -11,6 +11,19 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Commentaire / Motif *
                 </label>
+
+                @if(!empty($predefinedRejectionMessages))
+                    <div class="mb-2 flex flex-wrap items-center gap-2">
+                        <select wire:model="selectedRejectionMessageKey" class="field-input">
+                            <option value="">Message prédéfini...</option>
+                            @foreach($predefinedRejectionMessages as $index => $message)
+                                <option value="{{ $index }}">{{ \Illuminate\Support\Str::limit($message, 100) }}</option>
+                            @endforeach
+                        </select>
+                        <button type="button" wire:click="applyRejectionMessage" class="btn-secondary">Insérer</button>
+                    </div>
+                @endif
+
                 <textarea wire:model="rejectionComment" rows="4" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg dark:bg-zinc-700 dark:text-white" placeholder="Expliquez le motif du refus ou les corrections à apporter..."></textarea>
                 @error('rejectionComment') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>

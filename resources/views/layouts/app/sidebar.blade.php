@@ -87,6 +87,10 @@
                         Paramètres
                     </flux:sidebar.item>
 
+                    <flux:sidebar.item icon="chat-bubble-left-right" :href="route('admin.validation-messages')" :current="request()->routeIs('admin.validation-messages')" wire:navigate>
+                        Messages de validation
+                    </flux:sidebar.item>
+
                     @if(!app()->isProduction())
                     <flux:sidebar.item icon="wrench" :href="route('admin.dev-tools')" :current="request()->routeIs('admin.dev-tools')" wire:navigate>
                         Dev Tools
