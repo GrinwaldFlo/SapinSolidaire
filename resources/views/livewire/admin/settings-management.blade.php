@@ -1,6 +1,12 @@
 <div class="space-y-6">
     <h1 class="section-title">Paramètres du site</h1>
 
+    <p>
+        <a href="{{ route('admin.validation-messages') }}" class="link" wire:navigate>
+            Gérer les messages prédéfinis de validation
+        </a>
+    </p>
+
     @if(session()->has('message'))
         <div class="notice-success">
             {{ session('message') }}

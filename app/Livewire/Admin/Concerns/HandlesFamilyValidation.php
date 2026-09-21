@@ -48,6 +48,10 @@ trait HandlesFamilyValidation
         $this->rejectionTargetId = null;
         $this->isFinalRejection = false;
         $this->rejectionComment = '';
+
+        if (property_exists($this, 'selectedRejectionMessageKey')) {
+            $this->selectedRejectionMessageKey = '';
+        }
     }
 
     protected function sendRejectionEmail(string $email, bool $isFinal, string $comment): void

@@ -7,6 +7,7 @@ use App\Livewire\Admin\Concerns\HandlesFamilyValidation;
 use App\Livewire\Admin\Concerns\ShowsFamilyModal;
 use App\Models\GiftRequest;
 use App\Models\Season;
+use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 
@@ -19,10 +20,13 @@ class FamilyValidation extends Component
     public ?Season $activeSeason = null;
     public ?GiftRequest $currentRequest = null;
     public int $pendingFamiliesCount = 0;
+    public array $predefinedRejectionMessages = [];
+    public string $selectedRejectionMessageKey = '';
 
     public function mount(): void
     {
         $this->activeSeason = Season::getActive();
+        $this->predefinedRejectionMessages = Setting::getValidationCommentTemplates();
         $this->loadNextRequest();
         $this->loadCounts();
     }
@@ -85,7 +89,29 @@ class FamilyValidation extends Component
         $this->rejectionTargetId = $id;
         $this->isFinalRejection = $isFinal;
         $this->rejectionComment = '';
+        $this->selectedRejectionMessageKey = '';
         $this->showRejectionModal = true;
+    }
+
+    public function applyRejectionMessage(): void
+    {
+        if ($this->selectedRejectionMessageKey === '' || ! ctype_digit($this->selectedRejectionMessageKey)) {
+            return;
+        }
+
+        $index = (int) $this->selectedRejectionMessageKey;
+        if (! array_key_exists($index, $this->predefinedRejectionMessages)) {
+            return;
+        }
+
+        $template = trim((string) $this->predefinedRejectionMessages[$index]);
+        if ($template === '') {
+            return;
+        }
+
+        $currentComment = trim($this->rejectionComment);
+        $this->rejectionComment = $currentComment === '' ? $template : $currentComment."\n\n".$template;
+        $this->resetErrorBag('rejectionComment');
     }
 
     public function confirmRejection(): void

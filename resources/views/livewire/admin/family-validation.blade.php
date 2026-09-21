@@ -56,5 +56,10 @@
     @endif
 
     <x-validation.image-preview-modal />
-    <x-validation.rejection-modal :showRejectionModal="$showRejectionModal" :isFinalRejection="$isFinalRejection" />
+    <x-validation.rejection-modal
+        :showRejectionModal="$showRejectionModal"
+        :isFinalRejection="$isFinalRejection"
+        :predefinedRejectionMessages="$predefinedRejectionMessages"
+        :selectedRejectionMessageKey="$selectedRejectionMessageKey"
+    />
 </div>

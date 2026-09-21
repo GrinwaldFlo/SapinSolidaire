@@ -24,6 +24,7 @@ class Setting extends Model
     public const PROOF_OF_HABITATION_ENABLED = 'proof_of_habitation_enabled';
     public const PDF_STYLE = 'pdf_style';
     public const MAX_CHILD_AGE = 'max_child_age';
+    public const VALIDATION_COMMENT_TEMPLATES = 'validation_comment_templates';
 
     public const PDF_STYLE_LABEL = 'label';
     public const PDF_STYLE_GRID = 'grid';
@@ -203,6 +204,53 @@ class Setting extends Model
     }
 
     /**
+     * Get predefined validation comment templates.
+     *
+     * @return array<int, string>
+     */
+    public static function getValidationCommentTemplates(): array
+    {
+        $value = self::getValue(self::VALIDATION_COMMENT_TEMPLATES, '[]');
+
+        if (! is_string($value) || $value === '') {
+            return [];
+        }
+
+        $decoded = json_decode($value, true);
+
+        if (! is_array($decoded)) {
+            return [];
+        }
+
+        return array_values(
+            array_filter(
+                array_map(static fn ($message): string => trim((string) $message), $decoded),
+                static fn (string $message): bool => $message !== ''
+            )
+        );
+    }
+
+    /**
+     * Persist predefined validation comment templates.
+     *
+     * @param array<int, string> $templates
+     */
+    public static function setValidationCommentTemplates(array $templates): void
+    {
+        $cleanedTemplates = array_values(
+            array_filter(
+                array_map(static fn (string $message): string => trim($message), $templates),
+                static fn (string $message): bool => $message !== ''
+            )
+        );
+
+        self::setValue(
+            self::VALIDATION_COMMENT_TEMPLATES,
+            json_encode($cleanedTemplates, JSON_UNESCAPED_UNICODE) ?: '[]'
+        );
+    }
+
+    /**
      * Clear all settings cache.
      */
     public static function clearCache(): void
@@ -219,6 +267,7 @@ class Setting extends Model
             self::PROOF_OF_HABITATION_ENABLED,
             self::PDF_STYLE,
             self::MAX_CHILD_AGE,
+            self::VALIDATION_COMMENT_TEMPLATES,
         ];
 
         foreach ($keys as $key) {
