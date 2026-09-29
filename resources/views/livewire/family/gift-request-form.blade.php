@@ -93,7 +93,33 @@
                     </div>
                 @endif
 
-                @if($consecutiveYearsAccepted && !$cityAccepted)
+                @if($consecutiveYearsAccepted && !$pickupCommitmentAccepted)
+                    <div class="border border-gray-200 dark:border-zinc-600 rounded-lg p-6">
+                        <h3 class="section-title mb-2">Retrait du cadeau</h3>
+                        <p class="text-muted mb-4">
+                            Je viendrai chercher le cadeau
+                            @if(!empty($pickupConditionDateText))
+                                {{ $pickupConditionDateText }}
+                            @endif
+                            @if(!empty($pickupConditionAddressText))
+                                à {{ $pickupConditionAddressText }}
+                            @endif
+                            .
+                        </p>
+                        <button wire:click="acceptPickupCommitment" class="btn-confirm">
+                            Je confirme
+                        </button>
+                    </div>
+                @elseif($pickupCommitmentAccepted)
+                    <div class="notice-success">
+                        <div class="flex items-center gap-2">
+                            <span>✓</span>
+                            <span class="font-semibold">Condition de retrait du cadeau acceptée</span>
+                        </div>
+                    </div>
+                @endif
+
+                @if($consecutiveYearsAccepted && $pickupCommitmentAccepted && !$cityAccepted)
                     <div class="border border-gray-200 dark:border-zinc-600 rounded-lg p-6">
                         <h3 class="section-title mb-2">Zone géographique</h3>
                         @if(!empty($allowedCities))

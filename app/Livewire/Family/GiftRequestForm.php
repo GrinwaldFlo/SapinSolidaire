@@ -6,6 +6,7 @@ use App\Models\Child;
 use App\Models\EmailToken;
 use App\Models\Family;
 use App\Models\GiftRequest;
+use App\Models\PickupSlot;
 use App\Models\Season;
 use App\Models\Setting;
 use App\Services\AddressValidationService;
@@ -31,6 +32,7 @@ class GiftRequestForm extends Component
     public int $step = 1; // 1: eligibility, 2: form
     public bool $tokenValid = false;
     public bool $consecutiveYearsAccepted = false;
+    public bool $pickupCommitmentAccepted = false;
     public bool $cityAccepted = false;
     public bool $cityConfirmed = false;
     public bool $showCityConfirmation = false;
@@ -77,6 +79,8 @@ class GiftRequestForm extends Component
     public string $selectedCity = '';
     public array $giftSuggestions = [];
     public array $giftRestrictions = [];
+    public string $pickupConditionDateText = '';
+    public string $pickupConditionAddressText = '';
 
     public function mount(string $token): void
     {
@@ -107,6 +111,8 @@ class GiftRequestForm extends Component
 
             $this->season = $status['season'];
             $this->organizerEmail = $this->season->responsible_email ?? '';
+            $this->pickupConditionAddressText = trim((string) ($this->season->pickup_address ?? ''));
+            $this->pickupConditionDateText = $this->buildPickupConditionDateText();
 
             // Load settings
             $this->maxConsecutiveYears = Setting::getMaxConsecutiveYears();
@@ -168,6 +174,7 @@ class GiftRequestForm extends Component
                     // Skip eligibility if already accepted
                     $this->step = 2;
                     $this->consecutiveYearsAccepted = true;
+                    $this->pickupCommitmentAccepted = true;
                     $this->cityAccepted = true;
                     $this->cityConfirmed = true;
                 }
@@ -220,7 +227,16 @@ class GiftRequestForm extends Component
     {
         $this->consecutiveYearsAccepted = true;
 
-        if ($this->consecutiveYearsAccepted && $this->cityAccepted) {
+        if ($this->consecutiveYearsAccepted && $this->pickupCommitmentAccepted && $this->cityAccepted) {
+            $this->step = 2;
+        }
+    }
+
+    public function acceptPickupCommitment(): void
+    {
+        $this->pickupCommitmentAccepted = true;
+
+        if ($this->consecutiveYearsAccepted && $this->pickupCommitmentAccepted && $this->cityAccepted) {
             $this->step = 2;
         }
     }
@@ -239,9 +255,42 @@ class GiftRequestForm extends Component
             $this->cityConfirmed = true;
         }
 
-        if ($this->consecutiveYearsAccepted && $this->cityAccepted) {
+        if ($this->consecutiveYearsAccepted && $this->pickupCommitmentAccepted && $this->cityAccepted) {
             $this->step = 2;
         }
+    }
+
+    protected function buildPickupConditionDateText(): string
+    {
+        if (! $this->season) {
+            return '';
+        }
+
+        $slots = PickupSlot::query()
+            ->where('season_id', $this->season->id)
+            ->orderBy('start_datetime')
+            ->get();
+
+        if ($slots->isEmpty()) {
+            return '';
+        }
+
+        $firstStart = $slots->first()?->start_datetime;
+        $lastEnd = $slots->last()?->end_datetime;
+
+        if (! $firstStart || ! $lastEnd) {
+            return '';
+        }
+
+        if ($firstStart->toDateString() === $lastEnd->toDateString()) {
+            return 'le '.$firstStart->translatedFormat('l d F Y');
+        }
+
+        return sprintf(
+            'entre le %s et le %s',
+            $firstStart->translatedFormat('l d F Y'),
+            $lastEnd->translatedFormat('l d F Y')
+        );
     }
 
     public function requestCityChange(): void

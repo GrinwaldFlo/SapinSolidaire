@@ -2,6 +2,7 @@
 
 use App\Livewire\Family\GiftRequestForm;
 use App\Models\EmailToken;
+use App\Models\PickupSlot;
 use App\Models\Season;
 use App\Models\Setting;
 use Livewire\Livewire;
@@ -15,6 +16,13 @@ beforeEach(function () {
         'start_date' => now()->subDay(),
         'end_date' => now()->addMonth(),
         'modification_deadline' => now()->addMonth(),
+        'pickup_address' => "Temple d'Yverdon",
+    ]);
+
+    PickupSlot::create([
+        'season_id' => $this->season->id,
+        'start_datetime' => now()->setDate(2026, 12, 23)->setTime(14, 0),
+        'end_datetime' => now()->setDate(2026, 12, 23)->setTime(18, 0),
     ]);
 
     // Create a valid email token
@@ -28,6 +36,7 @@ test('acceptCity without selection shows error when cities are configured', func
 
     Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
         ->call('acceptConsecutiveYears')
+        ->call('acceptPickupCommitment')
         ->set('selectedCity', '')
         ->call('acceptCity')
         ->assertHasErrors('selectedCity')
@@ -40,6 +49,7 @@ test('acceptCity with valid selection sets city and marks it confirmed', functio
 
     Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
         ->call('acceptConsecutiveYears')
+        ->call('acceptPickupCommitment')
         ->set('selectedCity', 'Lausanne')
         ->call('acceptCity')
         ->assertHasNoErrors()
@@ -53,6 +63,7 @@ test('acceptCity without cities configured allows acceptance without selection',
     // No allowed cities configured
     Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
         ->call('acceptConsecutiveYears')
+        ->call('acceptPickupCommitment')
         ->call('acceptCity')
         ->assertHasNoErrors()
         ->assertSet('cityAccepted', true)
@@ -75,6 +86,7 @@ test('selected city pre-fills the city field in the form', function () {
 
     $component = Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
         ->call('acceptConsecutiveYears')
+        ->call('acceptPickupCommitment')
         ->set('selectedCity', 'Renens')
         ->call('acceptCity');
 
@@ -98,6 +110,14 @@ test('allowedCities is empty when no setting exists', function () {
     $component->assertSet('allowedCities', []);
 });
 
+test('pickup condition text uses season slots and pickup address', function () {
+    Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
+        ->call('acceptConsecutiveYears')
+        ->assertSee('Je viendrai chercher le cadeau')
+        ->assertSee("Temple d'Yverdon")
+        ->assertSee('mercredi 23 décembre 2026');
+});
+
 // --- Submit validation with city ---
 
 test('submit accepts allowed city', function () {
@@ -105,6 +125,7 @@ test('submit accepts allowed city', function () {
 
     Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
         ->call('acceptConsecutiveYears')
+        ->call('acceptPickupCommitment')
         ->set('selectedCity', 'Lausanne')
         ->call('acceptCity')
         ->set('firstName', 'Jean')
@@ -125,6 +146,7 @@ test('submit allows any city when no cities are configured', function () {
 
     Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
         ->call('acceptConsecutiveYears')
+        ->call('acceptPickupCommitment')
         ->call('acceptCity')
         ->set('city', 'AnyCity')
         ->set('firstName', 'Jean')
@@ -147,6 +169,7 @@ test('requestCityChange shows the confirmation modal', function () {
 
     Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
         ->call('acceptConsecutiveYears')
+        ->call('acceptPickupCommitment')
         ->set('selectedCity', 'Lausanne')
         ->call('acceptCity')
         ->set('city', 'Morges')
@@ -159,6 +182,7 @@ test('confirmCity confirms the new city and hides modal', function () {
 
     Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
         ->call('acceptConsecutiveYears')
+        ->call('acceptPickupCommitment')
         ->set('selectedCity', 'Lausanne')
         ->call('acceptCity')
         ->set('city', 'Morges')
@@ -174,6 +198,7 @@ test('cancelCityChange hides the confirmation modal', function () {
 
     Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
         ->call('acceptConsecutiveYears')
+        ->call('acceptPickupCommitment')
         ->set('selectedCity', 'Lausanne')
         ->call('acceptCity')
         ->set('city', 'Morges')
@@ -187,6 +212,7 @@ test('confirmCity rejects non-allowed city', function () {
 
     Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
         ->call('acceptConsecutiveYears')
+        ->call('acceptPickupCommitment')
         ->set('selectedCity', 'Lausanne')
         ->call('acceptCity')
         ->set('city', 'Genève')
@@ -200,6 +226,7 @@ test('confirmCity rejects empty city', function () {
 
     Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
         ->call('acceptConsecutiveYears')
+        ->call('acceptPickupCommitment')
         ->set('selectedCity', 'Lausanne')
         ->call('acceptCity')
         ->set('city', '')
@@ -213,6 +240,7 @@ test('submit accepts city after confirmation via modal', function () {
 
     Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
         ->call('acceptConsecutiveYears')
+        ->call('acceptPickupCommitment')
         ->set('selectedCity', 'Lausanne')
         ->call('acceptCity')
         ->set('city', 'Morges')
@@ -238,6 +266,7 @@ test('submit button is disabled when city is not confirmed and cities are config
 
     Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
         ->call('acceptConsecutiveYears')
+        ->call('acceptPickupCommitment')
         ->set('selectedCity', 'Lausanne')
         ->call('acceptCity')
         ->set('cityConfirmed', false)
@@ -250,6 +279,7 @@ test('submit button is enabled after city is confirmed', function () {
 
     Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
         ->call('acceptConsecutiveYears')
+        ->call('acceptPickupCommitment')
         ->set('selectedCity', 'Lausanne')
         ->call('acceptCity')
         ->assertDontSee('Veuillez sélectionner et confirmer votre commune de résidence');
@@ -258,6 +288,7 @@ test('submit button is enabled after city is confirmed', function () {
 test('submit button is enabled when no cities are configured', function () {
     Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
         ->call('acceptConsecutiveYears')
+        ->call('acceptPickupCommitment')
         ->call('acceptCity')
         ->assertDontSee('Veuillez sélectionner et confirmer votre commune de résidence');
 });
