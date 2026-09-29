@@ -1,277 +1,341 @@
-# SapinSolidaire - Project Context for Copilot
+# SapinSolidaire - Agent Context Guide
 
-## Project Overview
+## Mission And Product Scope
 
-SapinSolidaire is a Laravel 12 Livewire application for managing Christmas gift donations to families in need. The application serves families requesting help, validators verifying eligibility, organizers managing the process, and reception staff tracking gift distribution.
+SapinSolidaire is a Laravel + Livewire application used by a charity workflow around holiday gift distribution.
+
+Main actors:
+
+- Families: request help via tokenized email link.
+- Family validators: verify household eligibility.
+- Validators: validate/reject children and requests.
+- Organizers: generate labels, monitor lifecycle, send confirmations.
+- Reception staff: mark gifts received and delivered.
+- Admins: manage seasons, users/roles, settings, duplicate cleanup, dev tools.
+
+Core lifecycle:
+
+1. Family receives email token and submits/updates request.
+2. Admin-side validation queues process family and child statuses.
+3. Validated children get generated codes and printable labels.
+4. Reception marks gifts as received.
+5. Delivery marks gifts as given.
+6. Confirmation emails are sent using assigned pickup slots.
 
 ## Tech Stack
 
-- **PHP 8.2+** / **Laravel 12**
-- **Livewire 4** - full-stack UI (class-based components only)
-- **Flux UI** - component library (`<flux.*>` tags)
-- **Tailwind CSS v4** - utility layer (via `app.css`)
-- **Vite** - asset bundling
-- **PostgreSQL/SQLite** - UUIDs as primary keys throughout
-- **Pest PHP** - testing framework
-- **Laravel Pint** - PSR-12 code styling
-- **barryvdh/laravel-dompdf** - PDF generation
-- **giggsey/libphonenumber-for-php** - phone validation
-- **Laravel Fortify** - authentication + 2FA
+- PHP 8.2+
+- Laravel 12
+- Livewire 4 (class-based components)
+- Flux UI for auth/settings pages
+- Tailwind CSS v4 via resources/css/app.css
+- Vite 7
+- Pest 4 test suite
+- Laravel Fortify (auth + two-factor)
+- barryvdh/laravel-dompdf (PDF generation)
+- giggsey/libphonenumber-for-php (Swiss phone validation)
 
-## Directory Structure
+## Project Structure
 
-```
-app/
-  Actions/        - Reusable action classes
-  Concerns/       - Shared traits (e.g. WithSearch)
-  Http/Middleware/ - CheckRole, CheckAnyRole, SetLocale
-  Livewire/Admin/ - Admin panel Livewire components
-  Livewire/Family/- Public-facing Livewire components
-  Mail/           - Mailable classes
-  Models/         - Eloquent models (all use HasUuids)
-  Services/       - Business logic services
-resources/views/
-  livewire/       - Blade views for Livewire components
-  components/     - Reusable Blade components
-  emails/         - Email templates
-  layouts/        - app / auth / family layouts
-  pdf/            - DomPDF templates
-  partials/       - Shared partials
-routes/
-  web.php         - All routes (admin under /admin/* prefix)
-tests/            - Pest PHP test suite
-```
+High-value directories:
 
-## Key Conventions
+- app/Livewire/Family: public flow components (email entry + token form)
+- app/Livewire/Admin: admin console features
+- app/Livewire/Admin/Concerns: shared validation/rejection/duplicate logic
+- app/Models: domain models (UUID PKs)
+- app/Services: business services (season status, slot assignment, address/phone validation, duplicate detection)
+- app/Mail: outgoing emails for access links, correction/rejection, confirmation
+- routes/web.php: public + admin routes and role middleware
+- routes/settings.php: profile/password/appearance/2FA routes
+- database/migrations: full schema history and business-related schema evolution
+- resources/views/livewire: paired views for Livewire components
+- resources/views/pdf: label/monitoring PDF templates
+- tests/Feature: auth, settings, family flow, model logic, validation behavior
 
-1. **UUIDs everywhere** - `HasUuids` on all models; never assume integer IDs.
-2. **Role constants** - use `Role::ADMIN`, `Role::VALIDATOR`, etc., never raw strings.
-3. **Middleware** - `role:` and `any.role:` for route protection.
-4. **Livewire 4** - class-based components; one Blade view per component under `resources/views/livewire/`.
-5. **Status constants** - `public const STATUS_PENDING = 'pending'` pattern on models.
-6. **Season-scoped queries** - always filter by active season.
-7. **French-first i18n** - all user-facing strings via `__()`. French in `lang/fr/`, English in `lang/en/`.
-8. **Named routes** - always use `route('name')` and `->name()`.
-9. **Thin components** - push business logic to `Services/`.
+## Runtime Commands
 
-## Model Reference
+Development:
 
-| Model | Purpose |
-|---|---|
-| `User` | Auth user, many-to-many roles, 2FA |
-| `Role` | Role definitions with constants |
-| `Family` | Household unit |
-| `Child` | Gift recipient, linked to family + season |
-| `GiftRequest` | Family request for a season (status workflow) |
-| `Season` | Donation period (e.g. Christmas 2025) |
-| `EmailToken` | Token-based auth for families |
-| `Setting` | Key-value app settings |
-| `PickupSlot` | Gift pickup time slots |
-| `GeneratedPdf` | PDF generation tracking |
+- composer run dev (serve + queue listener + vite)
 
-**GiftRequest workflow:** `pending` -> `validated` -> `rejected_final` / `rejected`
+Quality:
 
-**Child workflow:** `pending` -> `validated` -> `printed` -> `received` -> `given`
+- composer lint
+- composer test:lint
+- composer test
 
-## Database Patterns
+Setup:
 
-- UUID primary keys on all tables
-- `foreignUuid()->constrained()->cascadeOnDelete()`
-- No soft deletes by default; timestamps always enabled
+- composer run setup
 
-## Testing
+## Authentication, Roles, And Access
 
-- **Pest PHP** - `composer test` / `composer test:lint`
-- **Pint** - `composer lint`
-- Feature tests for HTTP and Livewire interactions
-- Factories in `database/factories/`
+Role constants are defined in app/Models/Role.php.
 
-## Routing Pattern
+Roles:
 
-```php
-Route::prefix('admin')->middleware(['auth'])->group(function () {
-    Route::get('/dashboard', Dashboard::class)
-        ->middleware('any.role:'.Role::ADMIN.','.Role::VALIDATOR)
-        ->name('admin.dashboard');
+- visitor
+- validator
+- validateFamily
+- organizer
+- reception
+- admin
 
-    Route::middleware('role:'.Role::ADMIN)->group(function () {
-        Route::get('/settings', SettingsManagement::class)->name('admin.settings');
-    });
-});
-```
+Middleware aliases are registered in bootstrap/app.php:
 
----
+- role -> CheckRole
+- any.role -> CheckAnyRole
 
-## CSS Styling - Complete Reference
+Access patterns:
 
-> **Rule**: Never write raw Tailwind color, size, or spacing utilities directly in Blade templates.
-> Always use the shared classes below. If no class fits, add one to `resources/css/app.css` under `@layer components` and document it here.
+- /admin guarded by auth.
+- Feature-level pages guarded by role and any.role middleware.
+- Visitors with no operational roles are redirected to dashboard route.
 
-The live visual reference for all classes is: `/admin/css-showcase`
+Fortify behavior:
 
-### Cards
+- First registered user becomes admin.
+- Next users default to visitor.
+- Login and two-factor are rate limited.
 
-| Class | Usage |
-|---|---|
-| `.card` | Main content block - large padding, shadow |
-| `.card-sm` | Compact content block - reduced padding |
-| `.stat-card` | Dashboard stat tile |
-| `.card-footer` | Centered footer/hint below a card |
+## Route Map
 
-### Typography
+Public:
 
-| Class | Usage |
-|---|---|
-| `.section-title` | Section heading with bottom border |
-| `.sub-label` | Uppercase spaced annotation label |
-| `.field-label` | Form field label |
-| `.field-error` | Validation error message below a field |
-| `.text-muted` | Secondary / descriptive text |
-| `.detail-label` | Key in a key-value pair (e.g. "Prenom :") |
-| `.detail-value` | Value in a key-value pair |
-| `.link` | Inline hyperlink |
+- / -> Family Home (request link form)
+- /cadeau/{token} -> GiftRequestForm
 
-### Stat Labels (dashboard numbers)
+Admin modules under /admin:
 
-| Class | Usage |
-|---|---|
-| `.label-title` | Small caption above a stat number |
-| `.label-value` | Large neutral stat number |
-| `.label-value--warning` | Orange stat number |
-| `.label-value--success` | Green stat number |
-| `.label-value--info` | Blue stat number |
-| `.label-value--yellow` | Yellow stat number |
-| `.label-value--purple` | Purple stat number |
+- Dashboard
+- FamilyValidation
+- Validation
+- LabelGeneration
+- GiftReception
+- GiftDelivery
+- ChildrenMonitoring
+- SendConfirmations
+- FamilyManagement
+- FamilyDuplicates
+- SeasonManagement
+- UserManagement
+- SettingsManagement
+- ValidationMessageTemplates
+- DevTools
+- CssShowcase
 
-### Form Fields
+Special admin file routes:
 
-| Class | Usage |
-|---|---|
-| `.field-input` | Text input, select, textarea - normal state |
-| `.field-input-error` | Same but with red border for validation errors |
+- proof_of_habitation response (local disk)
+- generated PDF download (local disk)
 
-### Buttons
+## Domain Models And State Machines
 
-| Class | Color | Usage |
-|---|---|---|
-| `.btn-primary` | Green (full width) | Primary submit / save action |
-| `.btn-confirm` | Green (compact) | Inline confirm / accept |
-| `.btn-secondary` | Outline gray | Cancel / back |
-| `.btn-blue` | Blue | Info / generate / send actions |
-| `.btn-warning` | Yellow | Ask for correction |
-| `.btn-danger` | Red | Delete / reject |
-| `.btn-gray` | Gray | Neutral secondary action |
+GiftRequest:
 
-> `.btn-primary:disabled` applies `opacity-50 cursor-not-allowed` automatically.
+- Status: pending, validated, rejected, rejected_final
+- Linked to Family + Season, optional PickupSlot
+- Holds family_number, proof path, slot_start/end datetime
+- Mutation helper: setStatus(status, optional comment)
 
-### Badges (status pills)
+Child:
 
-| Class | Color | Status |
-|---|---|---|
-| `.badge--pending` | Yellow | A valider |
-| `.badge--validated` | Green | Valide |
-| `.badge--rejected` | Red | Rejete |
-| `.badge--printed` | Purple | Imprime |
-| `.badge--received` | Cyan | Recu |
-| `.badge--given` | Green | Remis |
-| `.badge--info` | Blue | Info / role |
-| `.badge--neutral` | Gray | Neutral state |
-| `.badge--warning` | Orange | Warning state |
+- Status: pending, validated, rejected, rejected_final, printed, received, given
+- Gender: boy, girl, unspecified
+- Code format: prefix + padded family_number + / + child_number
+- assignChildNumberAndCode() is transactional and season counter-safe through GiftRequest/Season locks
 
-### Notices / Banners
+Season:
 
-| Class | Usage |
-|---|---|
-| `.notice-info` | General information banner |
-| `.notice-success` | Success / confirmation banner |
-| `.notice-warning` | Warning / caution banner |
-| `.notice-error` | Error / problem banner |
+- Defines request window and optional modification deadline
+- Scheduling settings: family_limit_per_slot, slot_duration_minutes, responsible contact
+- Atomic assignNextFamilyNumber() with lockForUpdate
 
-### Tables
+Setting:
 
-| Class | Usage |
-|---|---|
-| `.table-container` | Wraps the full `<table>` - white card, rounded, shadow |
-| `.table-header` | `<th>` - uppercase, muted, small |
-| `.table-divider` | `<tbody>` - adds row dividers |
-| `.table-cell` | `<td>` - primary text color |
-| `.table-cell-muted` | `<td>` - muted text color |
-| `.table-empty` | `<td colspan>` - centered empty state message |
+- Cached key/value configuration with helpers for domain settings
+- Controls city whitelist, max ages/years, text blocks, code format, proof requirement, PDF style, validation templates
 
-### Modals
+Other models:
 
-| Class | Usage |
-|---|---|
-| `.modal-backdrop` | Fixed full-screen dark overlay |
-| `.modal-panel` | White/dark box, rounded, scrollable |
-| `.modal-header` | Top bar with title and close button |
-| `.modal-footer` | Bottom bar with action buttons |
+- EmailToken: 48h access token for family form
+- PickupSlot: pickup windows
+- GeneratedPdf: generated label export history
+- User/Role: many-to-many permissions
 
-### Layout Helpers
+## Main Business Workflows
 
-| Class | Usage |
-|---|---|
-| `.agenda-item` | Timeline row with icon + text |
-| `.slot-pill` | Pickup time slot badge |
+### Family request flow
 
-### Styling Rules
+1. Family submits email on Home component.
+2. EmailToken is created and AccessLinkMail is queued.
+3. GiftRequestForm validates token and active season.
+4. Existing family/request data is loaded if present.
+5. Address and phone are validated (Swiss services/libs).
+6. Request/children are created or updated.
+7. Optional proof of habitation upload is stored on local disk.
 
-1. **No raw utilities for color/size/spacing in Blade** - always use a shared class.
-2. **Dark mode included** - all shared classes have `dark:` variants; do not add them manually.
-3. **Adding a new class**:
-   - Add to `@layer components` in `resources/css/app.css`
-   - Use `kebab-case` naming; group with similar classes
-   - Include `dark:` variant if any color is set
-   - Add a row to the relevant table in this file
-4. **Flux UI** - use `<flux.*>` components for auth/settings pages. Use custom classes for application pages.
+### Validation flow
 
-### Blade Example
+FamilyValidation:
 
-```blade
-<div class="card">
-    <h2 class="section-title">Informations famille</h2>
+- Queue of pending family requests ordered by updated_at.
+- Cache locks prevent two admins validating same request simultaneously.
+- Can validate, reject, or final-reject with comment templates.
 
-    <p>
-        <span class="detail-label">Nom :</span>
-        <span class="detail-value">Dupont Marie</span>
-    </p>
+Validation:
 
-    <span class="badge--pending">À valider</span>
+- Handles both family and children decisions in one pass.
+- Uses DB transaction and row-level locks for consistency.
+- Assigns family numbers and child codes during validation.
+- Sends correction/final rejection emails from shared concern trait.
 
-    <div class="notice-warning">
-        Veuillez vérifier le justificatif.
-    </div>
+### Label and distribution flow
 
-    <label class="field-label">Commentaire</label>
-    <textarea class="field-input" wire:model="comment"></textarea>
-    @error('comment') <p class="field-error">{{ $message }}</p> @enderror
+- LabelGeneration selects validated children, marks them printed, generates PDF (label or grid style), stores file and DB trace.
+- GiftReception marks printed children as received by family number keypad flow.
+- GiftDelivery marks received children as given by family search.
 
-    <div>
-        <button class="btn-confirm" wire:click="validate">Valider</button>
-        <button class="btn-warning" wire:click="askCorrection">Demander correction</button>
-        <button class="btn-danger" wire:click="reject">Rejeter</button>
-        <button class="btn-secondary" wire:click="skip">Passer</button>
-    </div>
-</div>
-```
+### Confirmation flow
 
----
+- SendConfirmations auto-assigns pickup sub-slots via SlotAssignmentService.
+- Capacity summary compares available sub-slots vs families needing slots.
+- Queues GiftReceivedMail and stamps confirmation_email_sent_at.
 
-## Common Tasks
+### Duplicate management flow
 
-### Adding a new admin page
-1. `php artisan make:livewire Admin/MyPage`
-2. Add route in `routes/web.php` under `/admin` with role middleware
-3. Create Blade view in `resources/views/livewire/admin/`
-4. Add navigation link in `resources/views/layouts/app/sidebar.blade.php`
+- FamilyDuplicateService computes similarity scores across families.
+- FamilyDuplicates component runs scan on demand, caches pairs, supports merge with field-level overrides.
+- Merge reattaches or consolidates gift requests/children per season.
 
-### Adding a new model
-1. `php artisan make:model Name -mf`
-2. Add `HasUuids` trait; use `$table->uuid('id')->primary()`
-3. Define status constants as `public const STATUS_* = '...'`
-4. Use `foreignUuid()->constrained()->cascadeOnDelete()` for relations
+## Services Overview
 
-### Adding a new CSS class
-1. Open `resources/css/app.css` - add inside `@layer components`
-2. Use `@apply` with Tailwind utilities; include `dark:` variants
-3. Document the class in the relevant table in this file
+- SeasonService: current season status + overlap checks.
+- SlotAssignmentService: lazy, capacity-aware assignment and recalculation of pickup slot windows.
+- AddressValidationService: Swiss Post API validation.
+- PhoneValidationService: CH parsing/validation/formatting.
+- FamilyDuplicateService: duplicate scoring and merge transaction.
+- CodeGeneratorService: legacy 4-letter code generator (current production flow uses numeric family/child pattern in Child model).
+
+## Database And Migration Notes
+
+Schema principles:
+
+- UUID PK everywhere for domain tables.
+- Cascade deletes on most foreign keys.
+- No soft deletes.
+
+Important evolution points:
+
+- children.code moved from unique 4-char to nullable indexed varchar for family/child format.
+- seasons gained next_family_number counter.
+- pickup scheduling added with pickup_slots and slot_start/end on gift_requests.
+- families.address split into street_name + house_no.
+- gift_requests gained proof_of_habitation_path.
+- generated_pdfs table tracks exports.
+- users gained Fortify two-factor columns.
+
+## Livewire Component Inventory
+
+Family components:
+
+- Home: email link request, season status messaging, throttling.
+- GiftRequestForm: token gating, eligibility, family/children CRUD, proof upload, realtime validation.
+
+Admin components:
+
+- Dashboard: season-scoped KPI counters.
+- FamilyValidation: household-level queue validation.
+- Validation: family + child queue validation with lock and transaction semantics.
+- LabelGeneration: status transition to printed + PDF generation/history.
+- GiftReception: printed -> received transitions.
+- GiftDelivery: received -> given transitions.
+- ChildrenMonitoring: searchable/paginated child list + monitoring PDF export.
+- SendConfirmations: slot computation + confirmation email queue.
+- SeasonManagement: season CRUD + pickup window CRUD + overlap prevention.
+- SettingsManagement: application settings + city validation + code regeneration on prefix/padding changes.
+- UserManagement: role editing.
+- FamilyManagement: searchable and sortable household view.
+- FamilyDuplicates: duplicate scan + merge UI.
+- ValidationMessageTemplates: reusable rejection/correction templates.
+- DevTools: non-production helper operations (seed, batch transitions, cleanup, access links).
+- CssShowcase: style preview for shared CSS classes.
+
+## Mail And Queue Behavior
+
+Mails are queued, not sent synchronously:
+
+- AccessLinkMail
+- CorrectionRequestMail
+- FinalRejectionMail
+- GiftReceivedMail
+
+Queue worker is required in dev/prod for expected behavior.
+
+## Test Coverage Snapshot
+
+Tests are Pest feature-heavy and cover:
+
+- Auth/registration/password/verification/two-factor pages and guards.
+- Family form behavior including proof-of-habitation toggles.
+- Settings behavior for city lists, proof flag, code prefix/padding.
+- Model behavior for child code generation and season family numbering.
+- Validation component behavior around code/number assignment.
+
+When changing workflow logic, extend the corresponding Feature tests first.
+
+## Non-Negotiable Conventions For Agents
+
+1. Always use role constants from Role model.
+2. Keep queries season-scoped unless intentionally cross-season.
+3. Use model status constants, never raw status strings in new code.
+4. Preserve transactional + lock behavior in validation and numbering paths.
+5. Keep Livewire components lean; extract reusable logic into services/concerns.
+6. Respect UUID assumptions in migrations, routing, and tests.
+7. Use named routes.
+8. Keep user-facing text translatable; French is the primary language.
+9. Use shared CSS component classes in Blade (avoid inline utility drift).
+
+## Risky Areas To Modify Carefully
+
+- Validation queue locking (Cache keys and TTLs).
+- Family number and child code assignment concurrency.
+- Status transitions that trigger downstream UI/queries.
+- Slot assignment math and capacity assumptions.
+- Proof file storage paths and download routes.
+- Duplicate merge behavior across same-season requests.
+
+## CSS Styling Rules (Mandatory)
+
+Never write raw Tailwind color/spacing/size utilities directly inside app Blade views.
+Use shared component classes from resources/css/app.css.
+If a class is missing:
+
+1. Add it under @layer components.
+2. Include dark variants if color is involved.
+3. Document it in this guide.
+
+Live visual reference remains available at /admin/css-showcase.
+
+## Common Agent Tasks
+
+Add an admin page:
+
+1. php artisan make:livewire Admin/MyPage
+2. Register route in routes/web.php under /admin with role middleware
+3. Create or update corresponding Blade view in resources/views/livewire/admin
+4. Add entry in resources/views/layouts/app/sidebar.blade.php
+
+Add domain model/migration:
+
+1. Use UUID primary key and foreignUuid constraints.
+2. Add status constants where relevant.
+3. Add relationships and casts explicitly.
+4. Add/adjust Pest Feature tests for behavior.
+
+Modify validation or lifecycle logic:
+
+1. Update statuses via model methods.
+2. Preserve transaction + lock guarantees.
+3. Verify all downstream list filters (dashboard/reception/delivery/confirmations).
+4. Run composer test.
