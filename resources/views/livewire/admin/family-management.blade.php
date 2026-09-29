@@ -2,7 +2,22 @@
     <h1 class="section-title">Gestion des familles</h1>
 
     <div class="card-sm">
-        <input type="text" wire:model.live.debounce.300ms="search" placeholder="Rechercher par nom, email, téléphone, adresse ou prénom d'enfant..." class="field-input" autocomplete="off" data-bwignore="true" data-1p-ignore data-lpignore="true">
+        <div class="flex flex-wrap gap-4 items-end">
+            <div>
+                <label class="field-label">Statut</label>
+                <select wire:model.live="statusFilter" class="field-input">
+                    <option value="">Tous les statuts</option>
+                    @foreach($statuses as $value => $label)
+                        <option value="{{ $value }}">{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="flex-1 min-w-[280px]">
+                <label class="field-label">Recherche</label>
+                <input type="text" wire:model.live.debounce.300ms="search" placeholder="Rechercher par nom, email, téléphone, adresse ou prénom d'enfant..." class="field-input" autocomplete="off" data-bwignore="true" data-1p-ignore data-lpignore="true">
+            </div>
+        </div>
     </div>
 
     {{-- Desktop table --}}

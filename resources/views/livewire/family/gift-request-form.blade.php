@@ -15,7 +15,7 @@
             <span class="text-6xl mb-4 block">🚫</span>
             <h2 class="section-title">Demande impossible</h2>
             <div class="notice-error">
-                Votre famille a été définitivement refusée lors d'une saison précédente. Vous ne pouvez plus effectuer de demande de cadeau.
+                Votre famille a été définitivement refusée. Vous ne pouvez plus effectuer de demande de cadeau.
             </div>
             @if($rejectionComment)
                 <div class="notice-warning mt-4 text-left">

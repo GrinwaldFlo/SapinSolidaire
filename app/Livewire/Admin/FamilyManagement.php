@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Family;
+use App\Models\GiftRequest;
 use App\Models\Season;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -20,6 +21,7 @@ class FamilyManagement extends Component
 
     public ?Season $activeSeason = null;
     public string $search = '';
+    public string $statusFilter = '';
     public string $sortBy = 'last_name';
     public string $sortDirection = 'asc';
 
@@ -29,6 +31,11 @@ class FamilyManagement extends Component
     }
 
     public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedStatusFilter(): void
     {
         $this->resetPage();
     }
@@ -53,6 +60,12 @@ class FamilyManagement extends Component
     {
         $query = Family::with(['giftRequests.season', 'giftRequests.children']);
 
+        if ($this->statusFilter) {
+            $query->whereHas('giftRequests', function ($q) {
+                $q->where('status', $this->statusFilter);
+            });
+        }
+
         if ($this->search) {
             $search = '%'.trim($this->search).'%';
             $query->where(function ($q) use ($search) {
@@ -72,6 +85,12 @@ class FamilyManagement extends Component
 
         return view('livewire.admin.family-management', [
             'families' => $query->orderBy($this->sortBy, $this->sortDirection)->paginate(200),
+            'statuses' => [
+                GiftRequest::STATUS_PENDING => 'À valider',
+                GiftRequest::STATUS_VALIDATED => 'Validé',
+                GiftRequest::STATUS_REJECTED => 'Refusé',
+                GiftRequest::STATUS_REJECTED_FINAL => 'Refusé définitivement',
+            ],
         ]);
     }
 }
