@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Models\Family;
 use App\Models\GiftRequest;
 use App\Models\Season;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -54,6 +55,27 @@ class FamilyManagement extends Component
         }
 
         $this->resetPage();
+    }
+
+    public function applyAction(string $familyId, ?string $giftRequestId = null, string $action = ''): void
+    {
+        if ($action !== 'reset_pending' || ! $giftRequestId) {
+            return;
+        }
+
+        DB::transaction(function () use ($giftRequestId) {
+            $request = GiftRequest::with('children')->lockForUpdate()->find($giftRequestId);
+
+            if (! $request) {
+                return;
+            }
+
+            $request->resetToPending();
+
+            foreach ($request->children as $child) {
+                $child->resetToPending();
+            }
+        });
     }
 
     public function render()

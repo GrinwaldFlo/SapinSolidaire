@@ -234,6 +234,12 @@ class Validation extends Component
                 $decision = $this->childDecisions[$child->id] ?? 'pending';
                 $comment = $this->childComments[$child->id] ?? '';
 
+                if ($this->familyDecision === 'rejected') {
+                    $child->setStatus(Child::STATUS_REJECTED_FINAL, $this->familyComment);
+
+                    continue;
+                }
+
                 if ($decision === 'validated') {
                     if (! $child->code) {
                         $child->assignChildNumberAndCode();

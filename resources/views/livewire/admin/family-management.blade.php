@@ -39,11 +39,17 @@
                     </th>
                     <th class="table-header">Adresse</th>
                     <th class="table-header">Demandes</th>
+                    <th class="table-header">Actions</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
                 @forelse($families as $family)
-                    <tr>
+                    @php
+                        $actionRequest = $activeSeason
+                            ? $family->giftRequests->firstWhere('season_id', $activeSeason->id)
+                            : $family->giftRequests->sortByDesc('created_at')->first();
+                    @endphp
+                    <tr wire:key="family-row-{{ $family->id }}">
                         <td class="table-cell">{{ $family->first_name }}</td>
                         <td class="table-cell">{{ $family->last_name }}</td>
                         <td class="table-cell-muted">
@@ -99,10 +105,30 @@
                                 </div>
                             @endforeach
                         </td>
+                        <td class="table-cell">
+                            @if($actionRequest)
+                                <div x-data="{ action: '' }" class="space-y-2">
+                                    <select x-model="action" class="field-input">
+                                        <option value="">Choisir une action</option>
+                                        <option value="reset_pending">Remettre en attente</option>
+                                    </select>
+                                    <button
+                                        type="button"
+                                        x-on:click="$wire.applyAction('{{ $family->id }}', '{{ $actionRequest->id }}', action); action = '';"
+                                        class="btn-gray text-sm"
+                                        x-bind:disabled="!action"
+                                    >
+                                        Appliquer
+                                    </button>
+                                </div>
+                            @else
+                                -
+                            @endif
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="table-empty">Aucune famille trouvée</td>
+                        <td colspan="7" class="table-empty">Aucune famille trouvée</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -112,7 +138,12 @@
     {{-- Mobile cards --}}
     <div class="sm:hidden space-y-3">
         @forelse($families as $family)
-            <div class="card-sm space-y-2">
+            @php
+                $actionRequest = $activeSeason
+                    ? $family->giftRequests->firstWhere('season_id', $activeSeason->id)
+                    : $family->giftRequests->sortByDesc('created_at')->first();
+            @endphp
+            <div wire:key="family-card-{{ $family->id }}" class="card-sm space-y-2">
                 <div class="font-semibold detail-value text-base">
                     {{ $family->first_name }} {{ $family->last_name }}
                 </div>
@@ -169,6 +200,24 @@
                         @endforeach
                     </div>
                 @endif
+                <div class="space-y-2 pt-1">
+                    @if($actionRequest)
+                        <div x-data="{ action: '' }" class="space-y-2">
+                            <select x-model="action" class="field-input">
+                                <option value="">Choisir une action</option>
+                                <option value="reset_pending">Remettre en attente</option>
+                            </select>
+                            <button
+                                type="button"
+                                x-on:click="$wire.applyAction('{{ $family->id }}', '{{ $actionRequest->id }}', action); action = '';"
+                                class="btn-gray text-sm"
+                                x-bind:disabled="!action"
+                            >
+                                Appliquer
+                            </button>
+                        </div>
+                    @endif
+                </div>
             </div>
         @empty
             <div class="card-sm text-center text-muted">
