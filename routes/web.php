@@ -2,15 +2,18 @@
 
 use App\Livewire\Admin\ChildrenMonitoring;
 use App\Livewire\Admin\Dashboard;
+use App\Livewire\Admin\AdminActionLogs;
 use App\Livewire\Admin\CssShowcase;
 use App\Livewire\Admin\DevTools;
 use App\Livewire\Admin\FamilyDuplicates;
 use App\Livewire\Admin\FamilyManagement;
+use App\Livewire\Admin\FamilySubmissionLogs;
 use App\Livewire\Admin\FamilyValidation;
 use App\Livewire\Admin\GiftDelivery;
 use App\Livewire\Admin\GiftReception;
 use App\Livewire\Admin\GiftsManagement;
 use App\Livewire\Admin\LabelGeneration;
+use App\Livewire\Admin\SentMailsLog;
 use App\Livewire\Admin\SeasonManagement;
 use App\Livewire\Admin\SendConfirmations;
 use App\Livewire\Admin\SettingsManagement;
@@ -110,6 +113,9 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::get('/parametres', SettingsManagement::class)->name('admin.settings');
         Route::get('/parametres-cadeaux', GiftsManagement::class)->name('admin.gifts-management');
         Route::get('/messages-validation', ValidationMessageTemplates::class)->name('admin.validation-messages');
+        Route::get('/journal-mails', SentMailsLog::class)->name('admin.mail-logs');
+        Route::get('/journal-actions-admin', AdminActionLogs::class)->name('admin.admin-action-logs');
+        Route::get('/journal-demandes-familles', FamilySubmissionLogs::class)->name('admin.family-submission-logs');
         Route::get('/dev-tools', DevTools::class)->name('admin.dev-tools');
         Route::get('/css-showcase', CssShowcase::class)->name('admin.css-showcase');
     });
