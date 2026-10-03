@@ -9,20 +9,26 @@
         {{-- Search input --}}
         <div class="card-sm">
             <label class="field-label">Nom de famille</label>
-            <div class="flex items-center gap-3">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3">
                 <input
                     type="text"
                     inputmode="text"
                     autocomplete="off"
                     wire:model.live.debounce.300ms="searchName"
                     placeholder="Rechercher par nom…"
-                    class="w-full md:w-64 field-input"
+                    class="w-full sm:w-64 field-input"
                 />
-                @if($searchName !== '')
-                    <button wire:click="clearFilter" class="btn-secondary text-sm shrink-0">
-                        Effacer
+                <div class="flex items-center gap-3">
+                    @if($searchName !== '')
+                        <button wire:click="clearFilter" class="btn-secondary text-sm shrink-0">
+                            Effacer
+                        </button>
+                    @endif
+
+                    <button wire:click="exportSetupListingPdf" class="btn-primary text-sm shrink-0">
+                        Télécharger listing mise en place (PDF)
                     </button>
-                @endif
+                </div>
             </div>
         </div>
 
