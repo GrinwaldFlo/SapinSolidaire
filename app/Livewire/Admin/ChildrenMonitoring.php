@@ -16,6 +16,8 @@ class ChildrenMonitoring extends Component
 
     private const SORTABLE_COLUMNS = [
         'first_name',
+        'gender',
+        'birth_year',
         'code',
         'gift',
         'status',
