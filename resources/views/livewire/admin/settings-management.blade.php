@@ -88,6 +88,14 @@
             </div>
 
             <div>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" wire:model="familyFormMultiStepEnabled" class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 dark:border-zinc-600 dark:bg-zinc-700">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Activer le formulaire famille en plusieurs étapes</span>
+                </label>
+                <p class="mt-1 text-sm text-muted">Si activé, les familles verront un parcours guidé sur plusieurs pages (mobile, étape par étape) au lieu du long formulaire unique.</p>
+            </div>
+
+            <div>
                 <label class="field-label">Style des cartes PDF</label>
                 <select wire:model="pdfStyle" class="field-input">
                     <option value="label">Étiquettes (cartes individuelles)</option>

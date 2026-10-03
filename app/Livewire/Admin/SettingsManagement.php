@@ -18,6 +18,7 @@ class SettingsManagement extends Component
     public string $codePrefix = '';
     public int $codeFamilyPadding = 4;
     public bool $proofOfHabitationEnabled = false;
+    public bool $familyFormMultiStepEnabled = false;
     public string $pdfStyle = 'label';
 
     public function mount(): void
@@ -31,6 +32,7 @@ class SettingsManagement extends Component
         $this->codePrefix = Setting::getCodePrefix();
         $this->codeFamilyPadding = Setting::getCodeFamilyPadding();
         $this->proofOfHabitationEnabled = Setting::isProofOfHabitationEnabled();
+        $this->familyFormMultiStepEnabled = Setting::isFamilyFormMultiStepEnabled();
         $this->pdfStyle = Setting::getPdfStyle();
     }
 
@@ -79,6 +81,7 @@ class SettingsManagement extends Component
         }
 
         Setting::setValue(Setting::PROOF_OF_HABITATION_ENABLED, $this->proofOfHabitationEnabled ? '1' : '0');
+        Setting::setValue(Setting::FAMILY_FORM_MULTI_STEP_ENABLED, $this->familyFormMultiStepEnabled ? '1' : '0');
         Setting::setValue(Setting::PDF_STYLE, $this->pdfStyle);
 
         session()->flash('message', 'Paramètres enregistrés avec succès.');

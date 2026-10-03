@@ -153,8 +153,11 @@
             </div>
         </div>
     @else
-        {{-- Main form --}}
-        <div class="card">
+        @if($familyFormMultiStepEnabled)
+            @include('livewire.family.partials.gift-request-form-wizard')
+        @else
+            {{-- Main form --}}
+            <div class="card">
             <div class="text-center mb-8">
                 <span class="text-6xl mb-4 block">🎁</span>
                 <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">
@@ -559,6 +562,7 @@
                 </div>
             </form>
         </div>
+        @endif
     @endif
 
     {{-- City confirmation modal --}}
