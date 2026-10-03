@@ -5,6 +5,7 @@ namespace App\Livewire\Family;
 use App\Models\Child;
 use App\Models\EmailToken;
 use App\Models\Family;
+use App\Models\FamilySubmissionLog;
 use App\Models\GiftRequest;
 use App\Models\PickupSlot;
 use App\Models\Season;
@@ -695,7 +696,9 @@ class GiftRequestForm extends Component
         }
 
         // Save data
-        DB::transaction(function () use ($formattedPhone, $proofPath) {
+        $submissionAction = FamilySubmissionLog::ACTION_CREATED;
+
+        DB::transaction(function () use ($formattedPhone, $proofPath, &$submissionAction) {
             // Create or update family
             $this->family = Family::updateOrCreate(
                 ['email' => $this->email],
@@ -711,8 +714,6 @@ class GiftRequestForm extends Component
             );
 
             // Create or update gift request
-            $wasModifying = $this->isModifying;
-
             $this->giftRequest = GiftRequest::updateOrCreate(
                 [
                     'family_id' => $this->family->id,
@@ -724,6 +725,9 @@ class GiftRequestForm extends Component
                     'proof_of_habitation_path' => $proofPath,
                 ]
             );
+            $submissionAction = $this->giftRequest->wasRecentlyCreated
+                ? FamilySubmissionLog::ACTION_CREATED
+                : FamilySubmissionLog::ACTION_UPDATED;
 
             // Get existing child IDs
             $existingChildIds = $this->giftRequest->children->pluck('id')->toArray();
@@ -776,6 +780,13 @@ class GiftRequestForm extends Component
                 ->whereIn('status', [Child::STATUS_PENDING, Child::STATUS_REJECTED, Child::STATUS_VALIDATED])
                 ->delete();
         });
+
+        FamilySubmissionLog::create([
+            'email' => $this->email,
+            'action_type' => $submissionAction,
+            'family_id' => $this->family?->id,
+            'gift_request_id' => $this->giftRequest?->id,
+        ]);
 
         // Delete the old proof file after successful transaction
         if ($oldProofPath && $oldProofPath !== $proofPath) {

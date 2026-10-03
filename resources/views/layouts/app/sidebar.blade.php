@@ -95,6 +95,18 @@
                         Messages de validation
                     </flux:sidebar.item>
 
+                    <flux:sidebar.item icon="envelope" :href="route('admin.mail-logs')" :current="request()->routeIs('admin.mail-logs')" wire:navigate>
+                        Journal e-mails
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item icon="clipboard-document-list" :href="route('admin.admin-action-logs')" :current="request()->routeIs('admin.admin-action-logs')" wire:navigate>
+                        Journal actions admin
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item icon="document-text" :href="route('admin.family-submission-logs')" :current="request()->routeIs('admin.family-submission-logs')" wire:navigate>
+                        Journal demandes familles
+                    </flux:sidebar.item>
+
                     @if(!app()->isProduction())
                     <flux:sidebar.item icon="wrench" :href="route('admin.dev-tools')" :current="request()->routeIs('admin.dev-tools')" wire:navigate>
                         Dev Tools

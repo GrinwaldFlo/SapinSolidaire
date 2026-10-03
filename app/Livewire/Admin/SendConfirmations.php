@@ -3,9 +3,11 @@
 namespace App\Livewire\Admin;
 
 use App\Mail\GiftReceivedMail;
+use App\Models\AdminActionLog;
 use App\Models\Child;
 use App\Models\GiftRequest;
 use App\Models\Season;
+use App\Models\SentMailLog;
 use App\Services\SlotAssignmentService;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
@@ -83,7 +85,25 @@ class SendConfirmations extends Component
         $sent = 0;
         foreach ($requests as $request) {
             $familyEmail = $request->family->email;
-            Mail::to($familyEmail)->queue(new GiftReceivedMail($request, $this->activeSeason));
+            $mail = new GiftReceivedMail($request, $this->activeSeason);
+            Mail::to($familyEmail)->queue($mail);
+            SentMailLog::logQueuedMail(
+                recipientEmail: $familyEmail,
+                purpose: SentMailLog::PURPOSE_GIFT_CONFIRMATION,
+                mailable: $mail,
+                sender: auth()->user()
+            );
+            $familyLabel = trim((string) $request->family?->full_name) !== ''
+                ? $request->family->full_name
+                : $familyEmail;
+            AdminActionLog::create([
+                'user_id' => auth()->id(),
+                'user_label' => auth()->user()?->name,
+                'action_type' => AdminActionLog::ACTION_EMAIL_SENT,
+                'description' => "E-mail envoyé ({$mail->envelope()->subject}) à {$familyEmail} (famille: {$familyLabel})",
+                'family_id' => $request->family_id,
+                'gift_request_id' => $request->id,
+            ]);
 
             // Update confirmation timestamp on all received children
             $request->children()

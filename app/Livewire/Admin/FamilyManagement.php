@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\AdminActionLog;
 use App\Models\Family;
 use App\Models\GiftRequest;
 use App\Models\Season;
@@ -63,7 +64,9 @@ class FamilyManagement extends Component
             return;
         }
 
-        DB::transaction(function () use ($giftRequestId) {
+        $actionRequest = null;
+
+        DB::transaction(function () use ($giftRequestId, &$actionRequest) {
             $request = GiftRequest::with('children')->lockForUpdate()->find($giftRequestId);
 
             if (! $request) {
@@ -75,7 +78,20 @@ class FamilyManagement extends Component
             foreach ($request->children as $child) {
                 $child->resetToPending();
             }
+
+            $actionRequest = $request->loadMissing('family');
         });
+
+        if ($actionRequest instanceof GiftRequest) {
+            AdminActionLog::create([
+                'user_id' => auth()->id(),
+                'user_label' => auth()->user()?->name,
+                'action_type' => AdminActionLog::ACTION_FAMILY_STATUS_RESET,
+                'description' => 'Statut famille remis en attente: '.$actionRequest->family?->full_name,
+                'family_id' => $actionRequest->family_id,
+                'gift_request_id' => $actionRequest->id,
+            ]);
+        }
     }
 
     public function render()

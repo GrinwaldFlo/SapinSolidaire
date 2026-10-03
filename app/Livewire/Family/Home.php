@@ -5,6 +5,7 @@ namespace App\Livewire\Family;
 use App\Mail\AccessLinkMail;
 use App\Models\EmailToken;
 use App\Models\Season;
+use App\Models\SentMailLog;
 use App\Models\Setting;
 use App\Services\SeasonService;
 use Illuminate\Support\Facades\Mail;
@@ -54,7 +55,14 @@ class Home extends Component
         // Create token and send email
         $token = EmailToken::createForEmail($this->email);
 
-        Mail::to($this->email)->queue(new AccessLinkMail($this->email, $token->token));
+        $mail = new AccessLinkMail($this->email, $token->token);
+        Mail::to($this->email)->queue($mail);
+        SentMailLog::logQueuedMail(
+            recipientEmail: $this->email,
+            purpose: SentMailLog::PURPOSE_ACCESS_LINK,
+            mailable: $mail,
+            senderLabel: 'Famille'
+        );
 
         $this->emailSent = true;
     }
