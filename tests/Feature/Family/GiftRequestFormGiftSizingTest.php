@@ -71,3 +71,37 @@ test('default shoe keyword fallback still applies when no custom list is set', f
             return ($errors['children.0.shoe_size'][0] ?? null) === 'La pointure est obligatoire pour les chaussures.';
         });
 });
+
+test('shoe size and height fields are shown only when matching gift keywords', function () {
+    Setting::setValue(Setting::GIFTS_WITH_SHOE_SIZE, 'patin');
+    Setting::setValue(Setting::GIFTS_WITH_SIZE, 'veste');
+
+    $component = Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
+        ->set('step', 2);
+
+    $component
+        ->assertDontSee('Pointure (si chaussures)')
+        ->assertDontSee('Taille (cm)');
+
+    $component
+        ->set('children.0.gift', 'Patin à glace')
+        ->assertSee('Pointure (si chaussures)')
+        ->assertDontSee('Taille (cm)');
+
+    $component
+        ->set('children.0.gift', 'Veste d’hiver')
+        ->assertSee('Taille (cm)')
+        ->assertDontSee('Pointure (si chaussures)');
+});
+
+test('gift keyword matching ignores accents', function () {
+    Setting::setValue(Setting::GIFTS_WITH_SHOE_SIZE, 'chaussuré');
+    Setting::setValue(Setting::GIFTS_WITH_SIZE, 'vêtement');
+
+    Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
+        ->set('step', 2)
+        ->set('children.0.gift', 'Chaussure de sport')
+        ->assertSee('Pointure (si chaussures)')
+        ->set('children.0.gift', 'Vetement hiver')
+        ->assertSee('Taille (cm)');
+});

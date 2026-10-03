@@ -460,19 +460,6 @@
                                 </div>
 
                                 <div>
-                                    <label class="field-label">Taille (cm)</label>
-                                    @php $heightKey = "children.{$index}.height"; @endphp
-                                    <input type="number" wire:model="children.{{ $index }}.height" wire:blur="validateChild({{ $index }})" min="50" max="200"
-                                        class="{{ isset($fieldErrors[$heightKey]) && in_array("children.{$index}.height", $touchedFields) ? 'field-input-error' : 'field-input' }}"
-                                        {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
-                                    @if(isset($fieldErrors[$heightKey]) && in_array("children.{$index}.height", $touchedFields))
-                                        <p class="field-error">{{ collect($fieldErrors[$heightKey])->first() }}</p>
-                                    @elseif($errors->has($heightKey))
-                                        <p class="field-error">{{ $errors->first($heightKey) }}</p>
-                                    @endif
-                                </div>
-
-                                <div>
                                     <label class="field-label">Cadeau souhaité *</label>
                                     @php $giftKey = "children.{$index}.gift"; @endphp
                                     <x-combobox
@@ -489,18 +476,35 @@
                                     @endif
                                 </div>
 
-                                <div>
-                                    <label class="field-label">Pointure (si chaussures)</label>
-                                    @php $shoeSizeKey = "children.{$index}.shoe_size"; @endphp
-                                    <input type="text" wire:model="children.{{ $index }}.shoe_size" wire:blur="validateChild({{ $index }})"
-                                        class="{{ isset($fieldErrors[$shoeSizeKey]) && in_array("children.{$index}.shoe_size", $touchedFields) ? 'field-input-error' : 'field-input' }}"
-                                        {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
-                                    @if(isset($fieldErrors[$shoeSizeKey]) && in_array("children.{$index}.shoe_size", $touchedFields))
-                                        <p class="field-error">{{ collect($fieldErrors[$shoeSizeKey])->first() }}</p>
-                                    @elseif($errors->has($shoeSizeKey))
-                                        <p class="field-error">{{ $errors->first($shoeSizeKey) }}</p>
-                                    @endif
-                                </div>
+                                @if($this->shouldShowHeightField($index))
+                                    <div>
+                                        <label class="field-label">Taille (cm)</label>
+                                        @php $heightKey = "children.{$index}.height"; @endphp
+                                        <input type="number" wire:model="children.{{ $index }}.height" wire:blur="validateChild({{ $index }})" min="50" max="200"
+                                            class="{{ isset($fieldErrors[$heightKey]) && in_array("children.{$index}.height", $touchedFields) ? 'field-input-error' : 'field-input' }}"
+                                            {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
+                                        @if(isset($fieldErrors[$heightKey]) && in_array("children.{$index}.height", $touchedFields))
+                                            <p class="field-error">{{ collect($fieldErrors[$heightKey])->first() }}</p>
+                                        @elseif($errors->has($heightKey))
+                                            <p class="field-error">{{ $errors->first($heightKey) }}</p>
+                                        @endif
+                                    </div>
+                                @endif
+
+                                @if($this->shouldShowShoeSizeField($index))
+                                    <div>
+                                        <label class="field-label">Pointure (si chaussures)</label>
+                                        @php $shoeSizeKey = "children.{$index}.shoe_size"; @endphp
+                                        <input type="text" wire:model="children.{{ $index }}.shoe_size" wire:blur="validateChild({{ $index }})"
+                                            class="{{ isset($fieldErrors[$shoeSizeKey]) && in_array("children.{$index}.shoe_size", $touchedFields) ? 'field-input-error' : 'field-input' }}"
+                                            {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
+                                        @if(isset($fieldErrors[$shoeSizeKey]) && in_array("children.{$index}.shoe_size", $touchedFields))
+                                            <p class="field-error">{{ collect($fieldErrors[$shoeSizeKey])->first() }}</p>
+                                        @elseif($errors->has($shoeSizeKey))
+                                            <p class="field-error">{{ $errors->first($shoeSizeKey) }}</p>
+                                        @endif
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     @endforeach

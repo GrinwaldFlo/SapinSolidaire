@@ -14,6 +14,7 @@ use App\Services\PhoneValidationService;
 use App\Services\SeasonService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -815,6 +816,20 @@ class GiftRequestForm extends Component
         return $this->matchesGiftKeywordList($gift, $this->giftsWithSize);
     }
 
+    public function shouldShowShoeSizeField(int $index): bool
+    {
+        $gift = (string) ($this->children[$index]['gift'] ?? '');
+
+        return $this->isShoeGift($gift);
+    }
+
+    public function shouldShowHeightField(int $index): bool
+    {
+        $gift = (string) ($this->children[$index]['gift'] ?? '');
+
+        return $this->isSizedGift($gift);
+    }
+
     /**
      * @param array<int, string> $keywords
      */
@@ -824,15 +839,20 @@ class GiftRequestForm extends Component
             return false;
         }
 
-        $giftLower = mb_strtolower($gift);
+        $normalizedGift = $this->normalizeGiftKeywordValue($gift);
 
         foreach ($keywords as $keyword) {
-            if (str_contains($giftLower, mb_strtolower($keyword))) {
+            if (str_contains($normalizedGift, $this->normalizeGiftKeywordValue($keyword))) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    protected function normalizeGiftKeywordValue(string $value): string
+    {
+        return mb_strtolower(Str::ascii($value));
     }
 
     public function render()
