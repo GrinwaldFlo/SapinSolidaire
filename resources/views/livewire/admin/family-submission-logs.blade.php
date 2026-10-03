@@ -14,7 +14,7 @@
             <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
                 @forelse($submissionLogs as $log)
                     <tr>
-                        <td class="table-cell-muted">{{ $log->created_at->format('d/m/Y H:i') }}</td>
+                        <td class="table-cell-muted" data-local-datetime="{{ $log->created_at->toIso8601String() }}">{{ $log->created_at->format('d/m/Y H:i') }}</td>
                         <td class="table-cell">{{ $log->email }}</td>
                         <td class="table-cell">
                             @if($log->action_type === \App\Models\FamilySubmissionLog::ACTION_CREATED)
