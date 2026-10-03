@@ -79,6 +79,8 @@ class GiftRequestForm extends Component
     public string $selectedCity = '';
     public array $giftSuggestions = [];
     public array $giftRestrictions = [];
+    public array $giftsWithShoeSize = [];
+    public array $giftsWithSize = [];
     public string $pickupConditionDateText = '';
     public string $pickupConditionAddressText = '';
 
@@ -120,6 +122,8 @@ class GiftRequestForm extends Component
             $this->allowedCities = Setting::getAllowedCities();
             $this->giftSuggestions = Setting::getGiftSuggestions();
             $this->giftRestrictions = Setting::getGiftRestrictions();
+            $this->giftsWithShoeSize = Setting::getGiftsWithShoeSize();
+            $this->giftsWithSize = Setting::getGiftsWithSize();
             $this->proofOfHabitationEnabled = Setting::isProofOfHabitationEnabled();
 
             // Check if family exists
@@ -570,7 +574,7 @@ class GiftRequestForm extends Component
             return;
         }
 
-        $fields = ['first_name', 'gender', 'birth_year', 'gift', 'shoe_size'];
+        $fields = ['first_name', 'gender', 'birth_year', 'gift', 'shoe_size', 'height'];
         foreach ($fields as $field) {
             if ($this->hasAttemptedSubmit || !empty($child[$field])) {
                 $this->touchField("children.{$index}.{$field}");
@@ -625,6 +629,14 @@ class GiftRequestForm extends Component
             }
         } else {
             unset($this->fieldErrors["children.{$index}.shoe_size"]);
+        }
+
+        if ($this->isSizedGift($child['gift'] ?? '') && empty($child['height'])) {
+            if ($this->hasAttemptedSubmit) {
+                $this->fieldErrors["children.{$index}.height"] = ['La taille est obligatoire pour ce cadeau.'];
+            }
+        } else {
+            unset($this->fieldErrors["children.{$index}.height"]);
         }
     }
 
@@ -791,12 +803,31 @@ class GiftRequestForm extends Component
 
     protected function isShoeGift(string $gift): bool
     {
-        $shoeKeywords = ['chaussure', 'basket', 'botte', 'sandale', 'soulier', 'sneaker'];
+        $shoeKeywords = $this->giftsWithShoeSize !== []
+            ? $this->giftsWithShoeSize
+            : ['chaussure', 'basket', 'botte', 'sandale', 'soulier', 'sneaker'];
 
-        $giftLower = strtolower($gift);
+        return $this->matchesGiftKeywordList($gift, $shoeKeywords);
+    }
 
-        foreach ($shoeKeywords as $keyword) {
-            if (str_contains($giftLower, $keyword)) {
+    protected function isSizedGift(string $gift): bool
+    {
+        return $this->matchesGiftKeywordList($gift, $this->giftsWithSize);
+    }
+
+    /**
+     * @param array<int, string> $keywords
+     */
+    protected function matchesGiftKeywordList(string $gift, array $keywords): bool
+    {
+        if ($gift === '' || $keywords === []) {
+            return false;
+        }
+
+        $giftLower = mb_strtolower($gift);
+
+        foreach ($keywords as $keyword) {
+            if (str_contains($giftLower, mb_strtolower($keyword))) {
                 return true;
             }
         }

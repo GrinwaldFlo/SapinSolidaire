@@ -9,6 +9,7 @@ use App\Livewire\Admin\FamilyManagement;
 use App\Livewire\Admin\FamilyValidation;
 use App\Livewire\Admin\GiftDelivery;
 use App\Livewire\Admin\GiftReception;
+use App\Livewire\Admin\GiftsManagement;
 use App\Livewire\Admin\LabelGeneration;
 use App\Livewire\Admin\SeasonManagement;
 use App\Livewire\Admin\SendConfirmations;
@@ -107,6 +108,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::get('/saisons', SeasonManagement::class)->name('admin.seasons');
         Route::get('/utilisateurs', UserManagement::class)->name('admin.users');
         Route::get('/parametres', SettingsManagement::class)->name('admin.settings');
+        Route::get('/parametres-cadeaux', GiftsManagement::class)->name('admin.gifts-management');
         Route::get('/messages-validation', ValidationMessageTemplates::class)->name('admin.validation-messages');
         Route::get('/dev-tools', DevTools::class)->name('admin.dev-tools');
         Route::get('/css-showcase', CssShowcase::class)->name('admin.css-showcase');

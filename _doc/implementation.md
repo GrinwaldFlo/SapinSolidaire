@@ -119,9 +119,16 @@ Les paramètres suivants sont modifiables depuis l'interface:
 - Nom du site
 - Liste des code postaux autorisé à demander un cadeau
 - Nombre d'année où une famille a le droit de demander des cadeaux.
-- Liste de propositions de cadeaux que l'on peut demander. (un seul champ texte multi-ligne)
 - Texte d'introduction (affiché aux familles)
 - Adresse de réponse aux emails
+- Style PDF des cartes
+
+Une page dédiée "Gestion des cadeaux" permet de gérer:
+
+- Liste de propositions de cadeaux (champ texte multi-ligne)
+- Restrictions de cadeaux (cadeaux interdits)
+- Cadeaux avec pointure (mots-clés qui rendent la pointure obligatoire)
+- Cadeaux avec taille (mots-clés qui rendent la taille obligatoire)
 
 ### Gestion des rôles et permissions
 

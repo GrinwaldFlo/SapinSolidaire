@@ -13,8 +13,6 @@ class SettingsManagement extends Component
     public string $allowedCities = '';
     public int $maxConsecutiveYears = 3;
     public int $maxChildAge = 12;
-    public string $giftSuggestions = '';
-    public string $giftRestrictions = '';
     public string $introductionText = '';
     public string $replyToEmail = '';
     public string $codePrefix = '';
@@ -28,8 +26,6 @@ class SettingsManagement extends Component
         $this->allowedCities = Setting::getValue(Setting::ALLOWED_CITIES, '');
         $this->maxConsecutiveYears = Setting::getMaxConsecutiveYears();
         $this->maxChildAge = Setting::getMaxChildAge();
-        $this->giftSuggestions = Setting::getValue(Setting::GIFT_SUGGESTIONS, '');
-        $this->giftRestrictions = Setting::getValue(Setting::GIFT_RESTRICTIONS, '');
         $this->introductionText = Setting::getIntroductionText();
         $this->replyToEmail = Setting::getReplyToEmail() ?? '';
         $this->codePrefix = Setting::getCodePrefix();
@@ -70,8 +66,6 @@ class SettingsManagement extends Component
         Setting::setValue(Setting::ALLOWED_CITIES, implode(', ', $cities));
         Setting::setValue(Setting::MAX_CONSECUTIVE_YEARS, $this->maxConsecutiveYears);
         Setting::setValue(Setting::MAX_CHILD_AGE, $this->maxChildAge);
-        Setting::setValue(Setting::GIFT_SUGGESTIONS, $this->giftSuggestions);
-        Setting::setValue(Setting::GIFT_RESTRICTIONS, $this->giftRestrictions);
         Setting::setValue(Setting::INTRODUCTION_TEXT, $this->introductionText);
         Setting::setValue(Setting::REPLY_TO_EMAIL, $this->replyToEmail);
         $oldPrefix = Setting::getCodePrefix();

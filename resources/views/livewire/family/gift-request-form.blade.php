@@ -461,9 +461,15 @@
 
                                 <div>
                                     <label class="field-label">Taille (cm)</label>
-                                    <input type="number" wire:model="children.{{ $index }}.height" min="50" max="200"
-                                        class="field-input"
+                                    @php $heightKey = "children.{$index}.height"; @endphp
+                                    <input type="number" wire:model="children.{{ $index }}.height" wire:blur="validateChild({{ $index }})" min="50" max="200"
+                                        class="{{ isset($fieldErrors[$heightKey]) && in_array("children.{$index}.height", $touchedFields) ? 'field-input-error' : 'field-input' }}"
                                         {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
+                                    @if(isset($fieldErrors[$heightKey]) && in_array("children.{$index}.height", $touchedFields))
+                                        <p class="field-error">{{ collect($fieldErrors[$heightKey])->first() }}</p>
+                                    @elseif($errors->has($heightKey))
+                                        <p class="field-error">{{ $errors->first($heightKey) }}</p>
+                                    @endif
                                 </div>
 
                                 <div>
@@ -575,4 +581,3 @@
         </div>
     @endif
 </div>
-
