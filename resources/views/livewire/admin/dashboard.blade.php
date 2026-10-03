@@ -14,12 +14,12 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="stat-card">
-            <div class="label-title">Familles</div>
+            <div class="label-title">Familles (total hors refus définitifs)</div>
             <div class="label-value">{{ $totalFamilies }}</div>
         </div>
 
         <div class="stat-card">
-            <div class="label-title">Enfants</div>
+            <div class="label-title">Enfants (total hors refus définitifs)</div>
             <div class="label-value">{{ $totalChildren }}</div>
         </div>
 
@@ -52,6 +52,20 @@
             <div class="text-center">
                 <div class="label-value--success">{{ $givenChildren }}</div>
                 <div class="label-title">Donnés</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <h2 class="section-title">Refus finaux</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+            <div class="text-center">
+                <div class="label-value--warning">{{ $rejectedFinalFamilies }}</div>
+                <div class="label-title">Familles refusées définitivement</div>
+            </div>
+            <div class="text-center">
+                <div class="label-value--warning">{{ $rejectedFinalChildren }}</div>
+                <div class="label-title">Enfants refusés définitivement</div>
             </div>
         </div>
     </div>

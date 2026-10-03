@@ -47,6 +47,7 @@ test('submit does not require proof of habitation when feature is disabled', fun
 
     Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
         ->call('acceptConsecutiveYears')
+        ->call('acceptPickupCommitment')
         ->call('acceptCity')
         ->set('firstName', 'Jean')
         ->set('lastName', 'Dupont')

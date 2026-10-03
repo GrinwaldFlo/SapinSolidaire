@@ -46,8 +46,9 @@ class AddressValidationService
         if ($zipcode != $verification["ZipCode"])
             return ['Valide' => false, 'Message' => 'Code postal erroné', 'FormatedAddress' => $verification];
 
+/* Disabled for now
         if (!str_contains($verification["TownName"], $townname))
-            return ['Valide' => false, 'Message' => 'Ville erronée', 'FormatedAddress' => $verification];
+            return ['Valide' => false, 'Message' => 'Ville erronée', 'FormatedAddress' => $verification];*/
 
         return ['Valide' => true, 'Message' => '', 'FormatedAddress' => $verification];
     }

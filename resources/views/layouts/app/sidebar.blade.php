@@ -87,6 +87,10 @@
                         Paramètres
                     </flux:sidebar.item>
 
+                    <flux:sidebar.item icon="gift" :href="route('admin.gifts-management')" :current="request()->routeIs('admin.gifts-management')" wire:navigate>
+                        Cadeaux
+                    </flux:sidebar.item>
+
                     <flux:sidebar.item icon="chat-bubble-left-right" :href="route('admin.validation-messages')" :current="request()->routeIs('admin.validation-messages')" wire:navigate>
                         Messages de validation
                     </flux:sidebar.item>

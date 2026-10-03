@@ -26,10 +26,6 @@
 5. Register the first user at http://localhost:8000/admin to become Admin
 
 
-composer run dev
-
-
-
 ## Alternative (if you want to run services separately)
 
 Instead of `composer run dev`, you can run these in separate terminals:

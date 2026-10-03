@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Admin\Validation;
+use App\Livewire\Admin\FamilyValidation;
 use App\Models\Child;
 use App\Models\Family;
 use App\Models\GiftRequest;
@@ -8,6 +9,7 @@ use App\Models\Role;
 use App\Models\Season;
 use App\Models\Setting;
 use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -354,4 +356,80 @@ test('validateChild before family then validateFamily does not reassign family n
     expect($this->giftRequest->family_number)->toBe(1);
     expect($child->code)->toBe('Y0001/1');
     expect($this->season->next_family_number)->toBe(2);
+});
+
+test('final family rejection in combined validation final-rejects all children', function () {
+    $childPending = Child::create([
+        'gift_request_id' => $this->giftRequest->id,
+        'first_name' => 'Alice',
+        'gender' => Child::GENDER_GIRL,
+        'birth_year' => 2018,
+        'gift' => 'Poupée',
+        'status' => Child::STATUS_PENDING,
+    ]);
+
+    $childValidated = Child::create([
+        'gift_request_id' => $this->giftRequest->id,
+        'first_name' => 'Bob',
+        'gender' => Child::GENDER_BOY,
+        'birth_year' => 2016,
+        'gift' => 'Lego',
+        'status' => Child::STATUS_VALIDATED,
+    ]);
+
+    $this->actingAs($this->admin);
+
+    Livewire::test(Validation::class)
+        ->set('familyDecision', 'rejected')
+        ->set('familyComment', 'Refus définitif de la demande familiale.')
+        ->call('submitValidation');
+
+    $this->giftRequest->refresh();
+    $childPending->refresh();
+    $childValidated->refresh();
+
+    expect($this->giftRequest->status)->toBe(GiftRequest::STATUS_REJECTED_FINAL);
+    expect($childPending->status)->toBe(Child::STATUS_REJECTED_FINAL);
+    expect($childValidated->status)->toBe(Child::STATUS_REJECTED_FINAL);
+    expect($childPending->rejection_comment)->toBe('Refus définitif de la demande familiale.');
+    expect($childValidated->rejection_comment)->toBe('Refus définitif de la demande familiale.');
+});
+
+test('final family rejection in family validation final-rejects all children', function () {
+    Mail::fake();
+
+    $childPending = Child::create([
+        'gift_request_id' => $this->giftRequest->id,
+        'first_name' => 'Alice',
+        'gender' => Child::GENDER_GIRL,
+        'birth_year' => 2018,
+        'gift' => 'Poupée',
+        'status' => Child::STATUS_PENDING,
+    ]);
+
+    $childValidated = Child::create([
+        'gift_request_id' => $this->giftRequest->id,
+        'first_name' => 'Bob',
+        'gender' => Child::GENDER_BOY,
+        'birth_year' => 2016,
+        'gift' => 'Lego',
+        'status' => Child::STATUS_VALIDATED,
+    ]);
+
+    $this->actingAs($this->admin);
+
+    Livewire::test(FamilyValidation::class)
+        ->call('openRejectionModal', $this->giftRequest->id, true)
+        ->set('rejectionComment', 'Refus définitif de la famille pour dossier incomplet.')
+        ->call('confirmRejection');
+
+    $this->giftRequest->refresh();
+    $childPending->refresh();
+    $childValidated->refresh();
+
+    expect($this->giftRequest->status)->toBe(GiftRequest::STATUS_REJECTED_FINAL);
+    expect($childPending->status)->toBe(Child::STATUS_REJECTED_FINAL);
+    expect($childValidated->status)->toBe(Child::STATUS_REJECTED_FINAL);
+    expect($childPending->rejection_comment)->toBe('Refus définitif de la famille pour dossier incomplet.');
+    expect($childValidated->rejection_comment)->toBe('Refus définitif de la famille pour dossier incomplet.');
 });

@@ -13,6 +13,8 @@ class Dashboard extends Component
     public ?Season $activeSeason = null;
     public int $totalFamilies = 0;
     public int $totalChildren = 0;
+    public int $rejectedFinalFamilies = 0;
+    public int $rejectedFinalChildren = 0;
     public int $pendingFamilies = 0;
     public int $pendingChildren = 0;
     public int $validatedChildren = 0;
@@ -32,19 +34,31 @@ class Dashboard extends Component
             return;
         }
 
-        $this->totalFamilies = GiftRequest::where('season_id', $this->activeSeason->id)->count();
+        $familiesQuery = GiftRequest::where('season_id', $this->activeSeason->id);
 
-        $this->totalChildren = Child::whereHas('giftRequest', function ($q) {
-            $q->where('season_id', $this->activeSeason->id);
-        })->count();
+        $this->totalFamilies = (clone $familiesQuery)
+            ->where('status', '!=', GiftRequest::STATUS_REJECTED_FINAL)
+            ->count();
 
-        $this->pendingFamilies = GiftRequest::where('season_id', $this->activeSeason->id)
-            ->where('status', GiftRequest::STATUS_PENDING)
+        $this->rejectedFinalFamilies = (clone $familiesQuery)
+            ->where('status', GiftRequest::STATUS_REJECTED_FINAL)
             ->count();
 
         $childrenQuery = Child::whereHas('giftRequest', function ($q) {
             $q->where('season_id', $this->activeSeason->id);
         });
+
+        $this->totalChildren = (clone $childrenQuery)
+            ->where('status', '!=', Child::STATUS_REJECTED_FINAL)
+            ->count();
+
+        $this->rejectedFinalChildren = (clone $childrenQuery)
+            ->where('status', Child::STATUS_REJECTED_FINAL)
+            ->count();
+
+        $this->pendingFamilies = GiftRequest::where('season_id', $this->activeSeason->id)
+            ->where('status', GiftRequest::STATUS_PENDING)
+            ->count();
 
         $this->pendingChildren = (clone $childrenQuery)->where('status', Child::STATUS_PENDING)->count();
         $this->validatedChildren = (clone $childrenQuery)->where('status', Child::STATUS_VALIDATED)->count();

@@ -6,6 +6,11 @@
             Gérer les messages prédéfinis de validation
         </a>
     </p>
+    <p>
+        <a href="{{ route('admin.gifts-management') }}" class="link" wire:navigate>
+            Gérer les paramètres cadeaux
+        </a>
+    </p>
 
     @if(session()->has('message'))
         <div class="notice-success">
@@ -46,18 +51,6 @@
                     — Un enfant né en {{ $minBirthYear }} aura exactement {{ $maxChildAge }} ans au 31.12.{{ date('Y') }} ({{ date('Y') }} − {{ $maxChildAge }} = {{ $minBirthYear }}).
                 </p>
                 @error('maxChildAge') <p class="field-error">{{ $message }}</p> @enderror
-            </div>
-
-            <div>
-                <label class="field-label">Propositions de cadeaux</label>
-                <textarea wire:model="giftSuggestions" rows="6" placeholder="Un cadeau par ligne" class="field-input"></textarea>
-                <p class="mt-1 text-sm text-muted">Un cadeau par ligne. Ces suggestions apparaîtront dans l'autocomplétion du formulaire.</p>
-            </div>
-
-            <div>
-                <label class="field-label">Restrictions de cadeaux (cadeaux interdits)</label>
-                <textarea wire:model="giftRestrictions" rows="4" placeholder="Un mot-clé par ligne" class="field-input"></textarea>
-                <p class="mt-1 text-sm text-muted">Un mot-clé par ligne. Si le cadeau demandé contient un de ces mots, il sera refusé.</p>
             </div>
 
             <div>

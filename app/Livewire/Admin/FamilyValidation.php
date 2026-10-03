@@ -5,10 +5,12 @@ namespace App\Livewire\Admin;
 use App\Livewire\Admin\Concerns\ChecksDuplicateFamily;
 use App\Livewire\Admin\Concerns\HandlesFamilyValidation;
 use App\Livewire\Admin\Concerns\ShowsFamilyModal;
+use App\Models\Child;
 use App\Models\GiftRequest;
 use App\Models\Season;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class FamilyValidation extends Component
@@ -125,10 +127,22 @@ class FamilyValidation extends Component
 
         $status = $this->isFinalRejection ? GiftRequest::STATUS_REJECTED_FINAL : GiftRequest::STATUS_REJECTED;
 
-        $request = GiftRequest::with('family')->findOrFail($this->rejectionTargetId);
-        $request->setStatus($status, $this->rejectionComment);
+        $email = DB::transaction(function () use ($status) {
+            $request = GiftRequest::with('family')->lockForUpdate()->findOrFail($this->rejectionTargetId);
+            $request->setStatus($status, $this->rejectionComment);
 
-        $this->sendRejectionEmail($request->family->email, $this->isFinalRejection, $this->rejectionComment);
+            if ($this->isFinalRejection) {
+                $request->children()->update([
+                    'status' => Child::STATUS_REJECTED_FINAL,
+                    'status_changed_at' => now(),
+                    'rejection_comment' => $this->rejectionComment,
+                ]);
+            }
+
+            return (string) $request->family->email;
+        });
+
+        $this->sendRejectionEmail($email, $this->isFinalRejection, $this->rejectionComment);
 
         $this->closeRejectionModal();
         $this->loadNextRequest();

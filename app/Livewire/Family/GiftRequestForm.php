@@ -6,6 +6,7 @@ use App\Models\Child;
 use App\Models\EmailToken;
 use App\Models\Family;
 use App\Models\GiftRequest;
+use App\Models\PickupSlot;
 use App\Models\Season;
 use App\Models\Setting;
 use App\Services\AddressValidationService;
@@ -13,6 +14,7 @@ use App\Services\PhoneValidationService;
 use App\Services\SeasonService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -31,6 +33,7 @@ class GiftRequestForm extends Component
     public int $step = 1; // 1: eligibility, 2: form
     public bool $tokenValid = false;
     public bool $consecutiveYearsAccepted = false;
+    public bool $pickupCommitmentAccepted = false;
     public bool $cityAccepted = false;
     public bool $cityConfirmed = false;
     public bool $showCityConfirmation = false;
@@ -77,6 +80,10 @@ class GiftRequestForm extends Component
     public string $selectedCity = '';
     public array $giftSuggestions = [];
     public array $giftRestrictions = [];
+    public array $giftsWithShoeSize = [];
+    public array $giftsWithSize = [];
+    public string $pickupConditionDateText = '';
+    public string $pickupConditionAddressText = '';
 
     public function mount(string $token): void
     {
@@ -107,6 +114,8 @@ class GiftRequestForm extends Component
 
             $this->season = $status['season'];
             $this->organizerEmail = $this->season->responsible_email ?? '';
+            $this->pickupConditionAddressText = trim((string) ($this->season->pickup_address ?? ''));
+            $this->pickupConditionDateText = $this->buildPickupConditionDateText();
 
             // Load settings
             $this->maxConsecutiveYears = Setting::getMaxConsecutiveYears();
@@ -114,6 +123,8 @@ class GiftRequestForm extends Component
             $this->allowedCities = Setting::getAllowedCities();
             $this->giftSuggestions = Setting::getGiftSuggestions();
             $this->giftRestrictions = Setting::getGiftRestrictions();
+            $this->giftsWithShoeSize = Setting::getGiftsWithShoeSize();
+            $this->giftsWithSize = Setting::getGiftsWithSize();
             $this->proofOfHabitationEnabled = Setting::isProofOfHabitationEnabled();
 
             // Check if family exists
@@ -168,6 +179,7 @@ class GiftRequestForm extends Component
                     // Skip eligibility if already accepted
                     $this->step = 2;
                     $this->consecutiveYearsAccepted = true;
+                    $this->pickupCommitmentAccepted = true;
                     $this->cityAccepted = true;
                     $this->cityConfirmed = true;
                 }
@@ -220,7 +232,16 @@ class GiftRequestForm extends Component
     {
         $this->consecutiveYearsAccepted = true;
 
-        if ($this->consecutiveYearsAccepted && $this->cityAccepted) {
+        if ($this->consecutiveYearsAccepted && $this->pickupCommitmentAccepted && $this->cityAccepted) {
+            $this->step = 2;
+        }
+    }
+
+    public function acceptPickupCommitment(): void
+    {
+        $this->pickupCommitmentAccepted = true;
+
+        if ($this->consecutiveYearsAccepted && $this->pickupCommitmentAccepted && $this->cityAccepted) {
             $this->step = 2;
         }
     }
@@ -239,9 +260,42 @@ class GiftRequestForm extends Component
             $this->cityConfirmed = true;
         }
 
-        if ($this->consecutiveYearsAccepted && $this->cityAccepted) {
+        if ($this->consecutiveYearsAccepted && $this->pickupCommitmentAccepted && $this->cityAccepted) {
             $this->step = 2;
         }
+    }
+
+    protected function buildPickupConditionDateText(): string
+    {
+        if (! $this->season) {
+            return '';
+        }
+
+        $slots = PickupSlot::query()
+            ->where('season_id', $this->season->id)
+            ->orderBy('start_datetime')
+            ->get();
+
+        if ($slots->isEmpty()) {
+            return '';
+        }
+
+        $firstStart = $slots->first()?->start_datetime;
+        $lastEnd = $slots->last()?->end_datetime;
+
+        if (! $firstStart || ! $lastEnd) {
+            return '';
+        }
+
+        if ($firstStart->toDateString() === $lastEnd->toDateString()) {
+            return 'le '.$firstStart->translatedFormat('l d F Y');
+        }
+
+        return sprintf(
+            'entre le %s et le %s',
+            $firstStart->translatedFormat('l d F Y'),
+            $lastEnd->translatedFormat('l d F Y')
+        );
     }
 
     public function requestCityChange(): void
@@ -521,7 +575,7 @@ class GiftRequestForm extends Component
             return;
         }
 
-        $fields = ['first_name', 'gender', 'birth_year', 'gift', 'shoe_size'];
+        $fields = ['first_name', 'gender', 'birth_year', 'gift', 'shoe_size', 'height'];
         foreach ($fields as $field) {
             if ($this->hasAttemptedSubmit || !empty($child[$field])) {
                 $this->touchField("children.{$index}.{$field}");
@@ -576,6 +630,14 @@ class GiftRequestForm extends Component
             }
         } else {
             unset($this->fieldErrors["children.{$index}.shoe_size"]);
+        }
+
+        if ($this->isSizedGift($child['gift'] ?? '') && empty($child['height'])) {
+            if ($this->hasAttemptedSubmit) {
+                $this->fieldErrors["children.{$index}.height"] = ['La taille est obligatoire pour ce cadeau.'];
+            }
+        } else {
+            unset($this->fieldErrors["children.{$index}.height"]);
         }
     }
 
@@ -742,17 +804,55 @@ class GiftRequestForm extends Component
 
     protected function isShoeGift(string $gift): bool
     {
-        $shoeKeywords = ['chaussure', 'basket', 'botte', 'sandale', 'soulier', 'sneaker'];
+        $shoeKeywords = $this->giftsWithShoeSize !== []
+            ? $this->giftsWithShoeSize
+            : ['chaussure', 'basket', 'botte', 'sandale', 'soulier', 'sneaker'];
 
-        $giftLower = strtolower($gift);
+        return $this->matchesGiftKeywordList($gift, $shoeKeywords);
+    }
 
-        foreach ($shoeKeywords as $keyword) {
-            if (str_contains($giftLower, $keyword)) {
+    protected function isSizedGift(string $gift): bool
+    {
+        return $this->matchesGiftKeywordList($gift, $this->giftsWithSize);
+    }
+
+    public function shouldShowShoeSizeField(int $index): bool
+    {
+        $gift = (string) ($this->children[$index]['gift'] ?? '');
+
+        return $this->isShoeGift($gift);
+    }
+
+    public function shouldShowHeightField(int $index): bool
+    {
+        $gift = (string) ($this->children[$index]['gift'] ?? '');
+
+        return $this->isSizedGift($gift);
+    }
+
+    /**
+     * @param array<int, string> $keywords
+     */
+    protected function matchesGiftKeywordList(string $gift, array $keywords): bool
+    {
+        if ($gift === '' || $keywords === []) {
+            return false;
+        }
+
+        $normalizedGift = $this->normalizeGiftKeywordValue($gift);
+
+        foreach ($keywords as $keyword) {
+            if (str_contains($normalizedGift, $this->normalizeGiftKeywordValue($keyword))) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    protected function normalizeGiftKeywordValue(string $value): string
+    {
+        return mb_strtolower(Str::ascii($value));
     }
 
     public function render()

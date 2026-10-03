@@ -15,7 +15,7 @@
             <span class="text-6xl mb-4 block">🚫</span>
             <h2 class="section-title">Demande impossible</h2>
             <div class="notice-error">
-                Votre famille a été définitivement refusée lors d'une saison précédente. Vous ne pouvez plus effectuer de demande de cadeau.
+                Votre famille a été refusée, vous ne pouvez pas effectuer de demande de cadeau cette année.
             </div>
             @if($rejectionComment)
                 <div class="notice-warning mt-4 text-left">
@@ -93,7 +93,33 @@
                     </div>
                 @endif
 
-                @if($consecutiveYearsAccepted && !$cityAccepted)
+                @if($consecutiveYearsAccepted && !$pickupCommitmentAccepted)
+                    <div class="border border-gray-200 dark:border-zinc-600 rounded-lg p-6">
+                        <h3 class="section-title mb-2">Retrait du cadeau</h3>
+                        <p class="text-muted mb-4">
+                            Je viendrai chercher le cadeau
+                            @if(!empty($pickupConditionDateText))
+                                {{ $pickupConditionDateText }}
+                            @endif
+                            @if(!empty($pickupConditionAddressText))
+                                à {{ $pickupConditionAddressText }}
+                            @endif
+                            .
+                        </p>
+                        <button wire:click="acceptPickupCommitment" class="btn-confirm">
+                            Je confirme
+                        </button>
+                    </div>
+                @elseif($pickupCommitmentAccepted)
+                    <div class="notice-success">
+                        <div class="flex items-center gap-2">
+                            <span>✓</span>
+                            <span class="font-semibold">Condition de retrait du cadeau acceptée</span>
+                        </div>
+                    </div>
+                @endif
+
+                @if($consecutiveYearsAccepted && $pickupCommitmentAccepted && !$cityAccepted)
                     <div class="border border-gray-200 dark:border-zinc-600 rounded-lg p-6">
                         <h3 class="section-title mb-2">Zone géographique</h3>
                         @if(!empty($allowedCities))
@@ -434,13 +460,6 @@
                                 </div>
 
                                 <div>
-                                    <label class="field-label">Taille (cm)</label>
-                                    <input type="number" wire:model="children.{{ $index }}.height" min="50" max="200"
-                                        class="field-input"
-                                        {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
-                                </div>
-
-                                <div>
                                     <label class="field-label">Cadeau souhaité *</label>
                                     @php $giftKey = "children.{$index}.gift"; @endphp
                                     <x-combobox
@@ -457,18 +476,35 @@
                                     @endif
                                 </div>
 
-                                <div>
-                                    <label class="field-label">Pointure (si chaussures)</label>
-                                    @php $shoeSizeKey = "children.{$index}.shoe_size"; @endphp
-                                    <input type="text" wire:model="children.{{ $index }}.shoe_size" wire:blur="validateChild({{ $index }})"
-                                        class="{{ isset($fieldErrors[$shoeSizeKey]) && in_array("children.{$index}.shoe_size", $touchedFields) ? 'field-input-error' : 'field-input' }}"
-                                        {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
-                                    @if(isset($fieldErrors[$shoeSizeKey]) && in_array("children.{$index}.shoe_size", $touchedFields))
-                                        <p class="field-error">{{ collect($fieldErrors[$shoeSizeKey])->first() }}</p>
-                                    @elseif($errors->has($shoeSizeKey))
-                                        <p class="field-error">{{ $errors->first($shoeSizeKey) }}</p>
-                                    @endif
-                                </div>
+                                @if($this->shouldShowHeightField($index))
+                                    <div>
+                                        <label class="field-label">Taille (cm)</label>
+                                        @php $heightKey = "children.{$index}.height"; @endphp
+                                        <input type="number" wire:model="children.{{ $index }}.height" wire:blur="validateChild({{ $index }})" min="50" max="200"
+                                            class="{{ isset($fieldErrors[$heightKey]) && in_array("children.{$index}.height", $touchedFields) ? 'field-input-error' : 'field-input' }}"
+                                            {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
+                                        @if(isset($fieldErrors[$heightKey]) && in_array("children.{$index}.height", $touchedFields))
+                                            <p class="field-error">{{ collect($fieldErrors[$heightKey])->first() }}</p>
+                                        @elseif($errors->has($heightKey))
+                                            <p class="field-error">{{ $errors->first($heightKey) }}</p>
+                                        @endif
+                                    </div>
+                                @endif
+
+                                @if($this->shouldShowShoeSizeField($index))
+                                    <div>
+                                        <label class="field-label">Pointure (si chaussures)</label>
+                                        @php $shoeSizeKey = "children.{$index}.shoe_size"; @endphp
+                                        <input type="text" wire:model="children.{{ $index }}.shoe_size" wire:blur="validateChild({{ $index }})"
+                                            class="{{ isset($fieldErrors[$shoeSizeKey]) && in_array("children.{$index}.shoe_size", $touchedFields) ? 'field-input-error' : 'field-input' }}"
+                                            {{ !($child['can_modify'] ?? true) ? 'disabled' : '' }}>
+                                        @if(isset($fieldErrors[$shoeSizeKey]) && in_array("children.{$index}.shoe_size", $touchedFields))
+                                            <p class="field-error">{{ collect($fieldErrors[$shoeSizeKey])->first() }}</p>
+                                        @elseif($errors->has($shoeSizeKey))
+                                            <p class="field-error">{{ $errors->first($shoeSizeKey) }}</p>
+                                        @endif
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     @endforeach
@@ -549,4 +585,3 @@
         </div>
     @endif
 </div>
-
