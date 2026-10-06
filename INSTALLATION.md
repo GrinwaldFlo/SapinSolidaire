@@ -72,10 +72,11 @@ cd /var/www/sapin-solidaire
 sudo git clone <repository-url> .
 # OR: sudo cp -r /local/path/* .
 
+# Create cache folders
+mkdir -p storage/framework/{views,cache,sessions} storage/logs bootstrap/cache
+
 # Set proper permissions
-sudo chown -R www-data:www-data /var/www/sapin-solidaire
-sudo chmod -R 775 /var/www/sapin-solidaire/storage
-sudo chmod -R 775 /var/www/sapin-solidaire/bootstrap/cache
+chmod -R ug+rwX storage bootstrap/cache
 ```
 
 ### Step 3: Install PHP Dependencies
@@ -341,9 +342,13 @@ php artisan view:clear
 # Create first admin user
 php artisan tinker
 # In Tinker console:
-# User::factory()->create(['email' => 'admin@example.com', 'password' => bcrypt('temp-password')]);
-# $user = User::first();
-# $user->roles()->sync([Role::whereSlug('admin')->first()->id]);
+# use App\Models\User;
+# use App\Models\Role;
+# $user = User::firstOrCreate(
+#     ['email' => 'admin@example.com'],
+#     ['name' => 'Admin', 'password' => 'change-this-password-now']
+# );
+# $user->syncRoles([Role::ADMIN]);
 # exit
 ```
 
