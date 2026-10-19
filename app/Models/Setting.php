@@ -12,25 +12,47 @@ class Setting extends Model
     use HasFactory, HasUuids;
 
     public const SITE_NAME = 'site_name';
+
     public const LOGO_PATH = 'logo_path';
+
     public const ALLOWED_CITIES = 'allowed_cities';
+
     public const MAX_CONSECUTIVE_YEARS = 'max_consecutive_years';
+
     public const GIFT_SUGGESTIONS = 'gift_suggestions';
+
     public const GIFT_RESTRICTIONS = 'gift_restrictions';
+
     public const GIFTS_WITH_SHOE_SIZE = 'gifts_with_shoe_size';
+
     public const GIFTS_WITH_SIZE = 'gifts_with_size';
+
     public const LARGE_GIFTS = 'large_gifts';
+
     public const INTRODUCTION_TEXT = 'introduction_text';
+
     public const REPLY_TO_EMAIL = 'reply_to_email';
+
     public const CODE_PREFIX = 'code_prefix';
+
     public const CODE_FAMILY_PADDING = 'code_family_padding';
+
     public const PROOF_OF_HABITATION_ENABLED = 'proof_of_habitation_enabled';
+
     public const FAMILY_FORM_MULTI_STEP_ENABLED = 'family_form_multi_step_enabled';
+
     public const PDF_STYLE = 'pdf_style';
+
     public const MAX_CHILD_AGE = 'max_child_age';
+
     public const VALIDATION_COMMENT_TEMPLATES = 'validation_comment_templates';
 
+    public const REGISTRATION_BLOCKED = 'registration_blocked';
+
+    public const REGISTRATION_BLOCKED_REASON = 'registration_blocked_reason';
+
     public const PDF_STYLE_LABEL = 'label';
+
     public const PDF_STYLE_GRID = 'grid';
 
     /**
@@ -232,6 +254,22 @@ class Setting extends Model
     }
 
     /**
+     * Check if new registrations and modifications are blocked by an admin.
+     */
+    public static function isRegistrationBlocked(): bool
+    {
+        return (bool) self::getValue(self::REGISTRATION_BLOCKED, false);
+    }
+
+    /**
+     * Get the reason displayed to families when registrations are blocked.
+     */
+    public static function getRegistrationBlockedReason(): string
+    {
+        return trim((string) self::getValue(self::REGISTRATION_BLOCKED_REASON, ''));
+    }
+
+    /**
      * Get max child age (inclusive, evaluated on 31.12 of current year).
      */
     public static function getMaxChildAge(): int
@@ -269,7 +307,7 @@ class Setting extends Model
     /**
      * Persist predefined validation comment templates.
      *
-     * @param array<int, string> $templates
+     * @param  array<int, string>  $templates
      */
     public static function setValidationCommentTemplates(array $templates): void
     {
@@ -309,6 +347,8 @@ class Setting extends Model
             self::PDF_STYLE,
             self::MAX_CHILD_AGE,
             self::VALIDATION_COMMENT_TEMPLATES,
+            self::REGISTRATION_BLOCKED,
+            self::REGISTRATION_BLOCKED_REASON,
         ];
 
         foreach ($keys as $key) {

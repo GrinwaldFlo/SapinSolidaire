@@ -10,16 +10,30 @@ use Livewire\Component;
 class SettingsManagement extends Component
 {
     public string $siteName = '';
+
     public string $allowedCities = '';
+
     public int $maxConsecutiveYears = 3;
+
     public int $maxChildAge = 12;
+
     public string $introductionText = '';
+
     public string $replyToEmail = '';
+
     public string $codePrefix = '';
+
     public int $codeFamilyPadding = 4;
+
     public bool $proofOfHabitationEnabled = false;
+
     public bool $familyFormMultiStepEnabled = false;
+
     public string $pdfStyle = 'label';
+
+    public bool $registrationBlocked = false;
+
+    public string $registrationBlockedReason = '';
 
     public function mount(): void
     {
@@ -34,6 +48,8 @@ class SettingsManagement extends Component
         $this->proofOfHabitationEnabled = Setting::isProofOfHabitationEnabled();
         $this->familyFormMultiStepEnabled = Setting::isFamilyFormMultiStepEnabled();
         $this->pdfStyle = Setting::getPdfStyle();
+        $this->registrationBlocked = Setting::isRegistrationBlocked();
+        $this->registrationBlockedReason = Setting::getRegistrationBlockedReason();
     }
 
     public function save(AddressValidationService $addressValidationService): void
@@ -46,6 +62,7 @@ class SettingsManagement extends Component
             'codePrefix' => ['nullable', 'string', 'max:10'],
             'codeFamilyPadding' => ['required', 'integer', 'min:1', 'max:10'],
             'pdfStyle' => ['required', 'in:label,grid'],
+            'registrationBlockedReason' => ['nullable', 'string', 'max:2000'],
         ]);
 
         $cities = array_filter(array_map('trim', explode(',', $this->allowedCities)), fn ($c) => $c !== '');
@@ -60,7 +77,8 @@ class SettingsManagement extends Component
         }
 
         if (! empty($invalidCities)) {
-            $this->addError('allowedCities', 'Ville(s) invalide(s) : ' . implode(', ', $invalidCities));
+            $this->addError('allowedCities', 'Ville(s) invalide(s) : '.implode(', ', $invalidCities));
+
             return;
         }
 
@@ -83,6 +101,8 @@ class SettingsManagement extends Component
         Setting::setValue(Setting::PROOF_OF_HABITATION_ENABLED, $this->proofOfHabitationEnabled ? '1' : '0');
         Setting::setValue(Setting::FAMILY_FORM_MULTI_STEP_ENABLED, $this->familyFormMultiStepEnabled ? '1' : '0');
         Setting::setValue(Setting::PDF_STYLE, $this->pdfStyle);
+        Setting::setValue(Setting::REGISTRATION_BLOCKED, $this->registrationBlocked ? '1' : '0');
+        Setting::setValue(Setting::REGISTRATION_BLOCKED_REASON, trim($this->registrationBlockedReason));
 
         session()->flash('message', 'Paramètres enregistrés avec succès.');
 

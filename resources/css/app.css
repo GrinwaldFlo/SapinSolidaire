@@ -147,6 +147,11 @@ select:focus[data-flux-control] {
         @apply mt-1 list-disc pl-5 text-sm space-y-1;
     }
 
+    /* Free text inside a notice banner (keeps admin-entered line breaks) */
+    .notice-text {
+        @apply text-sm whitespace-pre-line;
+    }
+
     /* Bottom spacing when a notice sits above other content */
     .notice-spaced {
         @apply mb-6;
