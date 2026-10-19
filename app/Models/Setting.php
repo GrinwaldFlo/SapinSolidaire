@@ -24,6 +24,7 @@ class Setting extends Model
     public const CODE_PREFIX = 'code_prefix';
     public const CODE_FAMILY_PADDING = 'code_family_padding';
     public const PROOF_OF_HABITATION_ENABLED = 'proof_of_habitation_enabled';
+    public const FAMILY_FORM_MULTI_STEP_ENABLED = 'family_form_multi_step_enabled';
     public const PDF_STYLE = 'pdf_style';
     public const MAX_CHILD_AGE = 'max_child_age';
     public const VALIDATION_COMMENT_TEMPLATES = 'validation_comment_templates';
@@ -226,6 +227,14 @@ class Setting extends Model
     }
 
     /**
+     * Check if family multi-step form mode is enabled.
+     */
+    public static function isFamilyFormMultiStepEnabled(): bool
+    {
+        return (bool) self::getValue(self::FAMILY_FORM_MULTI_STEP_ENABLED, false);
+    }
+
+    /**
      * Get max child age (inclusive, evaluated on 31.12 of current year).
      */
     public static function getMaxChildAge(): int
@@ -298,6 +307,7 @@ class Setting extends Model
             self::CODE_PREFIX,
             self::CODE_FAMILY_PADDING,
             self::PROOF_OF_HABITATION_ENABLED,
+            self::FAMILY_FORM_MULTI_STEP_ENABLED,
             self::PDF_STYLE,
             self::MAX_CHILD_AGE,
             self::VALIDATION_COMMENT_TEMPLATES,

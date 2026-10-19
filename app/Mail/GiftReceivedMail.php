@@ -58,6 +58,7 @@ class GiftReceivedMail extends Mailable implements ShouldQueue
 
         return new Content(
             view: 'emails.gift-received',
+            text: 'emails.gift-received-text',
             with: [
                 'familyName' => $this->giftRequest->family->last_name ?? '',
                 'slotDate' => $start?->translatedFormat('l d F Y'),

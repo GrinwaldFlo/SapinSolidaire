@@ -41,6 +41,7 @@ class FinalRejectionMail extends Mailable implements ShouldQueue
     {
         return new Content(
             view: 'emails.final-rejection',
+            text: 'emails.final-rejection-text',
             with: [
                 'comment' => $this->comment,
                 'siteName' => Setting::getSiteName(),

@@ -87,7 +87,7 @@
     <input
         x-ref="input"
         type="text"
-        wire:model="{{ $model }}"
+        wire:model.live="{{ $model }}"
         @if($blur) wire:blur="{{ $blur }}" @endif
         x-on:input="onInput($event)"
         x-on:focus="onFocus($event)"

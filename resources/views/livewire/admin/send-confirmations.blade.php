@@ -87,7 +87,7 @@
                         <span class="text-orange-600 dark:text-orange-400">Non assigné</span>
                         @endif
                     </td>
-                    <td class="table-cell-muted"> {{ $family['last_email'] ? \Carbon\Carbon::parse($family['last_email'])->format('d/m/Y H:i') : '-' }}
+                    <td class="table-cell-muted" data-local-datetime="{{ $family['last_email'] ? \Carbon\Carbon::parse($family['last_email'])->toIso8601String() : '' }}">{{ $family['last_email'] ? \Carbon\Carbon::parse($family['last_email'])->format('d/m/Y H:i') : '-' }}</td>
                     </td>
                 </tr>
                 @endforeach

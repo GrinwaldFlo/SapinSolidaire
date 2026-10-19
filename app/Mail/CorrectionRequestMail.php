@@ -43,6 +43,7 @@ class CorrectionRequestMail extends Mailable implements ShouldQueue
     {
         return new Content(
             view: 'emails.correction-request',
+            text: 'emails.correction-request-text',
             with: [
                 'accessUrl' => url("/cadeau/{$this->token}"),
                 'comment' => $this->comment,

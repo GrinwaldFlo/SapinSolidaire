@@ -70,7 +70,7 @@
                     <tbody class="divide-y dark:divide-zinc-700">
                         @foreach($generatedPdfs as $pdf)
                         <tr class="hover:bg-gray-50 dark:hover:bg-zinc-700/50">
-                            <td class="table-cell">{{ $pdf->created_at->format('d/m/Y H:i') }}</td>
+                            <td class="table-cell" data-local-datetime="{{ $pdf->created_at->toIso8601String() }}">{{ $pdf->created_at->format('d/m/Y H:i') }}</td>
                             <td class="table-cell">{{ $pdf->children_count }}</td>
                             <td class="table-cell">{{ $pdf->user->name ?? '—' }}</td>
                             <td class="table-cell text-right">

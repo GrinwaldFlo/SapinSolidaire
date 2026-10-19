@@ -23,6 +23,7 @@ class SettingSeeder extends Seeder
             Setting::REPLY_TO_EMAIL => '',
             Setting::CODE_PREFIX => 'Y',
             Setting::CODE_FAMILY_PADDING => '4',
+            Setting::FAMILY_FORM_MULTI_STEP_ENABLED => '0',
         ];
 
         foreach ($settings as $key => $value) {

@@ -52,7 +52,7 @@
             <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
                 @forelse($actionLogs as $log)
                     <tr>
-                        <td class="table-cell-muted">{{ $log->created_at->format('d/m/Y H:i') }}</td>
+                        <td class="table-cell-muted" data-local-datetime="{{ $log->created_at->toIso8601String() }}">{{ $log->created_at->format('d/m/Y H:i') }}</td>
                         <td class="table-cell">{{ $log->user?->name ?? $log->user_label ?? 'Utilisateur supprimé' }}</td>
                         <td class="table-cell">
                             @if($log->action_type === \App\Models\AdminActionLog::ACTION_FAMILY_VALIDATED)
