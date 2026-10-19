@@ -13,6 +13,13 @@
             <div class="notice-success"><strong>.notice-success</strong> — Bannière de succès.</div>
             <div class="notice-warning"><strong>.notice-warning</strong> — Bannière d'avertissement.</div>
             <div class="notice-error"><strong>.notice-error</strong> — Bannière d'erreur.</div>
+            <div class="notice-info">
+                <p class="notice-title">.notice-title</p>
+                <ul class="notice-list">
+                    <li>.notice-list — Liste à puces dans une bannière.</li>
+                    <li>Deuxième élément.</li>
+                </ul>
+            </div>
         </div>
     </section>
 

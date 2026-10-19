@@ -138,6 +138,15 @@ select:focus[data-flux-control] {
         @apply bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-4;
     }
 
+    /* Title and bullet list inside a notice banner */
+    .notice-title {
+        @apply font-semibold;
+    }
+
+    .notice-list {
+        @apply mt-1 list-disc pl-5 text-sm space-y-1;
+    }
+
     /* Small card/container */
     .card-sm {
         @apply bg-white dark:bg-zinc-800 rounded-xl shadow-lg px-6 py-4;

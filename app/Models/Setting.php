@@ -19,6 +19,7 @@ class Setting extends Model
     public const GIFT_RESTRICTIONS = 'gift_restrictions';
     public const GIFTS_WITH_SHOE_SIZE = 'gifts_with_shoe_size';
     public const GIFTS_WITH_SIZE = 'gifts_with_size';
+    public const LARGE_GIFTS = 'large_gifts';
     public const INTRODUCTION_TEXT = 'introduction_text';
     public const REPLY_TO_EMAIL = 'reply_to_email';
     public const CODE_PREFIX = 'code_prefix';
@@ -123,17 +124,23 @@ class Setting extends Model
     }
 
     /**
+     * Get a multi-line setting as a list of trimmed, non-empty lines.
+     *
+     * @return array<int, string>
+     */
+    private static function getLineList(string $key): array
+    {
+        $value = (string) self::getValue($key, '');
+
+        return array_values(array_filter(array_map('trim', explode("\n", $value))));
+    }
+
+    /**
      * Get gift suggestions as array.
      */
     public static function getGiftSuggestions(): array
     {
-        $value = self::getValue(self::GIFT_SUGGESTIONS, '');
-
-        if (empty($value)) {
-            return [];
-        }
-
-        return array_filter(array_map('trim', explode("\n", $value)));
+        return self::getLineList(self::GIFT_SUGGESTIONS);
     }
 
     /**
@@ -141,13 +148,7 @@ class Setting extends Model
      */
     public static function getGiftRestrictions(): array
     {
-        $value = self::getValue(self::GIFT_RESTRICTIONS, '');
-
-        if (empty($value)) {
-            return [];
-        }
-
-        return array_filter(array_map('trim', explode("\n", $value)));
+        return self::getLineList(self::GIFT_RESTRICTIONS);
     }
 
     /**
@@ -155,13 +156,7 @@ class Setting extends Model
      */
     public static function getGiftsWithShoeSize(): array
     {
-        $value = self::getValue(self::GIFTS_WITH_SHOE_SIZE, '');
-
-        if (empty($value)) {
-            return [];
-        }
-
-        return array_filter(array_map('trim', explode("\n", $value)));
+        return self::getLineList(self::GIFTS_WITH_SHOE_SIZE);
     }
 
     /**
@@ -169,13 +164,15 @@ class Setting extends Model
      */
     public static function getGiftsWithSize(): array
     {
-        $value = self::getValue(self::GIFTS_WITH_SIZE, '');
+        return self::getLineList(self::GIFTS_WITH_SIZE);
+    }
 
-        if (empty($value)) {
-            return [];
-        }
-
-        return array_filter(array_map('trim', explode("\n", $value)));
+    /**
+     * Get large gifts (listed separately in the delivery setup listing) as array.
+     */
+    public static function getLargeGifts(): array
+    {
+        return self::getLineList(self::LARGE_GIFTS);
     }
 
     /**
@@ -302,6 +299,7 @@ class Setting extends Model
             self::GIFT_RESTRICTIONS,
             self::GIFTS_WITH_SHOE_SIZE,
             self::GIFTS_WITH_SIZE,
+            self::LARGE_GIFTS,
             self::INTRODUCTION_TEXT,
             self::REPLY_TO_EMAIL,
             self::CODE_PREFIX,

@@ -5,8 +5,9 @@ namespace App\Livewire\Admin;
 use App\Models\Child;
 use App\Models\Family;
 use App\Models\Season;
+use App\Models\Setting;
+use App\Services\GiftKeywordMatcher;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Livewire\Component;
 
@@ -19,13 +20,6 @@ class GiftDelivery extends Component
         Child::STATUS_PRINTED,
         Child::STATUS_RECEIVED,
         Child::STATUS_GIVEN,
-    ];
-
-    private const LARGE_OBJECT_TERMS = [
-        [
-            'needle' => 'velo',
-            'label' => 'Vélos',
-        ],
     ];
 
     public ?Season $activeSeason = null;
@@ -102,33 +96,18 @@ class GiftDelivery extends Component
             ->orderBy('code')
             ->get();
 
+        $largeGifts = Setting::getLargeGifts();
+
         $families = $children
             ->groupBy(fn (Child $child) => (int) $child->giftRequest->family_number)
             ->sortKeys()
-            ->map(function (Collection $familyChildren, int $familyCode) {
-                $giftTexts = $familyChildren
-                    ->pluck('gift')
-                    ->filter()
-                    ->map(fn (string $gift) => Str::lower(Str::ascii($gift)))
-                    ->all();
-
-                $largeObjects = collect(self::LARGE_OBJECT_TERMS)
-                    ->map(function (array $definition) use ($giftTexts, $familyCode) {
-                        $count = collect($giftTexts)
-                            ->filter(fn (string $giftText) => Str::contains($giftText, $definition['needle']))
-                            ->count();
-
-                        if ($count === 0) {
-                            return null;
-                        }
-
-                        return [
-                            'label' => $definition['label'],
-                            'count' => $count,
-                            'display' => $definition['label'].' '.$familyCode.'/'.$count,
-                        ];
-                    })
-                    ->filter()
+            ->map(function (Collection $familyChildren, int $familyCode) use ($largeGifts) {
+                $largeObjects = $familyChildren
+                    ->filter(fn (Child $child) => GiftKeywordMatcher::matches($child->gift, $largeGifts))
+                    ->sortBy('child_number')
+                    ->map(fn (Child $child) => [
+                        'display' => $child->gift.' '.$familyCode.'/'.$child->child_number,
+                    ])
                     ->values();
 
                 return [

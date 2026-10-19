@@ -19,6 +19,7 @@ test('gifts management page loads configured values', function () {
     Setting::setValue(Setting::GIFT_RESTRICTIONS, "arme");
     Setting::setValue(Setting::GIFTS_WITH_SHOE_SIZE, "basket");
     Setting::setValue(Setting::GIFTS_WITH_SIZE, "veste");
+    Setting::setValue(Setting::LARGE_GIFTS, "vélo");
 
     $this->actingAs($this->admin);
 
@@ -26,7 +27,8 @@ test('gifts management page loads configured values', function () {
         ->assertSet('giftSuggestions', "Livre\nJeu")
         ->assertSet('giftRestrictions', 'arme')
         ->assertSet('giftsWithShoeSize', 'basket')
-        ->assertSet('giftsWithSize', 'veste');
+        ->assertSet('giftsWithSize', 'veste')
+        ->assertSet('largeGifts', 'vélo');
 });
 
 test('admin can save gifts management settings', function () {
@@ -37,6 +39,7 @@ test('admin can save gifts management settings', function () {
         ->set('giftRestrictions', "arme\ncouteau")
         ->set('giftsWithShoeSize', "basket\npatin")
         ->set('giftsWithSize', "veste\npantalon")
+        ->set('largeGifts', "vélo\ntrottinette")
         ->call('save')
         ->assertHasNoErrors()
         ->assertSessionHas('message', 'Paramètres cadeaux enregistrés avec succès.')
@@ -48,4 +51,27 @@ test('admin can save gifts management settings', function () {
     expect(Setting::getGiftRestrictions())->toBe(['arme', 'couteau']);
     expect(Setting::getGiftsWithShoeSize())->toBe(['basket', 'patin']);
     expect(Setting::getGiftsWithSize())->toBe(['veste', 'pantalon']);
+    expect(Setting::getLargeGifts())->toBe(['vélo', 'trottinette']);
+});
+
+test('gifts management page explains how keyword matching works', function () {
+    $this->actingAs($this->admin)
+        ->get(route('admin.gifts-management'))
+        ->assertOk()
+        ->assertSee('Comment fonctionne la recherche des mots-clés ?')
+        ->assertSee('Les accents et les majuscules sont ignorés')
+        ->assertSee('Gros cadeaux');
+});
+
+test('large gifts setting ignores blank lines and surrounding spaces', function () {
+    $this->actingAs($this->admin);
+
+    Livewire::test(GiftsManagement::class)
+        ->set('largeGifts', "  vélo \n\n trottinette\r\n   \n")
+        ->call('save')
+        ->assertHasNoErrors();
+
+    Setting::clearCache();
+
+    expect(Setting::getLargeGifts())->toBe(['vélo', 'trottinette']);
 });

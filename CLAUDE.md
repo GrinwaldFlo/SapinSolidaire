@@ -295,6 +295,7 @@ When changing workflow logic, extend the corresponding Feature tests first.
 7. Use named routes.
 8. Keep user-facing text translatable; French is the primary language.
 9. Use shared CSS component classes in Blade (avoid inline utility drift).
+10. When comparing lingualized strings, accents should not be taken in account (vélo = velo)
 
 ## Risky Areas To Modify Carefully
 
@@ -314,6 +315,8 @@ If a class is missing:
 1. Add it under @layer components.
 2. Include dark variants if color is involved.
 3. Document it in this guide.
+
+Notice banners: notice-info / notice-warning / notice-success / notice-error, with notice-title and notice-list for structured content inside them.
 
 Live visual reference remains available at /admin/css-showcase.
 
