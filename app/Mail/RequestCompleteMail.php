@@ -18,7 +18,7 @@ class RequestCompleteMail extends Mailable implements ShouldQueue
     use Queueable, SerializesModels;
 
     /**
-     * @param  Collection<int, \App\Models\Child>  $children  Children whose card has just been printed
+     * @param  Collection<int, \App\Models\Child>  $children  All printed children of the request
      */
     public function __construct(
         public GiftRequest $giftRequest,

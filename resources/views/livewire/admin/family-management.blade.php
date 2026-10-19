@@ -42,7 +42,7 @@
                         <td class="table-cell">{{ $family->first_name }}</td>
                         <td class="table-cell">{{ $family->last_name }}</td>
                         <td class="table-cell-muted text-sm">
-                            <div class="space-y-1">
+                            <div class="contact-list">
                                 <div>
                                     <a href="mailto:{{ $family->email }}" class="inline-flex items-center gap-1 link">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>
@@ -99,7 +99,7 @@
                             @endforeach
                         </td>
                         <td class="table-cell">
-                            @include('livewire.admin.partials.family-actions', ['family' => $family, 'rejectionTemplates' => $rejectionTemplates])
+                            @include('livewire.admin.partials.family-actions', ['family' => $family])
                         </td>
                     </tr>
                 @empty
@@ -172,7 +172,7 @@
                     </div>
                 @endif
                 <div class="space-y-2 pt-1">
-                    @include('livewire.admin.partials.family-actions', ['family' => $family, 'rejectionTemplates' => $rejectionTemplates])
+                    @include('livewire.admin.partials.family-actions', ['family' => $family])
                 </div>
             </div>
         @empty

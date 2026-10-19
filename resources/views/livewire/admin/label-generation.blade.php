@@ -23,12 +23,12 @@
                 </p>
 
                 @if($validatedCount > 0)
-                    <div class="notice-warning mb-6">
+                    <div class="notice-warning notice-spaced">
                         <p class="notice-title">✉️ Envoi automatique d'e-mails</p>
-                        <p>La génération du PDF enverra un e-mail à chacune des {{ $validatedFamilyCount }} famille(s) concernée(s) pour l'informer que sa demande est complète et ne peut plus être modifiée.</p>
+                        <p>La génération du PDF enverra un e-mail à {{ $requestCompleteMailCount }} famille(s) dont tous les enfants auront leur carte imprimée, pour l'informer que sa demande est complète. Les familles déjà informées ne recevront pas de second e-mail.</p>
                     </div>
                     <button wire:click="generatePdf"
-                        wire:confirm="La génération du PDF enverra un e-mail à {{ $validatedFamilyCount }} famille(s). Continuer ?" wire:loading.attr="disabled" wire:target="generatePdf" class="btn-primary inline-flex !w-auto">
+                        wire:confirm="La génération du PDF enverra un e-mail à {{ $requestCompleteMailCount }} famille(s). Continuer ?" wire:loading.attr="disabled" wire:target="generatePdf" class="btn-primary inline-flex !w-auto">
                         <span wire:loading.remove wire:target="generatePdf">📄 Générer le PDF des cartes</span>
                         <span wire:loading wire:target="generatePdf">⏳ Génération en cours…</span>
                     </button>

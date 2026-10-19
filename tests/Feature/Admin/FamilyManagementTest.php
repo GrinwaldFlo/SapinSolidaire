@@ -7,6 +7,7 @@ use App\Models\Family;
 use App\Models\GiftRequest;
 use App\Models\Role;
 use App\Models\Season;
+use App\Models\Setting;
 use App\Models\User;
 use Livewire\Livewire;
 
@@ -82,7 +83,8 @@ test('row action can exclude a family and logs it', function () {
     $this->actingAs($this->admin);
 
     Livewire::test(FamilyManagement::class)
-        ->call('applyAction', $this->family->id, 'exclude', 'Hors zone');
+        ->set('exclusionReasons.'.$this->family->id, 'Hors zone')
+        ->call('applyAction', $this->family->id, 'exclude');
 
     expect($this->giftRequest->refresh()->status)->toBe(GiftRequest::STATUS_REJECTED_FINAL);
     expect($this->giftRequest->rejection_comment)->toBe('Hors zone');
@@ -100,7 +102,10 @@ test('excluding a family requires a reason', function () {
     $this->actingAs($this->admin);
 
     Livewire::test(FamilyManagement::class)
-        ->call('applyAction', $this->family->id, 'exclude', '  ');
+        ->set('exclusionReasons.'.$this->family->id, '  ')
+        ->call('applyAction', $this->family->id, 'exclude')
+        ->assertHasErrors(['exclusionReasons.'.$this->family->id])
+        ->assertSee('Un motif est obligatoire pour exclure une famille.');
 
     expect($this->giftRequest->refresh()->status)->toBe(GiftRequest::STATUS_VALIDATED);
     expect(AdminActionLog::where('action_type', AdminActionLog::ACTION_FAMILY_EXCLUDED)->exists())->toBeFalse();
@@ -113,7 +118,8 @@ test('excluding a family marks the family as excluded', function () {
     $this->actingAs($this->admin);
 
     Livewire::test(FamilyManagement::class)
-        ->call('applyAction', $this->family->id, 'exclude', 'Fraude');
+        ->set('exclusionReasons.'.$this->family->id, 'Fraude')
+        ->call('applyAction', $this->family->id, 'exclude');
 
     $this->family->refresh();
     expect($this->family->isExcluded())->toBeTrue();
@@ -126,7 +132,8 @@ test('a family without request in the active season can be excluded', function (
     $this->actingAs($this->admin);
 
     Livewire::test(FamilyManagement::class)
-        ->call('applyAction', $this->family->id, 'exclude', 'Comportement inacceptable');
+        ->set('exclusionReasons.'.$this->family->id, 'Comportement inacceptable')
+        ->call('applyAction', $this->family->id, 'exclude');
 
     $this->family->refresh();
     expect($this->family->isExcluded())->toBeTrue();
@@ -156,7 +163,8 @@ test('excluding a family does not modify requests from past seasons', function (
     $this->actingAs($this->admin);
 
     Livewire::test(FamilyManagement::class)
-        ->call('applyAction', $this->family->id, 'exclude', 'Motif');
+        ->set('exclusionReasons.'.$this->family->id, 'Motif')
+        ->call('applyAction', $this->family->id, 'exclude');
 
     expect($pastRequest->refresh()->status)->toBe(GiftRequest::STATUS_VALIDATED);
     expect($this->family->refresh()->isExcluded())->toBeTrue();
@@ -212,4 +220,18 @@ test('rejected final filter includes families excluded without request', functio
     Livewire::test(FamilyManagement::class)
         ->set('statusFilter', GiftRequest::STATUS_REJECTED_FINAL)
         ->assertSee('family-management@example.com');
+});
+
+test('inserting a template appends it to the exclusion reason of that family only', function () {
+    Setting::setValidationCommentTemplates(['Hors zone', 'Fraude']);
+
+    $this->actingAs($this->admin);
+
+    Livewire::test(FamilyManagement::class)
+        ->call('insertExclusionTemplate', $this->family->id, '0')
+        ->assertSet('exclusionReasons.'.$this->family->id, 'Hors zone')
+        ->call('insertExclusionTemplate', $this->family->id, '1')
+        ->assertSet('exclusionReasons.'.$this->family->id, "Hors zone\n\nFraude")
+        ->call('insertExclusionTemplate', $this->family->id, '99')
+        ->assertSet('exclusionReasons.'.$this->family->id, "Hors zone\n\nFraude");
 });

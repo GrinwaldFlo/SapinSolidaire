@@ -316,7 +316,9 @@ If a class is missing:
 2. Include dark variants if color is involved.
 3. Document it in this guide.
 
-Notice banners: notice-info / notice-warning / notice-success / notice-error, with notice-title and notice-list for structured content inside them.
+Notice banners: notice-info / notice-warning / notice-success / notice-error, with notice-title and notice-list for structured content inside them. Add notice-spaced for bottom spacing above following content.
+
+Layout helpers: badge-row (wrapping badges), family-actions (stacked per-row action controls), contact-list (stacked contact lines). Button size modifier: btn-sm (combine with any btn-* class).
 
 Live visual reference remains available at /admin/css-showcase.
 

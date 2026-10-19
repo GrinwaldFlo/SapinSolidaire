@@ -72,3 +72,10 @@ test('gift is validated while typing without calling validateChild', function ()
 
     expect($component->get('fieldErrors')['children.0.gift'] ?? null)->toBeNull();
 });
+
+test('replacing the whole children array does not crash the updated hook', function () {
+    $component = Livewire::test(GiftRequestForm::class, ['token' => test()->emailToken->token]);
+    $children = $component->get('children');
+
+    $component->set('children', $children)->assertOk();
+});

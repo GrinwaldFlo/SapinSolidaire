@@ -252,8 +252,13 @@ trait HandlesGiftRequestShared
         $this->validateProofFile();
     }
 
-    public function updatedChildren(mixed $value, string $key): void
+    public function updatedChildren(mixed $value, ?string $key = null): void
     {
+        // $key is null when the whole children array is replaced at once
+        if ($key === null) {
+            return;
+        }
+
         [$index, $field] = array_pad(explode('.', $key, 2), 2, null);
 
         if ($field === 'gift' && is_numeric($index)) {

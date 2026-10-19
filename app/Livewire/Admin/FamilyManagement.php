@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Admin\Concerns\InsertsCommentTemplates;
 use App\Models\AdminActionLog;
 use App\Models\Child;
 use App\Models\Family;
@@ -14,7 +15,7 @@ use Livewire\WithPagination;
 
 class FamilyManagement extends Component
 {
-    use WithPagination;
+    use InsertsCommentTemplates, WithPagination;
 
     private const SORTABLE_COLUMNS = [
         'first_name',
@@ -33,9 +34,17 @@ class FamilyManagement extends Component
 
     public string $sortDirection = 'asc';
 
+    public array $predefinedRejectionMessages = [];
+
+    /**
+     * @var array<string, string> Exclusion reason being typed, keyed by family id
+     */
+    public array $exclusionReasons = [];
+
     public function mount(): void
     {
         $this->activeSeason = Season::getActive();
+        $this->predefinedRejectionMessages = Setting::getValidationCommentTemplates();
     }
 
     public function updatedSearch(): void
@@ -64,13 +73,32 @@ class FamilyManagement extends Component
         $this->resetPage();
     }
 
-    public function applyAction(string $familyId, string $action = '', string $reason = ''): void
+    public function insertExclusionTemplate(string $familyId, string $messageKey): void
     {
-        match ($action) {
+        $template = $this->resolveTemplateMessage($messageKey);
+        if ($template === '') {
+            return;
+        }
+
+        $this->exclusionReasons[$familyId] = $this->appendTemplateMessage($this->exclusionReasons[$familyId] ?? '', $template);
+        $this->resetErrorBag(self::exclusionReasonKey($familyId));
+    }
+
+    /**
+     * @return bool Whether the action was applied
+     */
+    public function applyAction(string $familyId, string $action = ''): bool
+    {
+        return match ($action) {
             'reset_pending' => $this->resetToPending($familyId),
-            'exclude' => $this->excludeFamily($familyId, $reason),
-            default => null,
+            'exclude' => $this->excludeFamily($familyId, (string) ($this->exclusionReasons[$familyId] ?? '')),
+            default => false,
         };
+    }
+
+    public static function exclusionReasonKey(string $familyId): string
+    {
+        return 'exclusionReasons.'.$familyId;
     }
 
     /**
@@ -95,7 +123,7 @@ class FamilyManagement extends Component
         return [$family, $request];
     }
 
-    private function resetToPending(string $familyId): void
+    private function resetToPending(string $familyId): bool
     {
         [$family, $request] = DB::transaction(function () use ($familyId) {
             [$family, $request] = $this->lockFamilyAndActiveRequest($familyId);
@@ -117,24 +145,28 @@ class FamilyManagement extends Component
             return [$family, $request];
         });
 
-        if ($family instanceof Family) {
-            $this->logAction(
-                AdminActionLog::ACTION_FAMILY_STATUS_RESET,
-                ($request ? 'Statut famille remis en attente: ' : 'Exclusion levée: ').$family->full_name,
-                $family,
-                $request
-            );
+        if (! $family instanceof Family) {
+            return false;
         }
+
+        $this->logAction(
+            AdminActionLog::ACTION_FAMILY_STATUS_RESET,
+            ($request ? 'Statut famille remis en attente: ' : 'Exclusion levée: ').$family->full_name,
+            $family,
+            $request
+        );
+
+        return true;
     }
 
-    private function excludeFamily(string $familyId, string $reason): void
+    private function excludeFamily(string $familyId, string $reason): bool
     {
         $reason = trim($reason);
 
         if ($reason === '') {
-            $this->addError('exclusionReason', 'Un motif est obligatoire pour exclure une famille.');
+            $this->addError(self::exclusionReasonKey($familyId), 'Un motif est obligatoire pour exclure une famille.');
 
-            return;
+            return false;
         }
 
         [$family, $request] = DB::transaction(function () use ($familyId, $reason) {
@@ -158,14 +190,20 @@ class FamilyManagement extends Component
             return [$family, $request];
         });
 
-        if ($family instanceof Family) {
-            $this->logAction(
-                AdminActionLog::ACTION_FAMILY_EXCLUDED,
-                'Famille exclue: '.$family->full_name.' — Motif: '.$reason,
-                $family,
-                $request
-            );
+        if (! $family instanceof Family) {
+            return false;
         }
+
+        unset($this->exclusionReasons[$familyId]);
+
+        $this->logAction(
+            AdminActionLog::ACTION_FAMILY_EXCLUDED,
+            'Famille exclue: '.$family->full_name.' — Motif: '.$reason,
+            $family,
+            $request
+        );
+
+        return true;
     }
 
     private function logAction(string $type, string $description, Family $family, ?GiftRequest $request): void
@@ -214,7 +252,6 @@ class FamilyManagement extends Component
         }
 
         return view('livewire.admin.family-management', [
-            'rejectionTemplates' => Setting::getValidationCommentTemplates(),
             'families' => $query->orderBy($this->sortBy, $this->sortDirection)->paginate(200),
             'statuses' => [
                 GiftRequest::STATUS_PENDING => 'À valider',

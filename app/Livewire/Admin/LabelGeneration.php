@@ -5,21 +5,24 @@ namespace App\Livewire\Admin;
 use App\Mail\RequestCompleteMail;
 use App\Models\Child;
 use App\Models\GeneratedPdf;
+use App\Models\GiftRequest;
 use App\Models\Season;
 use App\Models\SentMailLog;
 use App\Models\Setting;
 use App\Services\FamilyMailer;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 
 class LabelGeneration extends Component
 {
     public ?Season $activeSeason = null;
+
     public int $validatedCount = 0;
-    public int $validatedFamilyCount = 0;
+
+    public int $requestCompleteMailCount = 0;
 
     public function mount(): void
     {
@@ -33,12 +36,29 @@ class LabelGeneration extends Component
             return;
         }
 
-        $query = Child::whereHas('giftRequest', function ($q) {
+        $this->validatedCount = Child::whereHas('giftRequest', function ($q) {
             $q->where('season_id', $this->activeSeason->id);
-        })->where('status', Child::STATUS_VALIDATED);
+        })->where('status', Child::STATUS_VALIDATED)->count();
 
-        $this->validatedCount = (clone $query)->count();
-        $this->validatedFamilyCount = (clone $query)->distinct()->count('gift_request_id');
+        // Families that will receive the "request complete" mail once the validated children are printed
+        $this->requestCompleteMailCount = $this->requestsWithChildrenInStatus(Child::STATUS_VALIDATED)
+            ->filter(fn (GiftRequest $request) => $request->isRequestCompleteMailDue([Child::STATUS_VALIDATED]))
+            ->count();
+    }
+
+    /**
+     * Active-season requests having at least one child in the given status, with family and children loaded.
+     *
+     * @param  array<int, string>  $giftRequestIds  Restrict to these requests when not empty
+     * @return Collection<int, GiftRequest>
+     */
+    protected function requestsWithChildrenInStatus(string $childStatus, array $giftRequestIds = []): Collection
+    {
+        return GiftRequest::with(['family', 'children'])
+            ->where('season_id', $this->activeSeason->id)
+            ->when($giftRequestIds !== [], fn ($q) => $q->whereIn('id', $giftRequestIds))
+            ->whereHas('children', fn ($q) => $q->where('status', $childStatus))
+            ->get();
     }
 
     public function generatePdf()
@@ -103,25 +123,28 @@ class LabelGeneration extends Component
     }
 
     /**
-     * Send one "request complete" mail per family, listing all of its children just printed.
+     * Send the "request complete" mail, at most once, to each family whose children are now all printed.
      *
-     * @param  Collection<int, Child>  $children
+     * @param  Collection<int, Child>  $printedChildren
      */
-    protected function sendRequestCompleteMails(Collection $children): int
+    protected function sendRequestCompleteMails(Collection $printedChildren): int
     {
         $mailer = app(FamilyMailer::class);
+        $giftRequestIds = $printedChildren->pluck('gift_request_id')->unique()->values()->all();
         $sent = 0;
 
-        foreach ($children->groupBy('gift_request_id') as $familyChildren) {
-            $giftRequest = $familyChildren->first()->giftRequest;
-
-            if (! $giftRequest?->family?->email) {
+        foreach ($this->requestsWithChildrenInStatus(Child::STATUS_PRINTED, $giftRequestIds) as $giftRequest) {
+            if (! $giftRequest->isRequestCompleteMailDue() || ! $giftRequest->markRequestCompleteMailSent()) {
                 continue;
             }
 
             $mailer->queueForRequest(
                 $giftRequest,
-                new RequestCompleteMail($giftRequest, $this->activeSeason, $familyChildren->values()),
+                new RequestCompleteMail(
+                    $giftRequest,
+                    $this->activeSeason,
+                    $giftRequest->children->whereIn('status', GiftRequest::PRINTED_CHILD_STATUSES)->values()
+                ),
                 SentMailLog::PURPOSE_REQUEST_COMPLETE
             );
             $sent++;
@@ -137,8 +160,8 @@ class LabelGeneration extends Component
         }
 
         Child::whereHas('giftRequest', function ($q) {
-                $q->where('season_id', $this->activeSeason->id);
-            })
+            $q->where('season_id', $this->activeSeason->id);
+        })
             ->where('status', Child::STATUS_PRINTED)
             ->get()
             ->each(fn ($child) => $child->setStatus(Child::STATUS_VALIDATED));

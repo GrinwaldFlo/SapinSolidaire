@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Livewire\Admin\Concerns\ChecksDuplicateFamily;
 use App\Livewire\Admin\Concerns\HandlesFamilyValidation;
+use App\Livewire\Admin\Concerns\InsertsCommentTemplates;
 use App\Livewire\Admin\Concerns\ShowsFamilyModal;
 use App\Models\AdminActionLog;
 use App\Models\Child;
@@ -16,7 +17,7 @@ use Livewire\Component;
 
 class Validation extends Component
 {
-    use ChecksDuplicateFamily, HandlesFamilyValidation, ShowsFamilyModal;
+    use ChecksDuplicateFamily, HandlesFamilyValidation, InsertsCommentTemplates, ShowsFamilyModal;
 
     private const LOCK_TTL_SECONDS = 300;
 
@@ -138,37 +139,6 @@ class Validation extends Component
         $currentComment = $this->childComments[$childId] ?? '';
         $this->childComments[$childId] = $this->appendTemplateMessage($currentComment, $message);
         $this->resetErrorBag("childComments.$childId");
-    }
-
-    protected function resolveTemplateMessage(string $messageKey): string
-    {
-        if ($messageKey === '' || ! ctype_digit($messageKey)) {
-            return '';
-        }
-
-        $index = (int) $messageKey;
-
-        if (! array_key_exists($index, $this->predefinedRejectionMessages)) {
-            return '';
-        }
-
-        return trim((string) $this->predefinedRejectionMessages[$index]);
-    }
-
-    protected function appendTemplateMessage(string $existing, string $template): string
-    {
-        $existing = trim($existing);
-        $template = trim($template);
-
-        if ($template === '') {
-            return $existing;
-        }
-
-        if ($existing === '') {
-            return $template;
-        }
-
-        return $existing."\n\n".$template;
     }
 
     protected function releaseReservation(string $adminId): void

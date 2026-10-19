@@ -80,7 +80,7 @@ test('generating labels sends one request complete mail per family with all prin
     $this->actingAs($this->admin);
 
     Livewire::test(LabelGeneration::class)
-        ->assertSet('validatedFamilyCount', 2)
+        ->assertSet('requestCompleteMailCount', 2)
         ->call('generatePdf')
         ->assertSee('2 e-mail(s) envoyé(s) aux familles');
 
@@ -114,4 +114,59 @@ test('label generation page warns that emails will be sent', function () {
     Livewire::test(LabelGeneration::class)
         ->assertSee("Envoi automatique d'e-mails", false)
         ->assertSee('1 famille(s)');
+});
+
+test('request complete mail is not sent again after resetting and regenerating labels', function () {
+    $request = ($this->createRequestWithChildren)('a@example.com', [Child::STATUS_VALIDATED]);
+
+    $this->actingAs($this->admin);
+
+    $component = Livewire::test(LabelGeneration::class)->call('generatePdf');
+
+    expect($request->refresh()->request_complete_email_sent_at)->not->toBeNull();
+
+    $component->call('resetPrintedLabels')
+        ->assertSet('requestCompleteMailCount', 0)
+        ->call('generatePdf')
+        ->assertSee('0 e-mail(s) envoyé(s) aux familles');
+
+    Mail::assertQueued(RequestCompleteMail::class, 1);
+    expect(SentMailLog::where('purpose', SentMailLog::PURPOSE_REQUEST_COMPLETE)->count())->toBe(1);
+});
+
+test('request complete mail waits until every child of the request is printed', function () {
+    $request = ($this->createRequestWithChildren)('a@example.com', [Child::STATUS_VALIDATED, Child::STATUS_PENDING]);
+    $pendingChild = $request->children()->where('status', Child::STATUS_PENDING)->first();
+
+    $this->actingAs($this->admin);
+
+    Livewire::test(LabelGeneration::class)
+        ->assertSet('requestCompleteMailCount', 0)
+        ->call('generatePdf')
+        ->assertSee('0 e-mail(s) envoyé(s) aux familles');
+
+    Mail::assertNothingQueued();
+    expect($request->refresh()->request_complete_email_sent_at)->toBeNull();
+
+    $pendingChild->setStatus(Child::STATUS_VALIDATED);
+
+    Livewire::test(LabelGeneration::class)
+        ->assertSet('requestCompleteMailCount', 1)
+        ->call('generatePdf');
+
+    Mail::assertQueued(RequestCompleteMail::class, fn ($mail) => $mail->hasTo('a@example.com')
+        && $mail->children->count() === 2);
+    expect($request->refresh()->request_complete_email_sent_at)->not->toBeNull();
+});
+
+test('finally rejected children do not block the request complete mail', function () {
+    ($this->createRequestWithChildren)('a@example.com', [Child::STATUS_VALIDATED, Child::STATUS_REJECTED_FINAL]);
+
+    $this->actingAs($this->admin);
+
+    Livewire::test(LabelGeneration::class)
+        ->assertSet('requestCompleteMailCount', 1)
+        ->call('generatePdf');
+
+    Mail::assertQueued(RequestCompleteMail::class, fn ($mail) => $mail->children->count() === 1);
 });
