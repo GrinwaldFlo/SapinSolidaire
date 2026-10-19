@@ -14,6 +14,7 @@ class AdminActionLog extends Model
     public const ACTION_FAMILY_VALIDATED = 'family_validated';
     public const ACTION_CHILD_VALIDATED = 'child_validated';
     public const ACTION_FAMILY_STATUS_RESET = 'family_status_reset';
+    public const ACTION_FAMILY_EXCLUDED = 'family_excluded';
     public const ACTION_EMAIL_SENT = 'email_sent';
 
     /**

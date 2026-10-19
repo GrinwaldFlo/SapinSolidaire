@@ -2,8 +2,6 @@
 
 namespace App\Livewire\Family\Concerns;
 
-use App\Models\PickupSlot;
-
 trait HandlesGiftRequestEligibility
 {
     public function acceptConsecutiveYears(): void
@@ -46,35 +44,7 @@ trait HandlesGiftRequestEligibility
 
     protected function buildPickupConditionDateText(): string
     {
-        if (! $this->season) {
-            return '';
-        }
-
-        $slots = PickupSlot::query()
-            ->where('season_id', $this->season->id)
-            ->orderBy('start_datetime')
-            ->get();
-
-        if ($slots->isEmpty()) {
-            return '';
-        }
-
-        $firstStart = $slots->first()?->start_datetime;
-        $lastEnd = $slots->last()?->end_datetime;
-
-        if (! $firstStart || ! $lastEnd) {
-            return '';
-        }
-
-        if ($firstStart->toDateString() === $lastEnd->toDateString()) {
-            return 'le '.$firstStart->translatedFormat('l d F Y');
-        }
-
-        return sprintf(
-            'entre le %s et le %s',
-            $firstStart->translatedFormat('l d F Y'),
-            $lastEnd->translatedFormat('l d F Y')
-        );
+        return $this->season?->pickupDateText() ?? '';
     }
 
     public function requestCityChange(): void

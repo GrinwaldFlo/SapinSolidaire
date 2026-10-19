@@ -2,17 +2,20 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Admin\Concerns\InsertsCommentTemplates;
 use App\Models\AdminActionLog;
+use App\Models\Child;
 use App\Models\Family;
 use App\Models\GiftRequest;
 use App\Models\Season;
+use App\Models\Setting;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class FamilyManagement extends Component
 {
-    use WithPagination;
+    use InsertsCommentTemplates, WithPagination;
 
     private const SORTABLE_COLUMNS = [
         'first_name',
@@ -22,14 +25,26 @@ class FamilyManagement extends Component
     ];
 
     public ?Season $activeSeason = null;
+
     public string $search = '';
+
     public string $statusFilter = '';
+
     public string $sortBy = 'last_name';
+
     public string $sortDirection = 'asc';
+
+    public array $predefinedRejectionMessages = [];
+
+    /**
+     * @var array<string, string> Exclusion reason being typed, keyed by family id
+     */
+    public array $exclusionReasons = [];
 
     public function mount(): void
     {
         $this->activeSeason = Season::getActive();
+        $this->predefinedRejectionMessages = Setting::getValidationCommentTemplates();
     }
 
     public function updatedSearch(): void
@@ -58,40 +73,149 @@ class FamilyManagement extends Component
         $this->resetPage();
     }
 
-    public function applyAction(string $familyId, ?string $giftRequestId = null, string $action = ''): void
+    public function insertExclusionTemplate(string $familyId, string $messageKey): void
     {
-        if ($action !== 'reset_pending' || ! $giftRequestId) {
+        $template = $this->resolveTemplateMessage($messageKey);
+        if ($template === '') {
             return;
         }
 
-        $actionRequest = null;
+        $this->exclusionReasons[$familyId] = $this->appendTemplateMessage($this->exclusionReasons[$familyId] ?? '', $template);
+        $this->resetErrorBag(self::exclusionReasonKey($familyId));
+    }
 
-        DB::transaction(function () use ($giftRequestId, &$actionRequest) {
-            $request = GiftRequest::with('children')->lockForUpdate()->find($giftRequestId);
+    /**
+     * @return bool Whether the action was applied
+     */
+    public function applyAction(string $familyId, string $action = ''): bool
+    {
+        return match ($action) {
+            'reset_pending' => $this->resetToPending($familyId),
+            'exclude' => $this->excludeFamily($familyId, (string) ($this->exclusionReasons[$familyId] ?? '')),
+            default => false,
+        };
+    }
 
-            if (! $request) {
-                return;
+    public static function exclusionReasonKey(string $familyId): string
+    {
+        return 'exclusionReasons.'.$familyId;
+    }
+
+    /**
+     * Lock the family row and its active-season request (if any) for update.
+     *
+     * @return array{0: ?Family, 1: ?GiftRequest}
+     */
+    private function lockFamilyAndActiveRequest(string $familyId): array
+    {
+        $family = Family::lockForUpdate()->find($familyId);
+
+        if (! $family || ! $this->activeSeason) {
+            return [$family, null];
+        }
+
+        $request = GiftRequest::with('children')
+            ->where('family_id', $family->id)
+            ->where('season_id', $this->activeSeason->id)
+            ->lockForUpdate()
+            ->first();
+
+        return [$family, $request];
+    }
+
+    private function resetToPending(string $familyId): bool
+    {
+        [$family, $request] = DB::transaction(function () use ($familyId) {
+            [$family, $request] = $this->lockFamilyAndActiveRequest($familyId);
+
+            if (! $family || (! $request && ! $family->isExcluded())) {
+                return [null, null];
             }
 
-            $request->resetToPending();
+            if ($request) {
+                $request->resetToPending();
 
-            foreach ($request->children as $child) {
-                $child->resetToPending();
+                foreach ($request->children as $child) {
+                    $child->resetToPending();
+                }
             }
 
-            $actionRequest = $request->loadMissing('family');
+            $family->clearExclusion();
+
+            return [$family, $request];
         });
 
-        if ($actionRequest instanceof GiftRequest) {
-            AdminActionLog::create([
-                'user_id' => auth()->id(),
-                'user_label' => auth()->user()?->name,
-                'action_type' => AdminActionLog::ACTION_FAMILY_STATUS_RESET,
-                'description' => 'Statut famille remis en attente: '.$actionRequest->family?->full_name,
-                'family_id' => $actionRequest->family_id,
-                'gift_request_id' => $actionRequest->id,
-            ]);
+        if (! $family instanceof Family) {
+            return false;
         }
+
+        $this->logAction(
+            AdminActionLog::ACTION_FAMILY_STATUS_RESET,
+            ($request ? 'Statut famille remis en attente: ' : 'Exclusion levée: ').$family->full_name,
+            $family,
+            $request
+        );
+
+        return true;
+    }
+
+    private function excludeFamily(string $familyId, string $reason): bool
+    {
+        $reason = trim($reason);
+
+        if ($reason === '') {
+            $this->addError(self::exclusionReasonKey($familyId), 'Un motif est obligatoire pour exclure une famille.');
+
+            return false;
+        }
+
+        [$family, $request] = DB::transaction(function () use ($familyId, $reason) {
+            [$family, $request] = $this->lockFamilyAndActiveRequest($familyId);
+
+            if (! $family) {
+                return [null, null];
+            }
+
+            if ($request) {
+                $request->setRelation('family', $family);
+                $request->setStatus(GiftRequest::STATUS_REJECTED_FINAL, $reason);
+
+                foreach ($request->children as $child) {
+                    $child->setStatus(Child::STATUS_REJECTED_FINAL, $reason);
+                }
+            } else {
+                $family->exclude($reason);
+            }
+
+            return [$family, $request];
+        });
+
+        if (! $family instanceof Family) {
+            return false;
+        }
+
+        unset($this->exclusionReasons[$familyId]);
+
+        $this->logAction(
+            AdminActionLog::ACTION_FAMILY_EXCLUDED,
+            'Famille exclue: '.$family->full_name.' — Motif: '.$reason,
+            $family,
+            $request
+        );
+
+        return true;
+    }
+
+    private function logAction(string $type, string $description, Family $family, ?GiftRequest $request): void
+    {
+        AdminActionLog::create([
+            'user_id' => auth()->id(),
+            'user_label' => auth()->user()?->name,
+            'action_type' => $type,
+            'description' => $description,
+            'family_id' => $family->id,
+            'gift_request_id' => $request?->id,
+        ]);
     }
 
     public function render()
@@ -99,8 +223,14 @@ class FamilyManagement extends Component
         $query = Family::with(['giftRequests.season', 'giftRequests.children']);
 
         if ($this->statusFilter) {
-            $query->whereHas('giftRequests', function ($q) {
-                $q->where('status', $this->statusFilter);
+            $query->where(function ($q) {
+                $q->whereHas('giftRequests', function ($q) {
+                    $q->where('status', $this->statusFilter);
+                });
+
+                if ($this->statusFilter === GiftRequest::STATUS_REJECTED_FINAL) {
+                    $q->orWhereNotNull('excluded_at');
+                }
             });
         }
 

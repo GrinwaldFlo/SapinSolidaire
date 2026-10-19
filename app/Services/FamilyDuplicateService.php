@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Child;
 use App\Models\Family;
-use App\Models\GiftRequest;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -21,21 +20,21 @@ class FamilyDuplicateService
         set_time_limit(300);
 
         $families = Family::with(['giftRequests.children', 'giftRequests.season'])->get();
-        $list     = $families->values();
-        $count    = $list->count();
-        $pairs    = collect();
+        $list = $families->values();
+        $count = $list->count();
+        $pairs = collect();
 
         for ($i = 0; $i < $count; $i++) {
             for ($j = $i + 1; $j < $count; $j++) {
-                $a      = $list[$i];
-                $b      = $list[$j];
+                $a = $list[$i];
+                $b = $list[$j];
                 $result = $this->score($a, $b);
 
                 if ($result['score'] >= $threshold) {
                     $pairs->push([
                         'familyA' => $a,
                         'familyB' => $b,
-                        'score'   => $result['score'],
+                        'score' => $result['score'],
                         'details' => $result['details'],
                     ]);
                 }
@@ -230,6 +229,11 @@ class FamilyDuplicateService
                 if (in_array($field, $chosenFields)) {
                     $keepFamily->$field = $removeFamily->$field;
                 }
+            }
+            // An exclusion on either family must survive the merge
+            if (! $keepFamily->isExcluded() && $removeFamily->isExcluded()) {
+                $keepFamily->excluded_at = $removeFamily->excluded_at;
+                $keepFamily->exclusion_reason = $removeFamily->exclusion_reason;
             }
             $keepFamily->save();
 

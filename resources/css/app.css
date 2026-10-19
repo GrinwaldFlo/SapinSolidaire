@@ -147,6 +147,11 @@ select:focus[data-flux-control] {
         @apply mt-1 list-disc pl-5 text-sm space-y-1;
     }
 
+    /* Bottom spacing when a notice sits above other content */
+    .notice-spaced {
+        @apply mb-6;
+    }
+
     /* Small card/container */
     .card-sm {
         @apply bg-white dark:bg-zinc-800 rounded-xl shadow-lg px-6 py-4;
@@ -271,6 +276,26 @@ select:focus[data-flux-control] {
     /* Neutral gray button */
     .btn-gray {
         @apply bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200;
+    }
+
+    /* Smaller text size modifier for any button */
+    .btn-sm {
+        @apply text-sm;
+    }
+
+    /* Wrapping row of status badges */
+    .badge-row {
+        @apply flex flex-wrap gap-1;
+    }
+
+    /* Stacked per-row action controls (select, comment, apply button) */
+    .family-actions {
+        @apply space-y-2;
+    }
+
+    /* Stacked contact lines (email, phone, address) */
+    .contact-list {
+        @apply space-y-1;
     }
 
     /* Empty state cell / block */

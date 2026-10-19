@@ -61,6 +61,8 @@
                                 Validation enfant
                             @elseif($log->action_type === \App\Models\AdminActionLog::ACTION_FAMILY_STATUS_RESET)
                                 Réinitialisation statut famille
+                            @elseif($log->action_type === \App\Models\AdminActionLog::ACTION_FAMILY_EXCLUDED)
+                                Exclusion famille
                             @elseif($log->action_type === \App\Models\AdminActionLog::ACTION_EMAIL_SENT)
                                 Envoi e-mail
                             @else

@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Livewire\Admin\Concerns\ChecksDuplicateFamily;
 use App\Livewire\Admin\Concerns\HandlesFamilyValidation;
+use App\Livewire\Admin\Concerns\InsertsCommentTemplates;
 use App\Livewire\Admin\Concerns\ShowsFamilyModal;
 use App\Models\Child;
 use App\Models\GiftRequest;
@@ -15,7 +16,7 @@ use Livewire\Component;
 
 class FamilyValidation extends Component
 {
-    use ChecksDuplicateFamily, HandlesFamilyValidation, ShowsFamilyModal;
+    use ChecksDuplicateFamily, HandlesFamilyValidation, InsertsCommentTemplates, ShowsFamilyModal;
 
     private const LOCK_TTL_SECONDS = 300;
 
@@ -97,22 +98,12 @@ class FamilyValidation extends Component
 
     public function applyRejectionMessage(): void
     {
-        if ($this->selectedRejectionMessageKey === '' || ! ctype_digit($this->selectedRejectionMessageKey)) {
-            return;
-        }
-
-        $index = (int) $this->selectedRejectionMessageKey;
-        if (! array_key_exists($index, $this->predefinedRejectionMessages)) {
-            return;
-        }
-
-        $template = trim((string) $this->predefinedRejectionMessages[$index]);
+        $template = $this->resolveTemplateMessage($this->selectedRejectionMessageKey);
         if ($template === '') {
             return;
         }
 
-        $currentComment = trim($this->rejectionComment);
-        $this->rejectionComment = $currentComment === '' ? $template : $currentComment."\n\n".$template;
+        $this->rejectionComment = $this->appendTemplateMessage($this->rejectionComment, $template);
         $this->resetErrorBag('rejectionComment');
     }
 

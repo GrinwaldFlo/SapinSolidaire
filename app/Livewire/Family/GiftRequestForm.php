@@ -14,6 +14,7 @@ use App\Services\PhoneValidationService;
 use App\Services\SeasonService;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -27,64 +28,103 @@ class GiftRequestForm extends Component
 
     // Token and email
     public string $token;
+
     public string $email = '';
 
     // States
     public int $step = 1; // 1: eligibility, 2: form
+
     public bool $tokenValid = false;
+
     public bool $consecutiveYearsAccepted = false;
+
     public bool $pickupCommitmentAccepted = false;
+
     public bool $cityAccepted = false;
+
     public bool $cityConfirmed = false;
+
     public bool $showCityConfirmation = false;
+
     public bool $isModifying = false;
+
     public bool $canModify = true;
+
     public bool $submitted = false;
+
+    #[Locked]
     public bool $isPermanentlyRejected = false;
+
     public string $organizerEmail = '';
+
     public ?string $rejectionComment = null;
 
     // Family data
     public string $firstName = '';
+
     public string $lastName = '';
+
     public string $streetName = '';
+
     public string $houseNo = '';
+
     public string $postalCode = '';
+
     public string $city = '';
+
     public string $phone = '';
+
     public bool $isAnonymous = false;
 
     // Proof of habitation
     public $proofOfHabitation = null;
+
     public bool $proofOfHabitationEnabled = false;
+
     public ?string $existingProofPath = null;
 
     // Real-time validation tracking
     public array $touchedFields = [];
+
     public array $fieldErrors = [];
+
     public bool $hasAttemptedSubmit = false;
 
     // Children
     public array $children = [];
+
     public int $childCount = 1;
 
     // Season
     public ?Season $season = null;
+
     public ?Family $family = null;
+
     public ?GiftRequest $giftRequest = null;
 
     // Settings
     public int $maxConsecutiveYears = 3;
+
     public int $maxChildAge = 12;
+
     public array $allowedCities = [];
+
     public string $selectedCity = '';
+
     public array $giftSuggestions = [];
+
     public array $giftRestrictions = [];
+
     public array $giftsWithShoeSize = [];
+
     public array $giftsWithSize = [];
+
     public string $pickupConditionDateText = '';
+
     public string $pickupConditionAddressText = '';
+
     public bool $familyFormMultiStepEnabled = false;
+
     public int $familyFormCurrentStep = 1;
 
     public function mount(string $token): void
@@ -129,18 +169,7 @@ class GiftRequestForm extends Component
             $this->family = Family::where('email', $this->email)->first();
 
             if ($this->family) {
-                $permanentlyRejected = GiftRequest::where('family_id', $this->family->id)
-                    ->where('status', GiftRequest::STATUS_REJECTED_FINAL)
-                    ->exists();
-
-                if ($permanentlyRejected) {
-                    $this->isPermanentlyRejected = true;
-                    $rejectedRequest = GiftRequest::where('family_id', $this->family->id)
-                        ->where('status', GiftRequest::STATUS_REJECTED_FINAL)
-                        ->latest()
-                        ->first();
-                    $this->rejectionComment = $rejectedRequest?->rejection_comment;
-
+                if ($this->blockIfExcluded($this->family)) {
                     return;
                 }
 

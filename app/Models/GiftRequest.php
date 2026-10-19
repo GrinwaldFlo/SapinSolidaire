@@ -13,9 +13,23 @@ class GiftRequest extends Model
     use HasFactory, HasUuids;
 
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_VALIDATED = 'validated';
+
     public const STATUS_REJECTED = 'rejected';
+
     public const STATUS_REJECTED_FINAL = 'rejected_final';
+
+    /**
+     * Child statuses meaning the gift card has been printed.
+     *
+     * @var array<int, string>
+     */
+    public const PRINTED_CHILD_STATUSES = [
+        Child::STATUS_PRINTED,
+        Child::STATUS_RECEIVED,
+        Child::STATUS_GIVEN,
+    ];
 
     /**
      * @var array<int, string>
@@ -31,6 +45,7 @@ class GiftRequest extends Model
         'pickup_slot_id',
         'slot_start_datetime',
         'slot_end_datetime',
+        'request_complete_email_sent_at',
     ];
 
     /**
@@ -41,6 +56,7 @@ class GiftRequest extends Model
         'status_changed_at' => 'datetime',
         'slot_start_datetime' => 'datetime',
         'slot_end_datetime' => 'datetime',
+        'request_complete_email_sent_at' => 'datetime',
     ];
 
     /**
@@ -104,6 +120,10 @@ class GiftRequest extends Model
         }
 
         $this->save();
+
+        if ($status === self::STATUS_REJECTED_FINAL) {
+            $this->family?->exclude($comment ?? $this->rejection_comment);
+        }
     }
 
     /**
@@ -114,5 +134,50 @@ class GiftRequest extends Model
         $this->setStatus(self::STATUS_PENDING);
         $this->rejection_comment = null;
         $this->save();
+    }
+
+    /**
+     * Whether every child still in the request (final rejections excluded) has its card printed.
+     * Statuses in $alsoReady are treated as printed, e.g. validated children about to be printed.
+     *
+     * @param  array<int, string>  $alsoReady
+     */
+    public function hasAllChildrenPrinted(array $alsoReady = []): bool
+    {
+        $readyStatuses = array_merge(self::PRINTED_CHILD_STATUSES, $alsoReady);
+        $children = $this->children->where('status', '!=', Child::STATUS_REJECTED_FINAL);
+
+        return $children->isNotEmpty()
+            && $children->every(fn (Child $child) => in_array($child->status, $readyStatuses, true));
+    }
+
+    /**
+     * Whether the "request complete" mail is due: never sent and all children printed.
+     *
+     * @param  array<int, string>  $alsoReady
+     */
+    public function isRequestCompleteMailDue(array $alsoReady = []): bool
+    {
+        return $this->request_complete_email_sent_at === null
+            && filled($this->family?->email)
+            && $this->hasAllChildrenPrinted($alsoReady);
+    }
+
+    /**
+     * Atomically stamp the "request complete" mail as sent. Returns false if it was already stamped.
+     */
+    public function markRequestCompleteMailSent(): bool
+    {
+        $now = now();
+        $updated = static::whereKey($this->getKey())
+            ->whereNull('request_complete_email_sent_at')
+            ->update(['request_complete_email_sent_at' => $now]);
+
+        if ($updated === 1) {
+            $this->request_complete_email_sent_at = $now;
+            $this->syncOriginalAttribute('request_complete_email_sent_at');
+        }
+
+        return $updated === 1;
     }
 }

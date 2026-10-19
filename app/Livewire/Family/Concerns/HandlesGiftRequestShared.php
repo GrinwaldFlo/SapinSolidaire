@@ -252,6 +252,20 @@ trait HandlesGiftRequestShared
         $this->validateProofFile();
     }
 
+    public function updatedChildren(mixed $value, ?string $key = null): void
+    {
+        // $key is null when the whole children array is replaced at once
+        if ($key === null) {
+            return;
+        }
+
+        [$index, $field] = array_pad(explode('.', $key, 2), 2, null);
+
+        if ($field === 'gift' && is_numeric($index)) {
+            $this->validateChild((int) $index);
+        }
+    }
+
     public function validateProofFile(): void
     {
         if (! $this->proofOfHabitation) {
@@ -364,9 +378,28 @@ trait HandlesGiftRequestShared
         }
     }
 
+    /**
+     * Flag the form as permanently rejected when the family is excluded.
+     */
+    protected function blockIfExcluded(?Family $family): bool
+    {
+        if (! $family?->isExcluded()) {
+            return false;
+        }
+
+        $this->isPermanentlyRejected = true;
+        $this->rejectionComment = $family->exclusion_reason;
+
+        return true;
+    }
+
     public function submit(): void
     {
         if (! $this->canModify) {
+            return;
+        }
+
+        if ($this->blockIfExcluded(Family::where('email', $this->email)->first())) {
             return;
         }
 
@@ -522,7 +555,7 @@ trait HandlesGiftRequestShared
     }
 
     /**
-     * @param array<int, string> $keywords
+     * @param  array<int, string>  $keywords
      */
     protected function matchesGiftKeywordList(string $gift, array $keywords): bool
     {

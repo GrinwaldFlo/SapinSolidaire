@@ -56,7 +56,7 @@ test('reset from family management writes an admin action log', function () {
     $this->actingAs($this->admin);
 
     Livewire::test(FamilyManagement::class)
-        ->call('applyAction', $this->family->id, $giftRequest->id, 'reset_pending');
+        ->call('applyAction', $this->family->id, 'reset_pending');
 
     $this->assertDatabaseHas('admin_action_logs', [
         'action_type' => AdminActionLog::ACTION_FAMILY_STATUS_RESET,
