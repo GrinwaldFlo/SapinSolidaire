@@ -57,3 +57,18 @@ test('gift not matching any restriction is accepted', function () {
 
     expect(giftErrorFor('Puzzle'))->toBeNull();
 });
+
+test('gift is validated while typing without calling validateChild', function () {
+    Setting::setValue(Setting::GIFT_RESTRICTIONS, 'console');
+
+    $component = Livewire::test(GiftRequestForm::class, ['token' => test()->emailToken->token])
+        ->set('children.0.gift', 'Console de jeu');
+
+    expect($component->get('fieldErrors')['children.0.gift'][0] ?? null)
+        ->toBe('Ce type de cadeau n\'est pas autorisé.')
+        ->and($component->get('touchedFields'))->toContain('children.0.gift');
+
+    $component->set('children.0.gift', 'Puzzle');
+
+    expect($component->get('fieldErrors')['children.0.gift'] ?? null)->toBeNull();
+});

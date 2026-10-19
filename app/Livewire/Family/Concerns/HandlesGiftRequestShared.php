@@ -252,6 +252,15 @@ trait HandlesGiftRequestShared
         $this->validateProofFile();
     }
 
+    public function updatedChildren(mixed $value, string $key): void
+    {
+        [$index, $field] = array_pad(explode('.', $key, 2), 2, null);
+
+        if ($field === 'gift' && is_numeric($index)) {
+            $this->validateChild((int) $index);
+        }
+    }
+
     public function validateProofFile(): void
     {
         if (! $this->proofOfHabitation) {
