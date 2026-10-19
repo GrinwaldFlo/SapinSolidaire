@@ -1,6 +1,12 @@
 <div class="space-y-6">
     <h1 class="section-title">Génération des cartes</h1>
 
+    @if(session()->has('message'))
+        <div class="notice-success">
+            {{ session('message') }}
+        </div>
+    @endif
+
     @if(!$activeSeason)
         <div class="notice-info">
             <p>Aucune saison n'est actuellement active.</p>
@@ -17,7 +23,12 @@
                 </p>
 
                 @if($validatedCount > 0)
-                    <button wire:click="generatePdf" wire:loading.attr="disabled" wire:target="generatePdf" class="btn-primary inline-flex !w-auto">
+                    <div class="notice-warning mb-6">
+                        <p class="notice-title">✉️ Envoi automatique d'e-mails</p>
+                        <p>La génération du PDF enverra un e-mail à chacune des {{ $validatedFamilyCount }} famille(s) concernée(s) pour l'informer que sa demande est complète et ne peut plus être modifiée.</p>
+                    </div>
+                    <button wire:click="generatePdf"
+                        wire:confirm="La génération du PDF enverra un e-mail à {{ $validatedFamilyCount }} famille(s). Continuer ?" wire:loading.attr="disabled" wire:target="generatePdf" class="btn-primary inline-flex !w-auto">
                         <span wire:loading.remove wire:target="generatePdf">📄 Générer le PDF des cartes</span>
                         <span wire:loading wire:target="generatePdf">⏳ Génération en cours…</span>
                     </button>

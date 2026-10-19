@@ -46,8 +46,23 @@
         .line {
             width: 100%;
         }
+        .line {
+            white-space: nowrap;
+        }
         .objects {
             font-size: 18pt;
+        }
+        .objects-md {
+            font-size: 14pt;
+        }
+        .objects-sm {
+            font-size: 11pt;
+        }
+        .objects-xs {
+            font-size: 9pt;
+        }
+        .objects-xxs {
+            font-size: 7pt;
         }
         .page-break {
             page-break-after: always;
@@ -61,13 +76,26 @@
 
             <div class="rows">
                 @for($index = 0; $index < 10; $index++)
-                    @php($row = $page['rows']->get($index))
+                    @php
+                        $row = $page['rows']->get($index);
+                    @endphp
                     <div class="row">
                         <div class="line">
                             @if($row)
                                 # {{ $row['family_code'] }} : {{ $row['children_count'] }}
                                 @if($row['large_objects']->isNotEmpty())
-                                    <span class="objects">{{ $row['large_objects']->pluck('display')->join(' · ') }}</span>
+                                    @php
+                                        $objectsText = $row['large_objects']->pluck('display')->join(' · ');
+                                        $objectsLength = mb_strlen($objectsText);
+                                        $objectsClass = match (true) {
+                                            $objectsLength <= 35 => 'objects',
+                                            $objectsLength <= 45 => 'objects-md',
+                                            $objectsLength <= 58 => 'objects-sm',
+                                            $objectsLength <= 75 => 'objects-xs',
+                                            default => 'objects-xxs',
+                                        };
+                                    @endphp
+                                    <span class="{{ $objectsClass }}">{{ $objectsText }}</span>
                                 @endif
                             @endif
                         </div>

@@ -2,12 +2,16 @@
 
 namespace App\Livewire\Admin;
 
+use App\Mail\RequestCompleteMail;
 use App\Models\Child;
 use App\Models\GeneratedPdf;
 use App\Models\Season;
+use App\Models\SentMailLog;
 use App\Models\Setting;
+use App\Services\FamilyMailer;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 
@@ -15,6 +19,7 @@ class LabelGeneration extends Component
 {
     public ?Season $activeSeason = null;
     public int $validatedCount = 0;
+    public int $validatedFamilyCount = 0;
 
     public function mount(): void
     {
@@ -28,9 +33,12 @@ class LabelGeneration extends Component
             return;
         }
 
-        $this->validatedCount = Child::whereHas('giftRequest', function ($q) {
+        $query = Child::whereHas('giftRequest', function ($q) {
             $q->where('season_id', $this->activeSeason->id);
-        })->where('status', Child::STATUS_VALIDATED)->count();
+        })->where('status', Child::STATUS_VALIDATED);
+
+        $this->validatedCount = (clone $query)->count();
+        $this->validatedFamilyCount = (clone $query)->distinct()->count('gift_request_id');
     }
 
     public function generatePdf()
@@ -82,12 +90,44 @@ class LabelGeneration extends Component
             'style' => $pdfStyle,
         ]);
 
+        $sentCount = $this->sendRequestCompleteMails($children);
+
         $this->loadCount();
+
+        session()->flash('message', "PDF généré pour {$children->count()} enfant(s). {$sentCount} e-mail(s) envoyé(s) aux familles.");
 
         return response()->streamDownload(
             fn () => print (Storage::disk('local')->get($path)),
             $filename
         );
+    }
+
+    /**
+     * Send one "request complete" mail per family, listing all of its children just printed.
+     *
+     * @param  Collection<int, Child>  $children
+     */
+    protected function sendRequestCompleteMails(Collection $children): int
+    {
+        $mailer = app(FamilyMailer::class);
+        $sent = 0;
+
+        foreach ($children->groupBy('gift_request_id') as $familyChildren) {
+            $giftRequest = $familyChildren->first()->giftRequest;
+
+            if (! $giftRequest?->family?->email) {
+                continue;
+            }
+
+            $mailer->queueForRequest(
+                $giftRequest,
+                new RequestCompleteMail($giftRequest, $this->activeSeason, $familyChildren->values()),
+                SentMailLog::PURPOSE_REQUEST_COMPLETE
+            );
+            $sent++;
+        }
+
+        return $sent;
     }
 
     public function resetPrintedLabels(): void

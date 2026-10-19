@@ -101,6 +101,32 @@ class Season extends Model
     }
 
     /**
+     * Human readable pickup date(s), e.g. "le samedi 12 décembre 2026"
+     * or "entre le samedi 12 décembre 2026 et le dimanche 13 décembre 2026".
+     */
+    public function pickupDateText(): string
+    {
+        $slots = $this->pickupSlots()->orderBy('start_datetime')->get();
+
+        $firstStart = $slots->first()?->start_datetime;
+        $lastEnd = $slots->sortBy('end_datetime')->last()?->end_datetime;
+
+        if (! $firstStart || ! $lastEnd) {
+            return '';
+        }
+
+        if ($firstStart->toDateString() === $lastEnd->toDateString()) {
+            return 'le '.$firstStart->translatedFormat('l d F Y');
+        }
+
+        return sprintf(
+            'entre le %s et le %s',
+            $firstStart->translatedFormat('l d F Y'),
+            $lastEnd->translatedFormat('l d F Y')
+        );
+    }
+
+    /**
      * Get the next upcoming season.
      */
     public static function getNextFuture(): ?self
