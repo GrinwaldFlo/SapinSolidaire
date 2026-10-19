@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Season;
+use App\Models\Setting;
 
 class SeasonService
 {
@@ -38,6 +39,24 @@ class SeasonService
             'season' => null,
             'message' => 'Aucune période de demandes n\'est actuellement programmée. Veuillez revenir plus tard.',
         ];
+    }
+
+    /**
+     * Get the message explaining why registrations are closed for the season,
+     * or null when families can still register and modify their request.
+     */
+    public function getRegistrationClosedMessage(Season $season): ?string
+    {
+        if (Setting::isRegistrationBlocked()) {
+            return Setting::getRegistrationBlockedReason()
+                ?: 'Les inscriptions sont momentanément fermées.';
+        }
+
+        if (! $season->canModify()) {
+            return 'Les inscriptions sont closes. La date limite était fixée au '.$season->modification_deadline->format('d/m/Y').'.';
+        }
+
+        return null;
     }
 
     /**

@@ -154,7 +154,7 @@ Season:
 Setting:
 
 - Cached key/value configuration with helpers for domain settings
-- Controls city whitelist, max ages/years, text blocks, code format, proof requirement, PDF style, validation templates
+- Controls city whitelist, max ages/years, text blocks, code format, proof requirement, PDF style, validation templates, registration block (+ reason)
 
 Other models:
 
@@ -210,7 +210,7 @@ Validation:
 
 ## Services Overview
 
-- SeasonService: current season status + overlap checks.
+- SeasonService: current season status + overlap checks + getRegistrationClosedMessage() (closed when admin block setting is on or modification_deadline passed; new families blocked, registered families see their request read-only).
 - SlotAssignmentService: lazy, capacity-aware assignment and recalculation of pickup slot windows.
 - AddressValidationService: Swiss Post API validation.
 - PhoneValidationService: CH parsing/validation/formatting.
@@ -316,7 +316,7 @@ If a class is missing:
 2. Include dark variants if color is involved.
 3. Document it in this guide.
 
-Notice banners: notice-info / notice-warning / notice-success / notice-error, with notice-title and notice-list for structured content inside them. Add notice-spaced for bottom spacing above following content.
+Notice banners: notice-info / notice-warning / notice-success / notice-error, with notice-title, notice-list and notice-text (free text keeping line breaks) for structured content inside them. Add notice-spaced for bottom spacing above following content.
 
 Layout helpers: badge-row (wrapping badges), family-actions (stacked per-row action controls), contact-list (stacked contact lines). Button size modifier: btn-sm (combine with any btn-* class).
 

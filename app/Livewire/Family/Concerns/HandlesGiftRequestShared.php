@@ -9,6 +9,7 @@ use App\Models\GiftRequest;
 use App\Services\AddressValidationService;
 use App\Services\GiftKeywordMatcher;
 use App\Services\PhoneValidationService;
+use App\Services\SeasonService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -393,9 +394,23 @@ trait HandlesGiftRequestShared
         return true;
     }
 
+    /**
+     * Switch the form to read-only when registrations are closed for the season
+     * (blocked by an admin or modification deadline passed).
+     */
+    protected function blockIfRegistrationClosed(): bool
+    {
+        $this->registrationClosedMessage = $this->season
+            ? app(SeasonService::class)->getRegistrationClosedMessage($this->season)
+            : 'Aucune période de demandes n\'est actuellement ouverte.';
+        $this->canModify = $this->registrationClosedMessage === null;
+
+        return ! $this->canModify;
+    }
+
     public function submit(): void
     {
-        if (! $this->canModify) {
+        if ($this->blockIfRegistrationClosed()) {
             return;
         }
 

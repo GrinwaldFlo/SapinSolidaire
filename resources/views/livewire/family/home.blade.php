@@ -46,6 +46,13 @@
                     <span class="text-6xl mb-4 block">🎁</span>
                     <h2 class="section-title">Demande de cadeau</h2>
 
+                    @if($registrationClosedMessage)
+                        <div class="notice-warning notice-spaced text-left">
+                            <p class="notice-title">Inscriptions closes</p>
+                            <p class="notice-text">{{ $registrationClosedMessage }}</p>
+                        </div>
+                    @endif
+
                     @if($introductionText)
                         <div class="text-gray-600 dark:text-gray-300 mb-6 whitespace-pre-line">
                             {{ $introductionText }}
@@ -56,7 +63,7 @@
                 <form wire:submit="sendLink" class="space-y-6">
                     <div>
                         <label for="email" class="field-label !mb-2">
-                            Votre adresse e-mail
+                            {{ $registrationClosedMessage ? 'Vous avez déjà fait une demande ? Entrez votre adresse e-mail pour la consulter' : 'Votre adresse e-mail' }}
                         </label>
                         <input
                             type="email"

@@ -44,10 +44,13 @@
     @elseif(!$canModify)
         <div class="card text-center">
             <span class="text-6xl mb-4 block">🔒</span>
-            <h2 class="section-title">Modification impossible</h2>
-            <p class="notice-warning">
-                La date limite de modification est dépassée. Vous ne pouvez plus modifier votre demande.
-            </p>
+            <h2 class="section-title">{{ $giftRequest ? 'Modification impossible' : 'Inscriptions closes' }}</h2>
+            <div class="notice-warning">
+                <p class="notice-text">{{ $registrationClosedMessage }}</p>
+                <p class="notice-text">
+                    {{ $giftRequest ? 'Vous pouvez consulter votre demande, mais vous ne pouvez plus la modifier.' : 'Il n\'est plus possible de faire une nouvelle demande.' }}
+                </p>
+            </div>
 
             @if($giftRequest)
                 <div class="mt-6 text-left bg-gray-50 dark:bg-zinc-700 rounded-lg p-6">

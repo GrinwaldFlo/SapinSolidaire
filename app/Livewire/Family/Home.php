@@ -17,10 +17,16 @@ use Livewire\Component;
 class Home extends Component
 {
     public string $email = '';
+
     public bool $emailSent = false;
+
     public string $statusMessage = '';
+
     public string $seasonStatus = '';
+
     public ?Season $season = null;
+
+    public ?string $registrationClosedMessage = null;
 
     public function mount(SeasonService $seasonService): void
     {
@@ -28,6 +34,10 @@ class Home extends Component
         $this->seasonStatus = $status['status'];
         $this->statusMessage = $status['message'];
         $this->season = $status['season'];
+
+        if ($this->seasonStatus === 'active') {
+            $this->registrationClosedMessage = $seasonService->getRegistrationClosedMessage($this->season);
+        }
     }
 
     public function sendLink(): void

@@ -48,7 +48,11 @@ class GiftRequestForm extends Component
 
     public bool $isModifying = false;
 
+    #[Locked]
     public bool $canModify = true;
+
+    #[Locked]
+    public ?string $registrationClosedMessage = null;
 
     public bool $submitted = false;
 
@@ -166,6 +170,8 @@ class GiftRequestForm extends Component
             $this->proofOfHabitationEnabled = Setting::isProofOfHabitationEnabled();
             $this->familyFormMultiStepEnabled = Setting::isFamilyFormMultiStepEnabled();
 
+            $this->blockIfRegistrationClosed();
+
             $this->family = Family::where('email', $this->email)->first();
 
             if ($this->family) {
@@ -190,7 +196,6 @@ class GiftRequestForm extends Component
 
                 if ($this->giftRequest) {
                     $this->isModifying = true;
-                    $this->canModify = $this->season->canModify();
                     $this->existingProofPath = $this->giftRequest->proof_of_habitation_path;
 
                     $this->loadChildrenFromRequest();
