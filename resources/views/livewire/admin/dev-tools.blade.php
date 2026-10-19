@@ -40,6 +40,7 @@
             <div class="label-value">{{ $stats['printedChildren'] ?? 0 }}</div>
         </div>
     </div>
+    @endif
 
     {{-- Family Access Link --}}
     <div class="card">
@@ -75,6 +76,7 @@
         @endif
     </div>
 
+    @if($activeSeason)
     {{-- Seed Families --}}
     <div class="card">
         <h2 class="section-title">Générer des familles de test</h2>
@@ -119,6 +121,8 @@
             <span wire:loading wire:target="batchReceive">Réception...</span>
         </button>
     </div>
+    @endif
+
     {{-- Delete Family --}}
     <div class="card">
         <h2 class="section-title">Supprimer une famille</h2>
@@ -177,5 +181,4 @@
             <span wire:loading wire:target="nukeDangerZone">Suppression...</span>
         </button>
     </div>
-    @endif
 </div>

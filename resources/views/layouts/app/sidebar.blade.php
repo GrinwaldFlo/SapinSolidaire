@@ -107,10 +107,10 @@
                         Journal demandes familles
                     </flux:sidebar.item>
 
-                    @if(!app()->isProduction())
                     <flux:sidebar.item icon="wrench" :href="route('admin.dev-tools')" :current="request()->routeIs('admin.dev-tools')" wire:navigate>
                         Dev Tools
                     </flux:sidebar.item>
+                    @if(!app()->isProduction())
                     <flux:sidebar.item icon="swatch" :href="route('admin.css-showcase')" :current="request()->routeIs('admin.css-showcase')" wire:navigate>
                         CSS Showcase
                     </flux:sidebar.item>
