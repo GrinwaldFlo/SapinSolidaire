@@ -318,7 +318,7 @@ If a class is missing:
 
 Notice banners: notice-info / notice-warning / notice-success / notice-error, with notice-title, notice-list and notice-text (free text keeping line breaks) for structured content inside them. Add notice-spaced for bottom spacing above following content.
 
-Layout helpers: badge-row (wrapping badges), family-actions (stacked per-row action controls), contact-list (stacked contact lines). Button size modifier: btn-sm (combine with any btn-* class).
+Layout helpers: badge-row (wrapping badges), family-actions (stacked per-row action controls), contact-list (stacked contact lines), inline-form + inline-form-field (single-line field + submit button), button-row (wrapping row of buttons under content). Button size modifier: btn-sm (combine with any btn-* class).
 
 Live visual reference remains available at /admin/css-showcase.
 

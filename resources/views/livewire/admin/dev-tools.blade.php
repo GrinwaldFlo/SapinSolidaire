@@ -4,7 +4,7 @@
     </div>
 
     @if($flashMessage)
-    <div class="{{ $flashType === 'success' ? 'notice-success' : 'notice-error' }}">
+    <div class="{{ match ($flashType) { 'success' => 'notice-success', 'warning' => 'notice-warning', default => 'notice-error' } }}">
         <p>{{ $flashMessage }}</p>
     </div>
     @endif
@@ -119,6 +119,52 @@
             <span wire:loading wire:target="batchReceive">Réception...</span>
         </button>
     </div>
+    {{-- Delete Family --}}
+    <div class="card">
+        <h2 class="section-title">Supprimer une famille</h2>
+        <p class="text-muted mb-4"> Supprime définitivement une famille avec toutes ses demandes (toutes saisons), ses enfants, ses liens d'accès et ses justificatifs de domicile.
+        </p>
+
+        <form wire:submit="searchFamilyToDelete">
+            <div class="inline-form">
+                <div class="inline-form-field">
+                    <label for="deleteFamilyEmail" class="field-label">E-mail de la famille</label>
+                    <input type="email" id="deleteFamilyEmail" wire:model="deleteFamilyEmail"
+                        class="field-input"
+                        placeholder="exemple@email.com" />
+                    @error('deleteFamilyEmail')
+                    <p class="field-error">{{ $message }}</p>
+                    @enderror
+                </div>
+                <button type="submit" wire:loading.attr="disabled" class="btn-gray">
+                    <span wire:loading.remove wire:target="searchFamilyToDelete">🔍 Rechercher</span>
+                    <span wire:loading wire:target="searchFamilyToDelete">Recherche...</span>
+                </button>
+            </div>
+        </form>
+
+        @if($familyToDelete)
+        <div class="notice-warning mt-4">
+            <p class="notice-title">{{ $familyToDelete->full_name }} ({{ $familyToDelete->email }})</p>
+            <ul class="notice-list">
+                <li>{{ $familyToDelete->full_address }}</li>
+                <li>{{ $familyToDelete->giftRequests->count() }} demande(s) :
+                    {{ $familyToDelete->giftRequests->map(fn ($request) => $request->season?->name)->filter()->join(', ') ?: '—' }}
+                </li>
+                <li>{{ $familyToDeleteChildrenCount }} enfant(s)</li>
+            </ul>
+            <div class="button-row">
+                <button wire:click="deleteFamily" wire:loading.attr="disabled" class="btn-danger"
+                    wire:confirm="⚠️ Cette action est irréversible. La famille {{ $familyToDelete->full_name }} et tous ses enfants seront définitivement supprimés. Continuer ?">
+                    <span wire:loading.remove wire:target="deleteFamily">🗑️ Supprimer la famille</span>
+                    <span wire:loading wire:target="deleteFamily">Suppression...</span>
+                </button>
+                <button wire:click="cancelFamilyDeletion" class="btn-secondary">Annuler</button>
+            </div>
+        </div>
+        @endif
+    </div>
+
     {{-- Danger Zone --}}
     <div class="card border-2 border-red-500 dark:border-red-600">
         <h2 class="section-title text-red-600 dark:text-red-400">⚠️ Zone de danger</h2>
