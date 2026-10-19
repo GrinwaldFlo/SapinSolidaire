@@ -11,6 +11,7 @@ class GiftsManagement extends Component
     public string $giftRestrictions = '';
     public string $giftsWithShoeSize = '';
     public string $giftsWithSize = '';
+    public string $largeGifts = '';
 
     public function mount(): void
     {
@@ -18,6 +19,7 @@ class GiftsManagement extends Component
         $this->giftRestrictions = Setting::getValue(Setting::GIFT_RESTRICTIONS, '');
         $this->giftsWithShoeSize = Setting::getValue(Setting::GIFTS_WITH_SHOE_SIZE, '');
         $this->giftsWithSize = Setting::getValue(Setting::GIFTS_WITH_SIZE, '');
+        $this->largeGifts = Setting::getValue(Setting::LARGE_GIFTS, '');
     }
 
     public function save(): void
@@ -27,12 +29,14 @@ class GiftsManagement extends Component
             'giftRestrictions' => ['nullable', 'string'],
             'giftsWithShoeSize' => ['nullable', 'string'],
             'giftsWithSize' => ['nullable', 'string'],
+            'largeGifts' => ['nullable', 'string'],
         ]);
 
         Setting::setValue(Setting::GIFT_SUGGESTIONS, $this->giftSuggestions);
         Setting::setValue(Setting::GIFT_RESTRICTIONS, $this->giftRestrictions);
         Setting::setValue(Setting::GIFTS_WITH_SHOE_SIZE, $this->giftsWithShoeSize);
         Setting::setValue(Setting::GIFTS_WITH_SIZE, $this->giftsWithSize);
+        Setting::setValue(Setting::LARGE_GIFTS, $this->largeGifts);
 
         session()->flash('message', 'Paramètres cadeaux enregistrés avec succès.');
 

@@ -9,6 +9,16 @@
 
     <div class="card">
         <form wire:submit="save" class="space-y-6">
+            <div class="notice-info">
+                <p class="font-semibold">Comment fonctionne la recherche des mots-clés ?</p>
+                <ul class="mt-1 list-disc pl-5 text-sm">
+                    <li>Les accents et les majuscules sont ignorés : « velo » trouve « Vélo ».</li>
+                    <li>Le mot-clé peut être une partie du mot : « chauss » trouve « chaussures ».</li>
+                    <li>Le mot-clé est cherché n'importe où dans le texte du cadeau : « velo » trouve « Vélo bleu » et « Grand vélo ».</li>
+                    <li>Il suffit qu'un seul mot-clé de la liste corresponde.</li>
+                </ul>
+            </div>
+
             <div>
                 <label class="field-label">Propositions de cadeaux</label>
                 <textarea wire:model="giftSuggestions" rows="8" placeholder="Un cadeau par ligne" class="field-input"></textarea>
@@ -31,6 +41,12 @@
                 <label class="field-label">Cadeaux avec taille</label>
                 <textarea wire:model="giftsWithSize" rows="6" placeholder="Ex: veste, pantalon" class="field-input"></textarea>
                 <p class="mt-1 text-sm text-muted">Un mot-clé par ligne. Si le cadeau contient un de ces mots, la taille (cm) devient obligatoire.</p>
+            </div>
+
+            <div>
+                <label class="field-label">Gros cadeaux</label>
+                <textarea wire:model="largeGifts" rows="4" placeholder="Ex: vélo, trottinette" class="field-input"></textarea>
+                <p class="mt-1 text-sm text-muted">Un mot-clé par ligne. Les cadeaux contenant un de ces mots sont listés par famille dans le listing de mise en place (PDF).</p>
             </div>
 
             <div class="pt-4">

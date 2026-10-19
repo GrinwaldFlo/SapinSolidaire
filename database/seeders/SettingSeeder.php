@@ -19,6 +19,7 @@ class SettingSeeder extends Seeder
             Setting::GIFT_RESTRICTIONS => '',
             Setting::GIFTS_WITH_SHOE_SIZE => "chaussure\nbasket\nbotte\nsandale\nsoulier\nsneaker\nroller\npatin",
             Setting::GIFTS_WITH_SIZE => "veste\nmanteau\npantalon\njean\npull\nt-shirt\nvelo\ntrottinette",
+            Setting::LARGE_GIFTS => "velo",
             Setting::INTRODUCTION_TEXT => "Bienvenue sur Sapin Solidaire.\n\nCette plateforme vous permet de faire une demande de cadeau pour vos enfants.",
             Setting::REPLY_TO_EMAIL => '',
             Setting::CODE_PREFIX => 'Y',

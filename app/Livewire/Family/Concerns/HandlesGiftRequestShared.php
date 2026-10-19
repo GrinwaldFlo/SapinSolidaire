@@ -490,19 +490,7 @@ trait HandlesGiftRequestShared
 
     protected function isForbiddenGift(string $gift): bool
     {
-        if (empty($this->giftRestrictions)) {
-            return false;
-        }
-
-        $giftLower = mb_strtolower($gift);
-
-        foreach ($this->giftRestrictions as $keyword) {
-            if (str_contains($giftLower, mb_strtolower($keyword))) {
-                return true;
-            }
-        }
-
-        return false;
+        return $this->matchesGiftKeywordList($gift, $this->giftRestrictions);
     }
 
     protected function isShoeGift(string $gift): bool

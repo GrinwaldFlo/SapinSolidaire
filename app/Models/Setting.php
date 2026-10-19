@@ -19,6 +19,7 @@ class Setting extends Model
     public const GIFT_RESTRICTIONS = 'gift_restrictions';
     public const GIFTS_WITH_SHOE_SIZE = 'gifts_with_shoe_size';
     public const GIFTS_WITH_SIZE = 'gifts_with_size';
+    public const LARGE_GIFTS = 'large_gifts';
     public const INTRODUCTION_TEXT = 'introduction_text';
     public const REPLY_TO_EMAIL = 'reply_to_email';
     public const CODE_PREFIX = 'code_prefix';
@@ -179,6 +180,20 @@ class Setting extends Model
     }
 
     /**
+     * Get large gifts (listed separately in the delivery setup listing) as array.
+     */
+    public static function getLargeGifts(): array
+    {
+        $value = self::getValue(self::LARGE_GIFTS, '');
+
+        if (empty($value)) {
+            return [];
+        }
+
+        return array_values(array_filter(array_map('trim', explode("\n", $value))));
+    }
+
+    /**
      * Get introduction text.
      */
     public static function getIntroductionText(): string
@@ -302,6 +317,7 @@ class Setting extends Model
             self::GIFT_RESTRICTIONS,
             self::GIFTS_WITH_SHOE_SIZE,
             self::GIFTS_WITH_SIZE,
+            self::LARGE_GIFTS,
             self::INTRODUCTION_TEXT,
             self::REPLY_TO_EMAIL,
             self::CODE_PREFIX,

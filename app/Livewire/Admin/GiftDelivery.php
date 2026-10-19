@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Models\Child;
 use App\Models\Family;
 use App\Models\Season;
+use App\Models\Setting;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
@@ -19,13 +20,6 @@ class GiftDelivery extends Component
         Child::STATUS_PRINTED,
         Child::STATUS_RECEIVED,
         Child::STATUS_GIVEN,
-    ];
-
-    private const LARGE_OBJECT_TERMS = [
-        [
-            'needle' => 'velo',
-            'label' => 'Vélos',
-        ],
     ];
 
     public ?Season $activeSeason = null;
@@ -102,30 +96,18 @@ class GiftDelivery extends Component
             ->orderBy('code')
             ->get();
 
+        $largeGifts = Setting::getLargeGifts();
+
         $families = $children
             ->groupBy(fn (Child $child) => (int) $child->giftRequest->family_number)
             ->sortKeys()
-            ->map(function (Collection $familyChildren, int $familyCode) {
-                $largeObjects = collect(self::LARGE_OBJECT_TERMS)
-                    ->map(function (array $definition) use ($familyChildren, $familyCode) {
-                        $childNumbers = $familyChildren
-                            ->filter(fn (Child $child) => $child->gift
-                                && Str::contains(Str::lower(Str::ascii($child->gift)), $definition['needle']))
-                            ->pluck('child_number')
-                            ->sort()
-                            ->values();
-
-                        if ($childNumbers->isEmpty()) {
-                            return null;
-                        }
-
-                        return [
-                            'label' => $definition['label'],
-                            'display' => $definition['label'].' '
-                                .$childNumbers->map(fn ($number) => $familyCode.'/'.$number)->join(', '),
-                        ];
-                    })
-                    ->filter()
+            ->map(function (Collection $familyChildren, int $familyCode) use ($largeGifts) {
+                $largeObjects = $familyChildren
+                    ->filter(fn (Child $child) => $child->gift && $this->isLargeGift($child->gift, $largeGifts))
+                    ->sortBy('child_number')
+                    ->map(fn (Child $child) => [
+                        'display' => $child->gift.' '.$familyCode.'/'.$child->child_number,
+                    ])
                     ->values();
 
                 return [
@@ -160,6 +142,19 @@ class GiftDelivery extends Component
             fn () => print($pdf->output()),
             $filename
         );
+    }
+
+    private function isLargeGift(string $gift, array $keywords): bool
+    {
+        $normalizedGift = Str::lower(Str::ascii($gift));
+
+        foreach ($keywords as $keyword) {
+            if (Str::contains($normalizedGift, Str::lower(Str::ascii($keyword)))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function render()
