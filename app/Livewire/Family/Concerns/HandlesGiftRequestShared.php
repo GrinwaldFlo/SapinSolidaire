@@ -7,10 +7,10 @@ use App\Models\Family;
 use App\Models\FamilySubmissionLog;
 use App\Models\GiftRequest;
 use App\Services\AddressValidationService;
+use App\Services\GiftKeywordMatcher;
 use App\Services\PhoneValidationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 trait HandlesGiftRequestShared
 {
@@ -526,23 +526,6 @@ trait HandlesGiftRequestShared
      */
     protected function matchesGiftKeywordList(string $gift, array $keywords): bool
     {
-        if ($gift === '' || $keywords === []) {
-            return false;
-        }
-
-        $normalizedGift = $this->normalizeGiftKeywordValue($gift);
-
-        foreach ($keywords as $keyword) {
-            if (str_contains($normalizedGift, $this->normalizeGiftKeywordValue($keyword))) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    protected function normalizeGiftKeywordValue(string $value): string
-    {
-        return mb_strtolower(Str::ascii($value));
+        return GiftKeywordMatcher::matches($gift, $keywords);
     }
 }

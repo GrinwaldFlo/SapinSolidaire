@@ -53,3 +53,25 @@ test('admin can save gifts management settings', function () {
     expect(Setting::getGiftsWithSize())->toBe(['veste', 'pantalon']);
     expect(Setting::getLargeGifts())->toBe(['vélo', 'trottinette']);
 });
+
+test('gifts management page explains how keyword matching works', function () {
+    $this->actingAs($this->admin)
+        ->get(route('admin.gifts-management'))
+        ->assertOk()
+        ->assertSee('Comment fonctionne la recherche des mots-clés ?')
+        ->assertSee('Les accents et les majuscules sont ignorés')
+        ->assertSee('Gros cadeaux');
+});
+
+test('large gifts setting ignores blank lines and surrounding spaces', function () {
+    $this->actingAs($this->admin);
+
+    Livewire::test(GiftsManagement::class)
+        ->set('largeGifts', "  vélo \n\n trottinette\r\n   \n")
+        ->call('save')
+        ->assertHasNoErrors();
+
+    Setting::clearCache();
+
+    expect(Setting::getLargeGifts())->toBe(['vélo', 'trottinette']);
+});

@@ -124,17 +124,23 @@ class Setting extends Model
     }
 
     /**
+     * Get a multi-line setting as a list of trimmed, non-empty lines.
+     *
+     * @return array<int, string>
+     */
+    private static function getLineList(string $key): array
+    {
+        $value = (string) self::getValue($key, '');
+
+        return array_values(array_filter(array_map('trim', explode("\n", $value))));
+    }
+
+    /**
      * Get gift suggestions as array.
      */
     public static function getGiftSuggestions(): array
     {
-        $value = self::getValue(self::GIFT_SUGGESTIONS, '');
-
-        if (empty($value)) {
-            return [];
-        }
-
-        return array_filter(array_map('trim', explode("\n", $value)));
+        return self::getLineList(self::GIFT_SUGGESTIONS);
     }
 
     /**
@@ -142,13 +148,7 @@ class Setting extends Model
      */
     public static function getGiftRestrictions(): array
     {
-        $value = self::getValue(self::GIFT_RESTRICTIONS, '');
-
-        if (empty($value)) {
-            return [];
-        }
-
-        return array_filter(array_map('trim', explode("\n", $value)));
+        return self::getLineList(self::GIFT_RESTRICTIONS);
     }
 
     /**
@@ -156,13 +156,7 @@ class Setting extends Model
      */
     public static function getGiftsWithShoeSize(): array
     {
-        $value = self::getValue(self::GIFTS_WITH_SHOE_SIZE, '');
-
-        if (empty($value)) {
-            return [];
-        }
-
-        return array_filter(array_map('trim', explode("\n", $value)));
+        return self::getLineList(self::GIFTS_WITH_SHOE_SIZE);
     }
 
     /**
@@ -170,13 +164,7 @@ class Setting extends Model
      */
     public static function getGiftsWithSize(): array
     {
-        $value = self::getValue(self::GIFTS_WITH_SIZE, '');
-
-        if (empty($value)) {
-            return [];
-        }
-
-        return array_filter(array_map('trim', explode("\n", $value)));
+        return self::getLineList(self::GIFTS_WITH_SIZE);
     }
 
     /**
@@ -184,13 +172,7 @@ class Setting extends Model
      */
     public static function getLargeGifts(): array
     {
-        $value = self::getValue(self::LARGE_GIFTS, '');
-
-        if (empty($value)) {
-            return [];
-        }
-
-        return array_values(array_filter(array_map('trim', explode("\n", $value))));
+        return self::getLineList(self::LARGE_GIFTS);
     }
 
     /**

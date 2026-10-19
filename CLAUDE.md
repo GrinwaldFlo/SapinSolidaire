@@ -316,6 +316,8 @@ If a class is missing:
 2. Include dark variants if color is involved.
 3. Document it in this guide.
 
+Notice banners: notice-info / notice-warning / notice-success / notice-error, with notice-title and notice-list for structured content inside them.
+
 Live visual reference remains available at /admin/css-showcase.
 
 ## Common Agent Tasks

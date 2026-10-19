@@ -10,8 +10,8 @@
     <div class="card">
         <form wire:submit="save" class="space-y-6">
             <div class="notice-info">
-                <p class="font-semibold">Comment fonctionne la recherche des mots-clés ?</p>
-                <ul class="mt-1 list-disc pl-5 text-sm">
+                <p class="notice-title">Comment fonctionne la recherche des mots-clés ?</p>
+                <ul class="notice-list">
                     <li>Les accents et les majuscules sont ignorés : « velo » trouve « Vélo ».</li>
                     <li>Le mot-clé peut être une partie du mot : « chauss » trouve « chaussures ».</li>
                     <li>Le mot-clé est cherché n'importe où dans le texte du cadeau : « velo » trouve « Vélo bleu » et « Grand vélo ».</li>
