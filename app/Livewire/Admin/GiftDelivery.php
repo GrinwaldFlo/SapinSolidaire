@@ -106,26 +106,23 @@ class GiftDelivery extends Component
             ->groupBy(fn (Child $child) => (int) $child->giftRequest->family_number)
             ->sortKeys()
             ->map(function (Collection $familyChildren, int $familyCode) {
-                $giftTexts = $familyChildren
-                    ->pluck('gift')
-                    ->filter()
-                    ->map(fn (string $gift) => Str::lower(Str::ascii($gift)))
-                    ->all();
-
                 $largeObjects = collect(self::LARGE_OBJECT_TERMS)
-                    ->map(function (array $definition) use ($giftTexts, $familyCode) {
-                        $count = collect($giftTexts)
-                            ->filter(fn (string $giftText) => Str::contains($giftText, $definition['needle']))
-                            ->count();
+                    ->map(function (array $definition) use ($familyChildren, $familyCode) {
+                        $childNumbers = $familyChildren
+                            ->filter(fn (Child $child) => $child->gift
+                                && Str::contains(Str::lower(Str::ascii($child->gift)), $definition['needle']))
+                            ->pluck('child_number')
+                            ->sort()
+                            ->values();
 
-                        if ($count === 0) {
+                        if ($childNumbers->isEmpty()) {
                             return null;
                         }
 
                         return [
                             'label' => $definition['label'],
-                            'count' => $count,
-                            'display' => $definition['label'].' '.$familyCode.'/'.$count,
+                            'display' => $definition['label'].' '
+                                .$childNumbers->map(fn ($number) => $familyCode.'/'.$number)->join(', '),
                         ];
                     })
                     ->filter()

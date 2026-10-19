@@ -295,6 +295,7 @@ When changing workflow logic, extend the corresponding Feature tests first.
 7. Use named routes.
 8. Keep user-facing text translatable; French is the primary language.
 9. Use shared CSS component classes in Blade (avoid inline utility drift).
+10. When comparing lingualized strings, accents should not be taken in account (vélo = velo)
 
 ## Risky Areas To Modify Carefully
 
