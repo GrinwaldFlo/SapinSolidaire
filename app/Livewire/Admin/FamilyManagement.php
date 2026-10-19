@@ -3,9 +3,11 @@
 namespace App\Livewire\Admin;
 
 use App\Models\AdminActionLog;
+use App\Models\Child;
 use App\Models\Family;
 use App\Models\GiftRequest;
 use App\Models\Season;
+use App\Models\Setting;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -58,19 +60,26 @@ class FamilyManagement extends Component
         $this->resetPage();
     }
 
-    public function applyAction(string $familyId, ?string $giftRequestId = null, string $action = ''): void
+    public function applyAction(string $familyId, ?string $giftRequestId = null, string $action = '', string $reason = ''): void
     {
-        if ($action !== 'reset_pending' || ! $giftRequestId) {
+        if (! $giftRequestId) {
             return;
         }
 
-        $actionRequest = null;
+        match ($action) {
+            'reset_pending' => $this->resetToPending($giftRequestId),
+            'exclude' => $this->excludeFamily($giftRequestId, $reason),
+            default => null,
+        };
+    }
 
-        DB::transaction(function () use ($giftRequestId, &$actionRequest) {
+    private function resetToPending(string $giftRequestId): void
+    {
+        $request = DB::transaction(function () use ($giftRequestId) {
             $request = GiftRequest::with('children')->lockForUpdate()->find($giftRequestId);
 
             if (! $request) {
-                return;
+                return null;
             }
 
             $request->resetToPending();
@@ -79,19 +88,63 @@ class FamilyManagement extends Component
                 $child->resetToPending();
             }
 
-            $actionRequest = $request->loadMissing('family');
+            return $request->loadMissing('family');
         });
 
-        if ($actionRequest instanceof GiftRequest) {
-            AdminActionLog::create([
-                'user_id' => auth()->id(),
-                'user_label' => auth()->user()?->name,
-                'action_type' => AdminActionLog::ACTION_FAMILY_STATUS_RESET,
-                'description' => 'Statut famille remis en attente: '.$actionRequest->family?->full_name,
-                'family_id' => $actionRequest->family_id,
-                'gift_request_id' => $actionRequest->id,
-            ]);
+        if ($request instanceof GiftRequest) {
+            $this->logAction(
+                AdminActionLog::ACTION_FAMILY_STATUS_RESET,
+                'Statut famille remis en attente: '.$request->family?->full_name,
+                $request
+            );
         }
+    }
+
+    private function excludeFamily(string $giftRequestId, string $reason): void
+    {
+        $reason = trim($reason);
+
+        if ($reason === '') {
+            $this->addError('exclusionReason', 'Un motif est obligatoire pour exclure une famille.');
+
+            return;
+        }
+
+        $request = DB::transaction(function () use ($giftRequestId, $reason) {
+            $request = GiftRequest::with('children')->lockForUpdate()->find($giftRequestId);
+
+            if (! $request) {
+                return null;
+            }
+
+            $request->setStatus(GiftRequest::STATUS_REJECTED_FINAL, $reason);
+
+            foreach ($request->children as $child) {
+                $child->setStatus(Child::STATUS_REJECTED_FINAL, $reason);
+            }
+
+            return $request->loadMissing('family');
+        });
+
+        if ($request instanceof GiftRequest) {
+            $this->logAction(
+                AdminActionLog::ACTION_FAMILY_EXCLUDED,
+                'Famille exclue: '.$request->family?->full_name.' — Motif: '.$reason,
+                $request
+            );
+        }
+    }
+
+    private function logAction(string $type, string $description, GiftRequest $request): void
+    {
+        AdminActionLog::create([
+            'user_id' => auth()->id(),
+            'user_label' => auth()->user()?->name,
+            'action_type' => $type,
+            'description' => $description,
+            'family_id' => $request->family_id,
+            'gift_request_id' => $request->id,
+        ]);
     }
 
     public function render()
@@ -122,6 +175,7 @@ class FamilyManagement extends Component
         }
 
         return view('livewire.admin.family-management', [
+            'rejectionTemplates' => Setting::getValidationCommentTemplates(),
             'families' => $query->orderBy($this->sortBy, $this->sortDirection)->paginate(200),
             'statuses' => [
                 GiftRequest::STATUS_PENDING => 'À valider',

@@ -70,6 +70,7 @@ class AdminActionLogs extends Component
                 AdminActionLog::ACTION_FAMILY_VALIDATED => 'Validation famille',
                 AdminActionLog::ACTION_CHILD_VALIDATED => 'Validation enfant',
                 AdminActionLog::ACTION_FAMILY_STATUS_RESET => 'Réinitialisation statut famille',
+                AdminActionLog::ACTION_FAMILY_EXCLUDED => 'Exclusion famille',
                 AdminActionLog::ACTION_EMAIL_SENT => 'Envoi e-mail',
             ],
         ]);

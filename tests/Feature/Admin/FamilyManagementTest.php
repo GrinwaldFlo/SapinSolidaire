@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Admin\FamilyManagement;
+use App\Models\AdminActionLog;
 use App\Models\Child;
 use App\Models\Family;
 use App\Models\GiftRequest;
@@ -64,4 +65,43 @@ test('row action can reset request and children to pending', function () {
     expect($this->giftRequest->rejection_comment)->toBeNull();
     expect($child->status)->toBe(Child::STATUS_PENDING);
     expect($child->rejection_comment)->toBeNull();
+});
+
+test('row action can exclude a family and logs it', function () {
+    $this->giftRequest->setStatus(GiftRequest::STATUS_VALIDATED);
+
+    $child = Child::create([
+        'gift_request_id' => $this->giftRequest->id,
+        'first_name' => 'Alice',
+        'gender' => Child::GENDER_GIRL,
+        'birth_year' => 2019,
+        'gift' => 'Poupée',
+        'status' => Child::STATUS_VALIDATED,
+    ]);
+
+    $this->actingAs($this->admin);
+
+    Livewire::test(FamilyManagement::class)
+        ->call('applyAction', $this->family->id, $this->giftRequest->id, 'exclude', 'Hors zone');
+
+    expect($this->giftRequest->refresh()->status)->toBe(GiftRequest::STATUS_REJECTED_FINAL);
+    expect($this->giftRequest->rejection_comment)->toBe('Hors zone');
+    expect($child->refresh()->status)->toBe(Child::STATUS_REJECTED_FINAL);
+
+    $log = AdminActionLog::where('action_type', AdminActionLog::ACTION_FAMILY_EXCLUDED)->first();
+    expect($log)->not->toBeNull();
+    expect($log->family_id)->toBe($this->family->id);
+    expect($log->description)->toContain('Hors zone');
+});
+
+test('excluding a family requires a reason', function () {
+    $this->giftRequest->setStatus(GiftRequest::STATUS_VALIDATED);
+
+    $this->actingAs($this->admin);
+
+    Livewire::test(FamilyManagement::class)
+        ->call('applyAction', $this->family->id, $this->giftRequest->id, 'exclude', '  ');
+
+    expect($this->giftRequest->refresh()->status)->toBe(GiftRequest::STATUS_VALIDATED);
+    expect(AdminActionLog::where('action_type', AdminActionLog::ACTION_FAMILY_EXCLUDED)->exists())->toBeFalse();
 });

@@ -107,20 +107,7 @@
                         </td>
                         <td class="table-cell">
                             @if($actionRequest)
-                                <div x-data="{ action: '' }" class="space-y-2">
-                                    <select x-model="action" class="field-input">
-                                        <option value="">Choisir une action</option>
-                                        <option value="reset_pending">Remettre en attente</option>
-                                    </select>
-                                    <button
-                                        type="button"
-                                        x-on:click="$wire.applyAction('{{ $family->id }}', '{{ $actionRequest->id }}', action); action = '';"
-                                        class="btn-gray text-sm"
-                                        x-bind:disabled="!action"
-                                    >
-                                        Appliquer
-                                    </button>
-                                </div>
+                                @include('livewire.admin.partials.family-actions', ['family' => $family, 'actionRequest' => $actionRequest, 'rejectionTemplates' => $rejectionTemplates])
                             @else
                                 -
                             @endif
@@ -202,20 +189,7 @@
                 @endif
                 <div class="space-y-2 pt-1">
                     @if($actionRequest)
-                        <div x-data="{ action: '' }" class="space-y-2">
-                            <select x-model="action" class="field-input">
-                                <option value="">Choisir une action</option>
-                                <option value="reset_pending">Remettre en attente</option>
-                            </select>
-                            <button
-                                type="button"
-                                x-on:click="$wire.applyAction('{{ $family->id }}', '{{ $actionRequest->id }}', action); action = '';"
-                                class="btn-gray text-sm"
-                                x-bind:disabled="!action"
-                            >
-                                Appliquer
-                            </button>
-                        </div>
+                        @include('livewire.admin.partials.family-actions', ['family' => $family, 'actionRequest' => $actionRequest, 'rejectionTemplates' => $rejectionTemplates])
                     @endif
                 </div>
             </div>
