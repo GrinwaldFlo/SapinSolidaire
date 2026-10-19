@@ -1,4 +1,12 @@
+@php
+    $statusBadgeClass = match ($actionRequest->status) {
+        \App\Models\GiftRequest::STATUS_VALIDATED => 'badge--validated',
+        \App\Models\GiftRequest::STATUS_REJECTED, \App\Models\GiftRequest::STATUS_REJECTED_FINAL => 'badge--rejected',
+        default => 'badge--pending',
+    };
+@endphp
 <div x-data="{ action: '', reason: '' }" class="space-y-2">
+    <div><span class="{{ $statusBadgeClass }}">{{ $statuses[$actionRequest->status] ?? $actionRequest->status }}</span></div>
     <select x-model="action" class="field-input">
         <option value="">Choisir une action</option>
         <option value="reset_pending">Remettre en attente</option>
