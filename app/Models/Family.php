@@ -23,7 +23,44 @@ class Family extends Model
         'postal_code',
         'city',
         'phone',
+        'excluded_at',
+        'exclusion_reason',
     ];
+
+    /**
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'excluded_at' => 'datetime',
+    ];
+
+    /**
+     * Check if the family is permanently excluded (blocked for all future seasons).
+     */
+    public function isExcluded(): bool
+    {
+        return $this->excluded_at !== null;
+    }
+
+    /**
+     * Permanently exclude the family from all future seasons.
+     */
+    public function exclude(?string $reason = null): void
+    {
+        $this->excluded_at = now();
+        $this->exclusion_reason = $reason;
+        $this->save();
+    }
+
+    /**
+     * Lift the family exclusion.
+     */
+    public function clearExclusion(): void
+    {
+        $this->excluded_at = null;
+        $this->exclusion_reason = null;
+        $this->save();
+    }
 
     /**
      * Get gift requests for this family.

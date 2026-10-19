@@ -13,8 +13,11 @@ class GiftRequest extends Model
     use HasFactory, HasUuids;
 
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_VALIDATED = 'validated';
+
     public const STATUS_REJECTED = 'rejected';
+
     public const STATUS_REJECTED_FINAL = 'rejected_final';
 
     /**
@@ -104,6 +107,10 @@ class GiftRequest extends Model
         }
 
         $this->save();
+
+        if ($status === self::STATUS_REJECTED_FINAL) {
+            $this->family?->exclude($comment ?? $this->rejection_comment);
+        }
     }
 
     /**

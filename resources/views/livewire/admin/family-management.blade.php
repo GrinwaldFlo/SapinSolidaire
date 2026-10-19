@@ -31,52 +31,45 @@
                     <th wire:click="sort('last_name')" class="table-header--sortable">
                         Nom @if($sortBy === 'last_name') <span>{{ $sortDirection === 'asc' ? '▲' : '▼' }}</span> @else <span class="opacity-30">▲</span> @endif
                     </th>
-                    <th wire:click="sort('email')" class="table-header--sortable">
-                        Email @if($sortBy === 'email') <span>{{ $sortDirection === 'asc' ? '▲' : '▼' }}</span> @else <span class="opacity-30">▲</span> @endif
-                    </th>
-                    <th wire:click="sort('phone')" class="table-header--sortable">
-                        Téléphone @if($sortBy === 'phone') <span>{{ $sortDirection === 'asc' ? '▲' : '▼' }}</span> @else <span class="opacity-30">▲</span> @endif
-                    </th>
-                    <th class="table-header">Adresse</th>
+                    <th class="table-header">Contact</th>
                     <th class="table-header">Demandes</th>
                     <th class="table-header">Actions</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
                 @forelse($families as $family)
-                    @php
-                        $actionRequest = $activeSeason
-                            ? $family->giftRequests->firstWhere('season_id', $activeSeason->id)
-                            : $family->giftRequests->sortByDesc('created_at')->first();
-                    @endphp
                     <tr wire:key="family-row-{{ $family->id }}">
                         <td class="table-cell">{{ $family->first_name }}</td>
                         <td class="table-cell">{{ $family->last_name }}</td>
-                        <td class="table-cell-muted">
-                            <a href="mailto:{{ $family->email }}" class="inline-flex items-center gap-1 link">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>
-                                {{ $family->email }}
-                            </a>
-                        </td>
-                        <td class="table-cell-muted">
-                            @if($family->phone)
-                                <a href="tel:{{ $family->tel_phone }}" class="inline-flex items-center gap-1 link">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.01-.24 11.47 11.47 0 0 0 3.58.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.58a1 1 0 0 1-.25 1.01z"/></svg>
-                                    {{ $family->formatted_phone }}
-                                </a>
-                            @else
-                                -
-                            @endif
-                        </td>
                         <td class="table-cell-muted text-sm">
-                            @if($family->full_address)
-                                <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($family->full_address) }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 link">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                                    {{ $family->full_address }}
-                                </a>
-                            @else
-                                -
-                            @endif
+                            <div class="space-y-1">
+                                <div>
+                                    <a href="mailto:{{ $family->email }}" class="inline-flex items-center gap-1 link">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                                        {{ $family->email }}
+                                    </a>
+                                </div>
+                                <div>
+                                    @if($family->phone)
+                                        <a href="tel:{{ $family->tel_phone }}" class="inline-flex items-center gap-1 link">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.01-.24 11.47 11.47 0 0 0 3.58.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.58a1 1 0 0 1-.25 1.01z"/></svg>
+                                            {{ $family->formatted_phone }}
+                                        </a>
+                                    @else
+                                        -
+                                    @endif
+                                </div>
+                                <div>
+                                    @if($family->full_address)
+                                        <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($family->full_address) }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 link">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                                            {{ $family->full_address }}
+                                        </a>
+                                    @else
+                                        -
+                                    @endif
+                                </div>
+                            </div>
                         </td>
                         <td class="table-cell">
                             @foreach($family->giftRequests as $request)
@@ -106,16 +99,12 @@
                             @endforeach
                         </td>
                         <td class="table-cell">
-                            @if($actionRequest)
-                                @include('livewire.admin.partials.family-actions', ['family' => $family, 'actionRequest' => $actionRequest, 'rejectionTemplates' => $rejectionTemplates])
-                            @else
-                                -
-                            @endif
+                            @include('livewire.admin.partials.family-actions', ['family' => $family, 'rejectionTemplates' => $rejectionTemplates])
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="table-empty">Aucune famille trouvée</td>
+                        <td colspan="5" class="table-empty">Aucune famille trouvée</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -125,11 +114,6 @@
     {{-- Mobile cards --}}
     <div class="sm:hidden space-y-3">
         @forelse($families as $family)
-            @php
-                $actionRequest = $activeSeason
-                    ? $family->giftRequests->firstWhere('season_id', $activeSeason->id)
-                    : $family->giftRequests->sortByDesc('created_at')->first();
-            @endphp
             <div wire:key="family-card-{{ $family->id }}" class="card-sm space-y-2">
                 <div class="font-semibold detail-value text-base">
                     {{ $family->first_name }} {{ $family->last_name }}
@@ -188,9 +172,7 @@
                     </div>
                 @endif
                 <div class="space-y-2 pt-1">
-                    @if($actionRequest)
-                        @include('livewire.admin.partials.family-actions', ['family' => $family, 'actionRequest' => $actionRequest, 'rejectionTemplates' => $rejectionTemplates])
-                    @endif
+                    @include('livewire.admin.partials.family-actions', ['family' => $family, 'rejectionTemplates' => $rejectionTemplates])
                 </div>
             </div>
         @empty

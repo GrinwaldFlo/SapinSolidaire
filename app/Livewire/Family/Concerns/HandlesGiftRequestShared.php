@@ -373,9 +373,28 @@ trait HandlesGiftRequestShared
         }
     }
 
+    /**
+     * Flag the form as permanently rejected when the family is excluded.
+     */
+    protected function blockIfExcluded(?Family $family): bool
+    {
+        if (! $family?->isExcluded()) {
+            return false;
+        }
+
+        $this->isPermanentlyRejected = true;
+        $this->rejectionComment = $family->exclusion_reason;
+
+        return true;
+    }
+
     public function submit(): void
     {
         if (! $this->canModify) {
+            return;
+        }
+
+        if ($this->blockIfExcluded(Family::where('email', $this->email)->first())) {
             return;
         }
 
@@ -531,7 +550,7 @@ trait HandlesGiftRequestShared
     }
 
     /**
-     * @param array<int, string> $keywords
+     * @param  array<int, string>  $keywords
      */
     protected function matchesGiftKeywordList(string $gift, array $keywords): bool
     {

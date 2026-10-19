@@ -24,9 +24,13 @@ class FamilyManagement extends Component
     ];
 
     public ?Season $activeSeason = null;
+
     public string $search = '';
+
     public string $statusFilter = '';
+
     public string $sortBy = 'last_name';
+
     public string $sortDirection = 'asc';
 
     public function mount(): void
@@ -60,47 +64,70 @@ class FamilyManagement extends Component
         $this->resetPage();
     }
 
-    public function applyAction(string $familyId, ?string $giftRequestId = null, string $action = '', string $reason = ''): void
+    public function applyAction(string $familyId, string $action = '', string $reason = ''): void
     {
-        if (! $giftRequestId) {
-            return;
-        }
-
         match ($action) {
-            'reset_pending' => $this->resetToPending($giftRequestId),
-            'exclude' => $this->excludeFamily($giftRequestId, $reason),
+            'reset_pending' => $this->resetToPending($familyId),
+            'exclude' => $this->excludeFamily($familyId, $reason),
             default => null,
         };
     }
 
-    private function resetToPending(string $giftRequestId): void
+    /**
+     * Lock the family row and its active-season request (if any) for update.
+     *
+     * @return array{0: ?Family, 1: ?GiftRequest}
+     */
+    private function lockFamilyAndActiveRequest(string $familyId): array
     {
-        $request = DB::transaction(function () use ($giftRequestId) {
-            $request = GiftRequest::with('children')->lockForUpdate()->find($giftRequestId);
+        $family = Family::lockForUpdate()->find($familyId);
 
-            if (! $request) {
-                return null;
+        if (! $family || ! $this->activeSeason) {
+            return [$family, null];
+        }
+
+        $request = GiftRequest::with('children')
+            ->where('family_id', $family->id)
+            ->where('season_id', $this->activeSeason->id)
+            ->lockForUpdate()
+            ->first();
+
+        return [$family, $request];
+    }
+
+    private function resetToPending(string $familyId): void
+    {
+        [$family, $request] = DB::transaction(function () use ($familyId) {
+            [$family, $request] = $this->lockFamilyAndActiveRequest($familyId);
+
+            if (! $family || (! $request && ! $family->isExcluded())) {
+                return [null, null];
             }
 
-            $request->resetToPending();
+            if ($request) {
+                $request->resetToPending();
 
-            foreach ($request->children as $child) {
-                $child->resetToPending();
+                foreach ($request->children as $child) {
+                    $child->resetToPending();
+                }
             }
 
-            return $request->loadMissing('family');
+            $family->clearExclusion();
+
+            return [$family, $request];
         });
 
-        if ($request instanceof GiftRequest) {
+        if ($family instanceof Family) {
             $this->logAction(
                 AdminActionLog::ACTION_FAMILY_STATUS_RESET,
-                'Statut famille remis en attente: '.$request->family?->full_name,
+                ($request ? 'Statut famille remis en attente: ' : 'Exclusion levée: ').$family->full_name,
+                $family,
                 $request
             );
         }
     }
 
-    private function excludeFamily(string $giftRequestId, string $reason): void
+    private function excludeFamily(string $familyId, string $reason): void
     {
         $reason = trim($reason);
 
@@ -110,40 +137,46 @@ class FamilyManagement extends Component
             return;
         }
 
-        $request = DB::transaction(function () use ($giftRequestId, $reason) {
-            $request = GiftRequest::with('children')->lockForUpdate()->find($giftRequestId);
+        [$family, $request] = DB::transaction(function () use ($familyId, $reason) {
+            [$family, $request] = $this->lockFamilyAndActiveRequest($familyId);
 
-            if (! $request) {
-                return null;
+            if (! $family) {
+                return [null, null];
             }
 
-            $request->setStatus(GiftRequest::STATUS_REJECTED_FINAL, $reason);
+            if ($request) {
+                $request->setRelation('family', $family);
+                $request->setStatus(GiftRequest::STATUS_REJECTED_FINAL, $reason);
 
-            foreach ($request->children as $child) {
-                $child->setStatus(Child::STATUS_REJECTED_FINAL, $reason);
+                foreach ($request->children as $child) {
+                    $child->setStatus(Child::STATUS_REJECTED_FINAL, $reason);
+                }
+            } else {
+                $family->exclude($reason);
             }
 
-            return $request->loadMissing('family');
+            return [$family, $request];
         });
 
-        if ($request instanceof GiftRequest) {
+        if ($family instanceof Family) {
             $this->logAction(
                 AdminActionLog::ACTION_FAMILY_EXCLUDED,
-                'Famille exclue: '.$request->family?->full_name.' — Motif: '.$reason,
+                'Famille exclue: '.$family->full_name.' — Motif: '.$reason,
+                $family,
                 $request
             );
         }
     }
 
-    private function logAction(string $type, string $description, GiftRequest $request): void
+    private function logAction(string $type, string $description, Family $family, ?GiftRequest $request): void
     {
         AdminActionLog::create([
             'user_id' => auth()->id(),
             'user_label' => auth()->user()?->name,
             'action_type' => $type,
             'description' => $description,
-            'family_id' => $request->family_id,
-            'gift_request_id' => $request->id,
+            'family_id' => $family->id,
+            'gift_request_id' => $request?->id,
         ]);
     }
 
@@ -152,8 +185,14 @@ class FamilyManagement extends Component
         $query = Family::with(['giftRequests.season', 'giftRequests.children']);
 
         if ($this->statusFilter) {
-            $query->whereHas('giftRequests', function ($q) {
-                $q->where('status', $this->statusFilter);
+            $query->where(function ($q) {
+                $q->whereHas('giftRequests', function ($q) {
+                    $q->where('status', $this->statusFilter);
+                });
+
+                if ($this->statusFilter === GiftRequest::STATUS_REJECTED_FINAL) {
+                    $q->orWhereNotNull('excluded_at');
+                }
             });
         }
 
