@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 class Family extends Model
 {
@@ -79,33 +80,40 @@ class Family extends Model
     }
 
     /**
-     * Get the number of consecutive years the family has requested gifts.
+     * Get the number of consecutive years, right before the given season, in which
+     * the family made a gift request that was not rejected.
      */
-    public function getConsecutiveYearsCount(): int
+    public function getConsecutiveYearsCountBefore(Season $season): int
     {
-        $requests = $this->giftRequests()
+        $requestYears = $this->giftRequests()
             ->join('seasons', 'gift_requests.season_id', '=', 'seasons.id')
-            ->orderByDesc('seasons.start_date')
-            ->get(['seasons.start_date']);
-
-        if ($requests->isEmpty()) {
-            return 0;
-        }
+            ->where('gift_requests.season_id', '!=', $season->id)
+            ->whereNotIn('gift_requests.status', [
+                GiftRequest::STATUS_REJECTED,
+                GiftRequest::STATUS_REJECTED_FINAL,
+            ])
+            ->pluck('seasons.start_date')
+            ->map(fn ($startDate): int => (int) Carbon::parse($startDate)->format('Y'))
+            ->unique();
 
         $count = 0;
-        $currentYear = (int) now()->format('Y');
+        $previousYear = (int) $season->start_date->format('Y') - 1;
 
-        foreach ($requests as $request) {
-            $requestYear = (int) $request->start_date->format('Y');
-
-            if ($requestYear === $currentYear - $count) {
-                $count++;
-            } else {
-                break;
-            }
+        while ($requestYears->contains($previousYear - $count)) {
+            $count++;
         }
 
         return $count;
+    }
+
+    /**
+     * Check if a new request for the given season would exceed the consecutive years limit.
+     * The limit includes the season itself: with a limit of 3, requests in the 2 previous
+     * years block the third one.
+     */
+    public function hasReachedConsecutiveYearsLimit(Season $season, int $maxConsecutiveYears): bool
+    {
+        return $this->getConsecutiveYearsCountBefore($season) >= $maxConsecutiveYears - 1;
     }
 
     /**

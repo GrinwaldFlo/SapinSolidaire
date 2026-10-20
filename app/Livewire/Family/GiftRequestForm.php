@@ -59,6 +59,9 @@ class GiftRequestForm extends Component
     #[Locked]
     public bool $isPermanentlyRejected = false;
 
+    #[Locked]
+    public bool $consecutiveYearsLimitReached = false;
+
     public string $organizerEmail = '';
 
     public ?string $rejectionComment = null;
@@ -176,6 +179,10 @@ class GiftRequestForm extends Component
 
             if ($this->family) {
                 if ($this->blockIfExcluded($this->family)) {
+                    return;
+                }
+
+                if ($this->blockIfConsecutiveYearsLimitReached($this->family)) {
                     return;
                 }
 

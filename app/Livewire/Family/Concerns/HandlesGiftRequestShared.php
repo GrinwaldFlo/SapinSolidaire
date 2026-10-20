@@ -6,6 +6,7 @@ use App\Models\Child;
 use App\Models\Family;
 use App\Models\FamilySubmissionLog;
 use App\Models\GiftRequest;
+use App\Models\Setting;
 use App\Services\AddressValidationService;
 use App\Services\GiftKeywordMatcher;
 use App\Services\PhoneValidationService;
@@ -395,6 +396,25 @@ trait HandlesGiftRequestShared
     }
 
     /**
+     * Block a new request when the family already requested gifts the maximum number
+     * of consecutive years. An existing request for the season stays editable.
+     */
+    protected function blockIfConsecutiveYearsLimitReached(?Family $family): bool
+    {
+        if (! $family || ! $this->season || $family->getRequestForSeason($this->season)) {
+            return false;
+        }
+
+        if (! $family->hasReachedConsecutiveYearsLimit($this->season, Setting::getMaxConsecutiveYears())) {
+            return false;
+        }
+
+        $this->consecutiveYearsLimitReached = true;
+
+        return true;
+    }
+
+    /**
      * Switch the form to read-only when registrations are closed for the season
      * (blocked by an admin or modification deadline passed).
      */
@@ -414,7 +434,13 @@ trait HandlesGiftRequestShared
             return;
         }
 
-        if ($this->blockIfExcluded(Family::where('email', $this->email)->first())) {
+        $existingFamily = Family::where('email', $this->email)->first();
+
+        if ($this->blockIfExcluded($existingFamily)) {
+            return;
+        }
+
+        if ($this->blockIfConsecutiveYearsLimitReached($existingFamily)) {
             return;
         }
 

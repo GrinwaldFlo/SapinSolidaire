@@ -23,12 +23,18 @@
                     <p class="text-sm">{{ $rejectionComment }}</p>
                 </div>
             @endif
-            @if($organizerEmail)
-                <p class="text-muted mt-4 text-sm">
-                    Pour toute question, veuillez contacter l'organisateur à l'adresse :
-                    <a href="mailto:{{ $organizerEmail }}" class="link">{{ $organizerEmail }}</a>
-                </p>
-            @endif
+            @include('livewire.family.partials.organizer-contact')
+        </div>
+    @elseif($consecutiveYearsLimitReached)
+        <div class="card text-center">
+            <span class="text-6xl mb-4 block">🎄</span>
+            <h2 class="section-title">Pas de demande cette année</h2>
+            <div class="notice-info">
+                <p class="notice-text">Votre famille a déjà fait une demande de cadeau en {{ implode(' et en ', $this->years) }}.</p>
+                <p class="notice-text">Pour que d'autres familles puissent aussi recevoir un cadeau, on ne peut pas faire une demande plusieurs années de suite.</p>
+                <p class="notice-text">Vous pourrez faire une nouvelle demande l'année prochaine. Nous vous souhaitons de belles fêtes !</p>
+            </div>
+            @include('livewire.family.partials.organizer-contact')
         </div>
     @elseif($submitted)
         <div class="card text-center">
