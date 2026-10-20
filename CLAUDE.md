@@ -272,6 +272,8 @@ Mails are queued, not sent synchronously:
 
 Queue worker is required in dev/prod for expected behavior.
 
+Optional IMAP copy (MAIL_IMAP_COPY_ENABLED in .env, config mail.imap_copy): listener App\Listeners\StoreSentMailCopy on MessageSent appends every sent email to a subfolder of the IMAP Sent folder (MAIL_IMAP_SENT_FOLDER + MAIL_IMAP_SUBFOLDER, created if missing) via SentMailArchiver and the socket-based App\Services\Imap\ImapClient. IMAP failures are logged, never thrown (avoids queue retries re-sending the email).
+
 ## Test Coverage Snapshot
 
 Tests are Pest feature-heavy and cover:
