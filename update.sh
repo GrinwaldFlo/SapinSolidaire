@@ -78,11 +78,13 @@ main() {
     
     # Step 6: Clear caches
     print_info "Clearing application caches..."
-    php artisan cache:clear
-    php artisan route:clear
-    php artisan config:clear
-    php artisan view:clear
+    php artisan optimize:clear
     print_success "Caches cleared"
+
+    # Step 6b: Restart queue workers (long-running workers keep the old .env/config until restarted)
+    print_info "Restarting queue workers..."
+    php artisan queue:restart
+    print_success "Queue workers will restart after their current job"
 
     # Step 7: Flush sessions (forces re-login, clears stale session data)
     print_info "Flushing sessions..."

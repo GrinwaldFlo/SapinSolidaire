@@ -127,4 +127,30 @@ return [
 
     'rate_limit_seconds' => env('MAIL_RATE_LIMIT_SECONDS', 5),
 
+    /*
+    |--------------------------------------------------------------------------
+    | IMAP Copy Of Sent Emails
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, every email successfully sent by the application is also
+    | appended to the IMAP mailbox, inside a subfolder of the Sent folder.
+    | Leave the subfolder empty to store the copies directly in Sent.
+    | Encryption: "ssl" (implicit TLS, port 993), "starttls" (port 143) or "none".
+    |
+    */
+
+    'imap_copy' => [
+        'enabled' => (bool) env('MAIL_IMAP_COPY_ENABLED', false),
+        'host' => env('MAIL_IMAP_HOST', env('MAIL_HOST')),
+        'port' => (int) env('MAIL_IMAP_PORT', 993),
+        'encryption' => env('MAIL_IMAP_ENCRYPTION', 'ssl'),
+        'username' => env('MAIL_IMAP_USERNAME', env('MAIL_USERNAME')),
+        'password' => env('MAIL_IMAP_PASSWORD', env('MAIL_PASSWORD')),
+        'sent_folder' => env('MAIL_IMAP_SENT_FOLDER', 'Sent'),
+        'subfolder' => env('MAIL_IMAP_SUBFOLDER', 'SapinSolidaire'),
+        'timeout' => (int) env('MAIL_IMAP_TIMEOUT', 15),
+        // Log the full IMAP conversation (password masked) to storage/logs/imap.log
+        'debug' => (bool) env('MAIL_IMAP_DEBUG', false),
+    ],
+
 ];

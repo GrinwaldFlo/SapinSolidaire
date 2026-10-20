@@ -88,9 +88,7 @@ cd /var/www/sapin-solidaire
 composer install --no-dev --optimize-autoloader
 
 # Clear cache
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+php artisan optimize:clear
 ```
 
 ### Step 4: Install Frontend Dependencies
@@ -358,30 +356,25 @@ Access the application at `https://your-domain.com/admin` and change the admin p
 
 ## Updating Production Deployment
 
+Run the update script from the project directory:
+
 ```bash
 cd /var/www/sapin-solidaire
-
-# Pull latest changes
-sudo git pull origin main
-
-# Install dependencies
-composer install --no-dev --optimize-autoloader
-
-# Run migrations
-php artisan migrate --force
-
-# Rebuild assets
-npm install --production && npm run build
-
-# Clear caches
-php artisan cache:clear
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-
-# Restart queue worker
-sudo systemctl restart sapin-queue
+./update.sh
 ```
+
+It pulls the latest changes, installs dependencies, builds assets, runs migrations and seeders, clears all caches (`php artisan optimize:clear`), restarts the queue workers (`php artisan queue:restart`), flushes sessions and sets permissions.
+
+### After editing `.env`
+
+`.env` changes are not picked up while the configuration is cached, and the queue worker (which sends all emails) keeps the configuration it loaded at startup. After any `.env` change, run:
+
+```bash
+php artisan optimize:clear
+php artisan queue:restart
+```
+
+Avoid running `php artisan config:cache` manually: while the config cache exists, `.env` is ignored.
 
 ---
 
