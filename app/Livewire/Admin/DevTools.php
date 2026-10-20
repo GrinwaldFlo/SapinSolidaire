@@ -7,19 +7,28 @@ use App\Models\EmailToken;
 use App\Models\Family;
 use App\Models\GiftRequest;
 use App\Models\Season;
+use App\Services\FamilyDeletionService;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Component;
 
 class DevTools extends Component
 {
     public ?Season $activeSeason = null;
+
     public int $familyCount = 5;
+
     public string $flashMessage = '';
+
     public string $flashType = '';
+
     public string $familyEmail = '';
+
     public string $familyAccessLink = '';
+
+    public string $deleteFamilyEmail = '';
+
+    public ?string $familyToDeleteId = null;
 
     public function mount(): void
     {
@@ -48,6 +57,58 @@ class DevTools extends Component
 
         $this->familyAccessLink = route('gift.form', ['token' => $token->token]);
         $this->flash('Lien de connexion généré.', 'success');
+    }
+
+    public function searchFamilyToDelete(): void
+    {
+        $this->validate([
+            'deleteFamilyEmail' => ['required', 'email'],
+        ], [
+            'deleteFamilyEmail.required' => 'Veuillez entrer une adresse e-mail.',
+            'deleteFamilyEmail.email' => 'Veuillez entrer une adresse e-mail valide.',
+        ]);
+
+        $family = Family::where('email', $this->deleteFamilyEmail)->first();
+        $this->familyToDeleteId = $family?->id;
+
+        if (! $family) {
+            $this->flash('Aucune famille trouvée avec cette adresse e-mail.', 'error');
+        }
+    }
+
+    public function cancelFamilyDeletion(): void
+    {
+        $this->familyToDeleteId = null;
+    }
+
+    public function deleteFamily(FamilyDeletionService $deletionService): void
+    {
+        $family = $this->familyToDeleteId ? Family::find($this->familyToDeleteId) : null;
+        $this->familyToDeleteId = null;
+
+        if (! $family) {
+            $this->flash('Famille introuvable, elle a peut-être déjà été supprimée.', 'error');
+
+            return;
+        }
+
+        try {
+            $failedDeletions = $deletionService->delete($family);
+        } catch (\Throwable $e) {
+            $this->flash('La suppression de la famille a échoué. Aucune donnée n\'a été supprimée.', 'error');
+
+            return;
+        }
+
+        $this->deleteFamilyEmail = '';
+
+        if ($failedDeletions !== []) {
+            $this->flash("La famille {$family->full_name} a été supprimée, mais certains fichiers n'ont pas pu être supprimés : ".implode(', ', $failedDeletions), 'warning');
+
+            return;
+        }
+
+        $this->flash("La famille {$family->full_name} et tous ses enfants ont été supprimés.", 'success');
     }
 
     public function seedFamilies(): void
@@ -219,19 +280,7 @@ class DevTools extends Component
             return;
         }
 
-        $failedDeletions = [];
-
-        foreach ($proofPaths as $path) {
-            if (! Storage::disk('local')->delete($path)) {
-                $failedDeletions[] = $path;
-            }
-        }
-
-        foreach ($pdfPaths as $path) {
-            if (! Storage::disk('local')->delete($path)) {
-                $failedDeletions[] = $path;
-            }
-        }
+        $failedDeletions = FamilyDeletionService::deleteLocalFiles($proofPaths->merge($pdfPaths));
 
         if ($failedDeletions !== []) {
             $this->flash('Toutes les données ont été supprimées de la base, mais certains fichiers n\'ont pas pu être supprimés : '.implode(', ', $failedDeletions), 'warning');
@@ -264,6 +313,13 @@ class DevTools extends Component
             ];
         }
 
-        return view('livewire.admin.dev-tools', compact('stats'));
+        $familyToDelete = $this->familyToDeleteId
+            ? Family::with('giftRequests.season')->find($this->familyToDeleteId)
+            : null;
+        $familyToDeleteChildrenCount = $familyToDelete
+            ? Child::whereIn('gift_request_id', $familyToDelete->giftRequests->pluck('id'))->count()
+            : 0;
+
+        return view('livewire.admin.dev-tools', compact('stats', 'familyToDelete', 'familyToDeleteChildrenCount'));
     }
 }
