@@ -56,7 +56,7 @@ class SettingsManagement extends Component
     {
         $this->validate([
             'siteName' => ['required', 'string', 'max:255'],
-            'maxConsecutiveYears' => ['required', 'integer', 'min:1', 'max:10'],
+            'maxConsecutiveYears' => ['required', 'integer', 'min:2', 'max:10'],
             'maxChildAge' => ['required', 'integer', 'min:1', 'max:25'],
             'replyToEmail' => ['nullable', 'email'],
             'codePrefix' => ['nullable', 'string', 'max:10'],
