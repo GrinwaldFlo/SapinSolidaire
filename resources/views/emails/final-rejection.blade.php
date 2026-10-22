@@ -47,21 +47,19 @@
     <div class="content">
         <p>Bonjour,</p>
         
-        <p>Nous avons examiné votre demande de cadeau et nous sommes dans le regret de vous informer que nous ne pouvons pas y donner suite.</p>
+        <p>@multiline($introText)</p>
         
         <div class="comment-box">
             <strong>Motif :</strong><br>
             {!! nl2br(e($comment)) !!}
         </div>
         
-        <p>Nous vous remercions de votre compréhension.</p>
-        
-        <p>Si vous pensez qu'il s'agit d'une erreur, vous pouvez nous contacter.</p>
+        <p>@multiline($closingText)</p>
         
         <p>Cordialement,<br>L'équipe {{ $siteName }}</p>
     </div>
     <div class="footer">
-        <p>Cet e-mail a été envoyé automatiquement. Merci de ne pas y répondre directement.</p>
+        <p>@multiline($footerText)</p>
     </div>
 </body>
 </html>

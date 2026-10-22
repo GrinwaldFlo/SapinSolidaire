@@ -11,6 +11,11 @@
             Gérer les paramètres cadeaux
         </a>
     </p>
+    <p>
+        <a href="{{ route('admin.texts-management') }}" class="link" wire:navigate>
+            Gérer les textes personnalisables
+        </a>
+    </p>
 
     @if(session()->has('message'))
         <div class="notice-success">
@@ -54,12 +59,6 @@
             </div>
 
             <div>
-                <label class="field-label">Texte d'introduction</label>
-                <textarea wire:model="introductionText" rows="4" class="field-input"></textarea>
-                <p class="mt-1 text-sm text-muted">Ce texte sera affiché aux familles sur la page d'accueil.</p>
-            </div>
-
-            <div>
                 <label class="field-label">Adresse e-mail de réponse</label>
                 <input type="email" wire:model="replyToEmail" class="field-input">
                 @error('replyToEmail') <p class="field-error">{{ $message }}</p> @enderror
@@ -97,19 +96,10 @@
 
             <div>
                 <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" wire:model.live="registrationBlocked" class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 dark:border-zinc-600 dark:bg-zinc-700">
+                    <input type="checkbox" wire:model="registrationBlocked" class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 dark:border-zinc-600 dark:bg-zinc-700">
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Bloquer les inscriptions</span>
                 </label>
-                <p class="mt-1 text-sm text-muted">Si activé pendant une saison, les nouvelles familles ne peuvent plus s'inscrire. Les familles déjà inscrites peuvent consulter leur demande, sans pouvoir la modifier.</p>
-
-                @if($registrationBlocked)
-                    <div class="mt-4">
-                        <label class="field-label">Motif du blocage</label>
-                        <textarea wire:model="registrationBlockedReason" rows="4" placeholder="Les inscriptions sont momentanément fermées." class="field-input"></textarea>
-                        <p class="mt-1 text-sm text-muted">Ce message sera affiché aux familles sur la page d'accueil et sur leur formulaire. Laissez vide pour afficher le message par défaut.</p>
-                        @error('registrationBlockedReason') <p class="field-error">{{ $message }}</p> @enderror
-                    </div>
-                @endif
+                <p class="mt-1 text-sm text-muted">Si activé pendant une saison, les nouvelles familles ne peuvent plus s'inscrire. Les familles déjà inscrites peuvent consulter leur demande, sans pouvoir la modifier. Le motif affiché aux familles se modifie dans les <a href="{{ route('admin.texts-management') }}" class="link" wire:navigate>textes personnalisables</a>.</p>
             </div>
 
             <div>

@@ -293,6 +293,16 @@ select:focus[data-flux-control] {
         @apply flex flex-wrap gap-1;
     }
 
+    /* Help text under a form field */
+    .field-help {
+        @apply mt-1 text-sm text-gray-500 dark:text-gray-400;
+    }
+
+    /* Placeholder token inside help text (e.g. {site}) */
+    .placeholder-tag {
+        @apply font-mono text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 dark:bg-zinc-700 dark:text-gray-200;
+    }
+
     /* Stacked per-row action controls (select, comment, apply button) */
     .family-actions {
         @apply space-y-2;

@@ -120,6 +120,7 @@ Admin modules under /admin:
 - SeasonManagement
 - UserManagement
 - SettingsManagement
+- TextsManagement
 - ValidationMessageTemplates
 - DevTools
 - CssShowcase
@@ -154,7 +155,8 @@ Season:
 Setting:
 
 - Cached key/value configuration with helpers for domain settings
-- Controls city whitelist, max ages/years, text blocks, code format, proof requirement, PDF style, validation templates, registration block (+ reason)
+- Controls city whitelist, max ages/years, text blocks, code format, proof requirement, PDF style, validation templates, registration block
+- Customizable family-facing texts (pages + emails) are registered in App\Services\CustomText: each text is a Setting key with a default used when the stored value is empty, and {placeholders} ({site} always available) replaced by CustomText::get(). Add new customizable texts there; they appear automatically on the TextsManagement page
 
 Other models:
 
@@ -254,6 +256,7 @@ Admin components:
 - SendConfirmations: slot computation + confirmation email queue.
 - SeasonManagement: season CRUD + pickup window CRUD + overlap prevention.
 - SettingsManagement: application settings + city validation + code regeneration on prefix/padding changes.
+- TextsManagement: customizable texts (home intro, registration block reason, season messages, form messages, email subjects/paragraphs/signature/footers) backed by CustomText.
 - UserManagement: role editing.
 - FamilyManagement: searchable and sortable household view.
 - FamilyDuplicates: duplicate scan + merge UI.
@@ -321,6 +324,10 @@ If a class is missing:
 Notice banners: notice-info / notice-warning / notice-success / notice-error, with notice-title, notice-list and notice-text (free text keeping line breaks) for structured content inside them. Add notice-spaced for bottom spacing above following content.
 
 Layout helpers: badge-row (wrapping badges), family-actions (stacked per-row action controls), contact-list (stacked contact lines), inline-form + inline-form-field (single-line field + submit button), button-row (wrapping row of buttons under content). Button size modifier: btn-sm (combine with any btn-* class).
+
+Form helpers: field-help (help text under a field), placeholder-tag (inline token such as {site}).
+
+Blade directive @multiline($text): escaped text with line breaks as <br> (used for custom texts in HTML emails).
 
 Live visual reference remains available at /admin/css-showcase.
 

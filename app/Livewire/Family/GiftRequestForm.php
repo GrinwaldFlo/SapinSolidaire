@@ -10,6 +10,7 @@ use App\Models\Family;
 use App\Models\GiftRequest;
 use App\Models\Season;
 use App\Models\Setting;
+use App\Services\CustomText;
 use App\Services\PhoneValidationService;
 use App\Services\SeasonService;
 use Livewire\Attributes\Computed;
@@ -241,6 +242,12 @@ class GiftRequestForm extends Component
 
     public function render()
     {
-        return view('livewire.family.gift-request-form');
+        return view('livewire.family.gift-request-form', [
+            'submittedText' => CustomText::get(CustomText::FORM_SUBMITTED),
+            'permanentlyRejectedText' => CustomText::get(CustomText::FORM_PERMANENTLY_REJECTED),
+            'consecutiveYearsReachedText' => CustomText::get(CustomText::FORM_CONSECUTIVE_YEARS_REACHED, [
+                'annees' => implode(' et en ', $this->years),
+            ]),
+        ]);
     }
 }

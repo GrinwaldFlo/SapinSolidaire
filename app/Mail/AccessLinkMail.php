@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\Setting;
+use App\Services\CustomText;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -30,7 +31,7 @@ class AccessLinkMail extends Mailable implements ShouldQueue
         $replyTo = Setting::getReplyToEmail();
 
         return new Envelope(
-            subject: 'Votre demande de cadeau - '.Setting::getSiteName(),
+            subject: CustomText::get(CustomText::MAIL_ACCESS_LINK_SUBJECT),
             replyTo: $replyTo ? [$replyTo] : [],
         );
     }
@@ -46,6 +47,9 @@ class AccessLinkMail extends Mailable implements ShouldQueue
             with: [
                 'accessUrl' => url("/cadeau/{$this->token}"),
                 'siteName' => Setting::getSiteName(),
+                'introText' => CustomText::get(CustomText::MAIL_ACCESS_LINK_INTRO),
+                'closingText' => CustomText::get(CustomText::MAIL_ACCESS_LINK_CLOSING),
+                'footerText' => CustomText::get(CustomText::MAIL_FOOTER_NO_REPLY),
             ],
         );
     }

@@ -91,6 +91,10 @@
                         Cadeaux
                     </flux:sidebar.item>
 
+                    <flux:sidebar.item icon="document-text" :href="route('admin.texts-management')" :current="request()->routeIs('admin.texts-management')" wire:navigate>
+                        Textes
+                    </flux:sidebar.item>
+
                     <flux:sidebar.item icon="chat-bubble-left-right" :href="route('admin.validation-messages')" :current="request()->routeIs('admin.validation-messages')" wire:navigate>
                         Messages de validation
                     </flux:sidebar.item>

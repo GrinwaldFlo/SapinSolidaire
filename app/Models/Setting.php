@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\CustomText;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -198,14 +199,6 @@ class Setting extends Model
     }
 
     /**
-     * Get introduction text.
-     */
-    public static function getIntroductionText(): string
-    {
-        return self::getValue(self::INTRODUCTION_TEXT, '');
-    }
-
-    /**
      * Get reply-to email address.
      */
     public static function getReplyToEmail(): ?string
@@ -259,14 +252,6 @@ class Setting extends Model
     public static function isRegistrationBlocked(): bool
     {
         return (bool) self::getValue(self::REGISTRATION_BLOCKED, false);
-    }
-
-    /**
-     * Get the reason displayed to families when registrations are blocked.
-     */
-    public static function getRegistrationBlockedReason(): string
-    {
-        return trim((string) self::getValue(self::REGISTRATION_BLOCKED_REASON, ''));
     }
 
     /**
@@ -351,7 +336,7 @@ class Setting extends Model
             self::REGISTRATION_BLOCKED_REASON,
         ];
 
-        foreach ($keys as $key) {
+        foreach (array_unique([...$keys, ...CustomText::keys()]) as $key) {
             Cache::forget("setting_{$key}");
         }
     }

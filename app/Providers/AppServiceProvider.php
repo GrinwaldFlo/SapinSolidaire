@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Role;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -27,6 +28,13 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         $this->configureGates();
+        $this->configureBladeDirectives();
+    }
+
+    protected function configureBladeDirectives(): void
+    {
+        // Escaped multiline text with line breaks as <br>, e.g. custom texts in HTML emails.
+        Blade::directive('multiline', fn (string $expression): string => "<?php echo \\App\\Services\\CustomText::toHtml({$expression}); ?>");
     }
 
     protected function configureDefaults(): void

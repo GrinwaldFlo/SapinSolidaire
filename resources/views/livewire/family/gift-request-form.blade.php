@@ -15,7 +15,7 @@
             <span class="text-6xl mb-4 block">🚫</span>
             <h2 class="section-title">Demande impossible</h2>
             <div class="notice-error">
-                Votre famille a été refusée, vous ne pouvez pas effectuer de demande de cadeau cette année.
+                <p class="notice-text">{{ $permanentlyRejectedText }}</p>
             </div>
             @if($rejectionComment)
                 <div class="notice-warning mt-4 text-left">
@@ -30,9 +30,7 @@
             <span class="text-6xl mb-4 block">🎄</span>
             <h2 class="section-title">Pas de demande cette année</h2>
             <div class="notice-info">
-                <p class="notice-text">Votre famille a déjà fait une demande de cadeau en {{ implode(' et en ', $this->years) }}.</p>
-                <p class="notice-text">Pour que d'autres familles puissent aussi recevoir un cadeau, on ne peut pas faire une demande plusieurs années de suite.</p>
-                <p class="notice-text">Vous pourrez faire une nouvelle demande l'année prochaine. Nous vous souhaitons de belles fêtes !</p>
+                <p class="notice-text">{{ $consecutiveYearsReachedText }}</p>
             </div>
             @include('livewire.family.partials.organizer-contact')
         </div>
@@ -43,9 +41,7 @@
             <p class="notice-success">
                 Votre demande a bien été {{ $isModifying ? 'mise à jour' : 'enregistrée' }}.
             </p>
-            <p class="text-muted text-sm">
-                Nous examinerons votre demande et vous contacterons par e-mail.
-            </p>
+            <p class="text-muted text-sm whitespace-pre-line">{{ $submittedText }}</p>
         </div>
     @elseif(!$canModify)
         <div class="card text-center">

@@ -59,7 +59,7 @@
     <div class="content">
         <p>Chère famille {{ $familyName }},</p>
 
-        <p>Vous avez inscrit vos enfants au Sapin solidaire afin qu'ils reçoivent un cadeau de Noël.</p>
+        <p>@multiline($introText)</p>
 
         <div class="info-box">
             <strong>Les cadeaux sont prêts !</strong>
@@ -77,14 +77,13 @@
         @endif
 
         <div class="important">
-            <p>📋 N'oubliez pas de prendre avec vous votre pièce d'identité et celles de vos enfants.</p>
-            <p>🛍️ Pensez également à prendre un grand sac avec vous pour y glisser les cadeaux qui sont parfois volumineux.</p>
+            <p>@multiline($remindersText)</p>
         </div>
 
-        <p>Nous nous réjouissons de vous voir !</p>
+        <p>@multiline($closingText)</p>
 
         <div class="signature">
-            <p>Au nom du comité de Sapin Solidaire</p>
+            <p>@multiline($signatureText)</p>
             @if($responsibleName)
                 <p><strong>{{ $responsibleName }}</strong></p>
             @endif
@@ -97,7 +96,7 @@
         </div>
     </div>
     <div class="footer">
-        <p>Cet e-mail a été envoyé automatiquement. Vous pouvez y répondre directement si vous avez des questions.</p>
+        <p>@multiline($footerText)</p>
     </div>
 </body>
 </html>

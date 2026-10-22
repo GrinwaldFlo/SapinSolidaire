@@ -149,9 +149,7 @@
                             <span class="text-lg mt-0.5">🎁</span>
                             <div>
                                 <p class="detail-value">Créneaux de récupération des cadeaux</p>
-                                <p class="text-sm text-muted mt-1">
-                                    Vous devrez être disponible lors de l'un de ces créneaux. Vous recevrez une invitation précisant le créneau auquel vous devrez vous présenter.
-                                </p>
+                                <p class="text-sm text-muted mt-1 whitespace-pre-line">{{ $pickupSlotsInfo }}</p>
                             </div>
                         </div>
 
