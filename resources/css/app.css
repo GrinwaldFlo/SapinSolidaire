@@ -212,6 +212,11 @@ select:focus[data-flux-control] {
         @apply text-gray-500 dark:text-gray-400;
     }
 
+    /* Free text keeping its line breaks (custom texts) */
+    .text-multiline {
+        @apply whitespace-pre-line;
+    }
+
     /* Detail field label (e.g. "Prénom :") */
     .detail-label {
         @apply text-sm text-gray-500 dark:text-gray-400;

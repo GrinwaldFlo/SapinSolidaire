@@ -108,13 +108,13 @@
         <div class="card text-center">
             <span class="text-6xl mb-4 block">📅</span>
             <h2 class="section-title">Bientôt disponible</h2>
-            <p class="text-muted">{{ $statusMessage }}</p>
+            <p class="text-muted text-multiline">{{ $statusMessage }}</p>
         </div>
     @else
         <div class="card text-center">
             <span class="text-6xl mb-4 block">🎄</span>
             <h2 class="section-title">À bientôt !</h2>
-            <p class="text-muted">{{ $statusMessage }}</p>
+            <p class="text-muted text-multiline">{{ $statusMessage }}</p>
         </div>
     @endif
 

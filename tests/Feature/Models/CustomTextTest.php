@@ -43,6 +43,27 @@ test('given placeholders are replaced and extra spaces of empty ones collapsed',
         ->toBe("Bonjour Martin,\nRetrait à l'heure indiquée.");
 });
 
+test('spacing entered by the admin is kept', function () {
+    Setting::setValue(CustomText::MAIL_GIFT_RECEIVED_REMINDERS, "Rappels :\n  - pièce d'identité\n  - grand  sac");
+
+    expect(CustomText::get(CustomText::MAIL_GIFT_RECEIVED_REMINDERS))
+        ->toBe("Rappels :\n  - pièce d'identité\n  - grand  sac");
+});
+
+test('replacement values are inserted as is', function () {
+    Setting::setValue(CustomText::MAIL_REQUEST_COMPLETE_BODY, 'Bonjour {famille},');
+
+    expect(CustomText::get(CustomText::MAIL_REQUEST_COMPLETE_BODY, ['famille' => 'Da  Silva']))
+        ->toBe('Bonjour Da  Silva,');
+});
+
+test('empty placeholders at line boundaries leave no extra space', function () {
+    Setting::setValue(CustomText::MAIL_REQUEST_COMPLETE_BODY, "{date_retrait} Retrait\nBonjour {famille}");
+
+    expect(CustomText::get(CustomText::MAIL_REQUEST_COMPLETE_BODY, ['famille' => '', 'date_retrait' => '']))
+        ->toBe("Retrait\nBonjour");
+});
+
 test('unknown placeholders are left untouched', function () {
     Setting::setValue(CustomText::FORM_SUBMITTED, 'Merci {inconnu}');
 

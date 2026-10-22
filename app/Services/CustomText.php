@@ -75,6 +75,13 @@ class CustomText
     private const PLACEHOLDER_FAMILY = ['{famille}' => 'Nom de famille'];
 
     /**
+     * Memoized result of definitions() (texts are static, built once per process).
+     *
+     * @var array<string, array{label: string, default: string, multiline: bool, help?: string, placeholders?: array<string, string>}>|null
+     */
+    private static ?array $definitions = null;
+
+    /**
      * Texts grouped by section, in display order.
      *
      * @return array<string, array{title: string, texts: array<string, array{label: string, default: string, multiline: bool, help?: string, placeholders?: array<string, string>}>}>
@@ -295,7 +302,7 @@ class CustomText
      */
     public static function definitions(): array
     {
-        return array_merge(...array_values(array_map(
+        return self::$definitions ??= array_merge(...array_values(array_map(
             static fn (array $group): array => $group['texts'],
             self::groups()
         )));
@@ -350,8 +357,30 @@ class CustomText
             $map['{'.$name.'}'] = (string) $value;
         }
 
-        // Collapse spaces left by empty placeholders, line breaks are kept.
-        return trim(preg_replace('/[ \t]{2,}/', ' ', strtr($text, $map)));
+        return trim(strtr(self::removeEmptyPlaceholders($text, $map), $map));
+    }
+
+    /**
+     * Remove placeholders replaced by an empty value, collapsing the spaces around
+     * them into one so the surrounding text keeps its own spacing and line breaks.
+     *
+     * @param  array<string, string>  $map  Placeholder (with braces) => value
+     */
+    private static function removeEmptyPlaceholders(string $text, array $map): string
+    {
+        $empty = array_keys(array_filter($map, static fn (string $value): bool => trim($value) === ''));
+
+        if ($empty === []) {
+            return $text;
+        }
+
+        $pattern = '/([ \t]*)(?:'.implode('|', array_map(static fn (string $p): string => preg_quote($p, '/'), $empty)).')([ \t]*)/';
+
+        return preg_replace_callback(
+            $pattern,
+            static fn (array $m): string => $m[1] !== '' && $m[2] !== '' ? ' ' : $m[1].$m[2],
+            $text
+        );
     }
 
     /**
