@@ -15,7 +15,7 @@
             <span class="text-6xl mb-4 block">🚫</span>
             <h2 class="section-title">Demande impossible</h2>
             <div class="notice-error">
-                <p class="notice-text">{{ $permanentlyRejectedText }}</p>
+                <p class="notice-text">{{ $statusText }}</p>
             </div>
             @if($rejectionComment)
                 <div class="notice-warning mt-4 text-left">
@@ -30,7 +30,7 @@
             <span class="text-6xl mb-4 block">🎄</span>
             <h2 class="section-title">Pas de demande cette année</h2>
             <div class="notice-info">
-                <p class="notice-text">{{ $consecutiveYearsReachedText }}</p>
+                <p class="notice-text">{{ $statusText }}</p>
             </div>
             @include('livewire.family.partials.organizer-contact')
         </div>
@@ -41,7 +41,7 @@
             <p class="notice-success">
                 Votre demande a bien été {{ $isModifying ? 'mise à jour' : 'enregistrée' }}.
             </p>
-            <p class="text-muted text-sm whitespace-pre-line">{{ $submittedText }}</p>
+            <p class="text-muted text-sm text-multiline">{{ $statusText }}</p>
         </div>
     @elseif(!$canModify)
         <div class="card text-center">

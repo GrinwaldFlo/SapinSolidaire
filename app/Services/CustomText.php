@@ -326,6 +326,18 @@ class CustomText
         return self::PLACEHOLDER_SITE + (self::definitions()[$key]['placeholders'] ?? []);
     }
 
+    /**
+     * Placeholders used in a text that are not available for it, e.g. ['{famille}'].
+     *
+     * @return array<int, string>
+     */
+    public static function unknownPlaceholders(string $key, string $text): array
+    {
+        preg_match_all('/\{[^{}\s]+\}/u', $text, $matches);
+
+        return array_values(array_diff(array_unique($matches[0]), array_keys(self::placeholders($key))));
+    }
+
     public static function default(string $key): string
     {
         return self::definitions()[$key]['default'] ?? '';
@@ -346,7 +358,10 @@ class CustomText
      */
     public static function get(string $key, array $replacements = []): string
     {
-        $text = self::stored($key) ?: self::default($key);
+        $text = self::stored($key);
+        if ($text === '') {
+            $text = self::default($key);
+        }
 
         if ($text === '') {
             return '';

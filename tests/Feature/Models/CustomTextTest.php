@@ -25,6 +25,12 @@ test('custom value overrides the default text', function () {
     expect(CustomText::get(CustomText::REGISTRATION_BLOCKED))->toBe('Fermé');
 });
 
+test('custom value "0" is not replaced by the default text', function () {
+    Setting::setValue(CustomText::REGISTRATION_BLOCKED, '0');
+
+    expect(CustomText::get(CustomText::REGISTRATION_BLOCKED))->toBe('0');
+});
+
 test('introduction text has no default', function () {
     expect(CustomText::get(CustomText::HOME_INTRODUCTION))->toBe('');
 });

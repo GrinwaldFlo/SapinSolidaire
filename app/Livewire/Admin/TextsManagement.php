@@ -25,7 +25,17 @@ class TextsManagement extends Component
     {
         $rules = [];
         foreach (CustomText::definitions() as $key => $definition) {
-            $rules["texts.{$key}"] = ['nullable', 'string', $definition['multiline'] ? 'max:5000' : 'max:255'];
+            $rules["texts.{$key}"] = [
+                'nullable',
+                'string',
+                $definition['multiline'] ? 'max:5000' : 'max:255',
+                static function (string $attribute, mixed $value, \Closure $fail) use ($key): void {
+                    $unknown = CustomText::unknownPlaceholders($key, (string) $value);
+                    if ($unknown !== []) {
+                        $fail('Variable inconnue pour ce texte : '.implode(', ', $unknown).'.');
+                    }
+                },
+            ];
         }
 
         $this->validate($rules);

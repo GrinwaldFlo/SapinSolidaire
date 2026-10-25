@@ -243,11 +243,24 @@ class GiftRequestForm extends Component
     public function render()
     {
         return view('livewire.family.gift-request-form', [
-            'submittedText' => CustomText::get(CustomText::FORM_SUBMITTED),
-            'permanentlyRejectedText' => CustomText::get(CustomText::FORM_PERMANENTLY_REJECTED),
-            'consecutiveYearsReachedText' => CustomText::get(CustomText::FORM_CONSECUTIVE_YEARS_REACHED, [
+            'statusText' => $this->statusText(),
+        ]);
+    }
+
+    /**
+     * Custom text of the final state shown instead of the form (same precedence as the view),
+     * built only for that state to avoid loading unused texts on every request.
+     */
+    private function statusText(): string
+    {
+        return match (true) {
+            ! $this->tokenValid => '',
+            $this->isPermanentlyRejected => CustomText::get(CustomText::FORM_PERMANENTLY_REJECTED),
+            $this->consecutiveYearsLimitReached => CustomText::get(CustomText::FORM_CONSECUTIVE_YEARS_REACHED, [
                 'annees' => implode(' et en ', $this->years),
             ]),
-        ]);
+            $this->submitted => CustomText::get(CustomText::FORM_SUBMITTED),
+            default => '',
+        };
     }
 }

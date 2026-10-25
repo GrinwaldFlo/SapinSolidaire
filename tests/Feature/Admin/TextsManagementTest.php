@@ -90,3 +90,21 @@ test('subject length is validated', function () {
         ->call('save')
         ->assertHasErrors('texts.'.CustomText::MAIL_ACCESS_LINK_SUBJECT);
 });
+
+test('saving is refused when a text uses a placeholder not available for it', function () {
+    Livewire::test(TextsManagement::class)
+        ->set('texts.'.CustomText::MAIL_ACCESS_LINK_SUBJECT, 'Bonjour {famille} de {inconnu}')
+        ->call('save')
+        ->assertHasErrors('texts.'.CustomText::MAIL_ACCESS_LINK_SUBJECT)
+        ->assertSee('{famille}, {inconnu}');
+
+    Setting::clearCache();
+    expect(CustomText::stored(CustomText::MAIL_ACCESS_LINK_SUBJECT))->toBe('');
+});
+
+test('available placeholders are accepted', function () {
+    Livewire::test(TextsManagement::class)
+        ->set('texts.'.CustomText::MAIL_ACCESS_LINK_SUBJECT, 'Votre lien {site}')
+        ->call('save')
+        ->assertHasNoErrors();
+});

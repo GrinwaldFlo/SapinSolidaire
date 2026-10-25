@@ -30,6 +30,7 @@
                         @else
                             <input id="text-{{ $key }}" type="text" wire:model.blur="texts.{{ $key }}" placeholder="{{ $definition['default'] }}" class="field-input">
                         @endif
+                        @error('texts.'.$key) <p class="field-error">{{ $message }}</p> @enderror
 
                         @if(!empty($definition['help']))
                             <p class="field-help">{{ $definition['help'] }}</p>

@@ -149,7 +149,7 @@
                             <span class="text-lg mt-0.5">🎁</span>
                             <div>
                                 <p class="detail-value">Créneaux de récupération des cadeaux</p>
-                                <p class="text-sm text-muted mt-1 whitespace-pre-line">{{ $pickupSlotsInfo }}</p>
+                                <p class="field-help text-multiline">{{ $pickupSlotsInfo }}</p>
                             </div>
                         </div>
 

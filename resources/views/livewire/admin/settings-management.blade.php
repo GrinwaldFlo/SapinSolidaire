@@ -99,7 +99,7 @@
                     <input type="checkbox" wire:model="registrationBlocked" class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 dark:border-zinc-600 dark:bg-zinc-700">
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Bloquer les inscriptions</span>
                 </label>
-                <p class="mt-1 text-sm text-muted">Si activé pendant une saison, les nouvelles familles ne peuvent plus s'inscrire. Les familles déjà inscrites peuvent consulter leur demande, sans pouvoir la modifier. Le motif affiché aux familles se modifie dans les <a href="{{ route('admin.texts-management') }}" class="link" wire:navigate>textes personnalisables</a>.</p>
+                <p class="field-help">Si activé pendant une saison, les nouvelles familles ne peuvent plus s'inscrire. Les familles déjà inscrites peuvent consulter leur demande, sans pouvoir la modifier. Le motif affiché aux familles se modifie dans les <a href="{{ route('admin.texts-management') }}" class="link" wire:navigate>textes personnalisables</a>.</p>
             </div>
 
             <div>
