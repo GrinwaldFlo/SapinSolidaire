@@ -40,7 +40,7 @@ class SeasonManagement extends Component
             'familyLimitPerSlot' => ['nullable', 'integer', 'min:1'],
             'slotDurationMinutes' => ['nullable', 'integer', 'min:5'],
             'responsibleName' => ['nullable', 'string', 'max:255'],
-            'responsiblePhone' => ['nullable', 'string', 'max:20'],
+            'responsiblePhone' => ['nullable', 'string', 'max:100'],
             'responsibleEmail' => ['nullable', 'email', 'max:255'],
             'pickupEntries.*.start_datetime' => ['required', 'date'],
             'pickupEntries.*.end_datetime' => ['required', 'date', 'after:pickupEntries.*.start_datetime'],
