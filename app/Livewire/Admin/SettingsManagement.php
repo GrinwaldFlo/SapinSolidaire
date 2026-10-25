@@ -17,8 +17,6 @@ class SettingsManagement extends Component
 
     public int $maxChildAge = 12;
 
-    public string $introductionText = '';
-
     public string $replyToEmail = '';
 
     public string $codePrefix = '';
@@ -33,15 +31,12 @@ class SettingsManagement extends Component
 
     public bool $registrationBlocked = false;
 
-    public string $registrationBlockedReason = '';
-
     public function mount(): void
     {
         $this->siteName = Setting::getSiteName();
         $this->allowedCities = Setting::getValue(Setting::ALLOWED_CITIES, '');
         $this->maxConsecutiveYears = Setting::getMaxConsecutiveYears();
         $this->maxChildAge = Setting::getMaxChildAge();
-        $this->introductionText = Setting::getIntroductionText();
         $this->replyToEmail = Setting::getReplyToEmail() ?? '';
         $this->codePrefix = Setting::getCodePrefix();
         $this->codeFamilyPadding = Setting::getCodeFamilyPadding();
@@ -49,7 +44,6 @@ class SettingsManagement extends Component
         $this->familyFormMultiStepEnabled = Setting::isFamilyFormMultiStepEnabled();
         $this->pdfStyle = Setting::getPdfStyle();
         $this->registrationBlocked = Setting::isRegistrationBlocked();
-        $this->registrationBlockedReason = Setting::getRegistrationBlockedReason();
     }
 
     public function save(AddressValidationService $addressValidationService): void
@@ -62,7 +56,6 @@ class SettingsManagement extends Component
             'codePrefix' => ['nullable', 'string', 'max:10'],
             'codeFamilyPadding' => ['required', 'integer', 'min:1', 'max:10'],
             'pdfStyle' => ['required', 'in:label,grid'],
-            'registrationBlockedReason' => ['nullable', 'string', 'max:2000'],
         ]);
 
         $cities = array_filter(array_map('trim', explode(',', $this->allowedCities)), fn ($c) => $c !== '');
@@ -86,7 +79,6 @@ class SettingsManagement extends Component
         Setting::setValue(Setting::ALLOWED_CITIES, implode(', ', $cities));
         Setting::setValue(Setting::MAX_CONSECUTIVE_YEARS, $this->maxConsecutiveYears);
         Setting::setValue(Setting::MAX_CHILD_AGE, $this->maxChildAge);
-        Setting::setValue(Setting::INTRODUCTION_TEXT, $this->introductionText);
         Setting::setValue(Setting::REPLY_TO_EMAIL, $this->replyToEmail);
         $oldPrefix = Setting::getCodePrefix();
         $oldPadding = Setting::getCodeFamilyPadding();
@@ -102,7 +94,6 @@ class SettingsManagement extends Component
         Setting::setValue(Setting::FAMILY_FORM_MULTI_STEP_ENABLED, $this->familyFormMultiStepEnabled ? '1' : '0');
         Setting::setValue(Setting::PDF_STYLE, $this->pdfStyle);
         Setting::setValue(Setting::REGISTRATION_BLOCKED, $this->registrationBlocked ? '1' : '0');
-        Setting::setValue(Setting::REGISTRATION_BLOCKED_REASON, trim($this->registrationBlockedReason));
 
         session()->flash('message', 'Paramètres enregistrés avec succès.');
 

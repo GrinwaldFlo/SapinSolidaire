@@ -17,6 +17,7 @@ use App\Livewire\Admin\SentMailsLog;
 use App\Livewire\Admin\SeasonManagement;
 use App\Livewire\Admin\SendConfirmations;
 use App\Livewire\Admin\SettingsManagement;
+use App\Livewire\Admin\TextsManagement;
 use App\Livewire\Admin\UserManagement;
 use App\Livewire\Admin\Validation;
 use App\Livewire\Admin\ValidationMessageTemplates;
@@ -112,6 +113,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::get('/utilisateurs', UserManagement::class)->name('admin.users');
         Route::get('/parametres', SettingsManagement::class)->name('admin.settings');
         Route::get('/parametres-cadeaux', GiftsManagement::class)->name('admin.gifts-management');
+        Route::get('/parametres-textes', TextsManagement::class)->name('admin.texts-management');
         Route::get('/messages-validation', ValidationMessageTemplates::class)->name('admin.validation-messages');
         Route::get('/journal-mails', SentMailsLog::class)->name('admin.mail-logs');
         Route::get('/journal-actions-admin', AdminActionLogs::class)->name('admin.admin-action-logs');

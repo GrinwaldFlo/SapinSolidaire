@@ -6,6 +6,7 @@ use App\Models\Family;
 use App\Models\GiftRequest;
 use App\Models\Season;
 use App\Models\Setting;
+use App\Services\CustomText;
 use App\Services\FamilyDuplicateService;
 use Livewire\Livewire;
 
@@ -70,7 +71,8 @@ test('family excluded without any request cannot request in the active season', 
 
     Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
         ->assertSet('isPermanentlyRejected', true)
-        ->assertSet('rejectionComment', 'Exclue par admin');
+        ->assertSet('rejectionComment', 'Exclue par admin')
+        ->assertSee(CustomText::get(CustomText::FORM_PERMANENTLY_REJECTED));
 });
 
 test('submit is refused when the family is excluded after the form was opened', function () {

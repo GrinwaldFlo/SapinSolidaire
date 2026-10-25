@@ -49,7 +49,7 @@
     <div class="content">
         <p>Bonjour,</p>
         
-        <p>Vous avez demandé à accéder au formulaire de demande de cadeau.</p>
+        <p>@multiline($introText)</p>
         
         <p>Cliquez sur le bouton ci-dessous pour continuer votre demande :</p>
         
@@ -59,12 +59,12 @@
         
         <p><strong>Ce lien est valable pendant 48 heures.</strong></p>
         
-        <p>Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail.</p>
+        <p>@multiline($closingText)</p>
         
         <p>Cordialement,<br>L'équipe {{ $siteName }}</p>
     </div>
     <div class="footer">
-        <p>Cet e-mail a été envoyé automatiquement. Merci de ne pas y répondre directement.</p>
+        <p>@multiline($footerText)</p>
     </div>
 </body>
 </html>

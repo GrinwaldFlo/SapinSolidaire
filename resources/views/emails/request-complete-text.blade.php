@@ -1,25 +1,25 @@
-Chère famille {{ $familyName }},
+Chère famille {!! $familyName !!},
 
-Vous avez inscrit vos enfants au Sapin solidaire afin qu'ils reçoivent un cadeau de Noël.
+{!! $introText !!}
 @if($childNames->isNotEmpty())
 
 Enfant(s) concerné(s) :
 @foreach($childNames as $childName)
-- {{ $childName }}
+- {!! $childName !!}
 @endforeach
 @endif
 
-Votre demande est à présent complète et ne peut plus être modifiée. Vous recevrez prochainement un message pour venir chercher les cadeaux souhaités{{ $pickupDateText !== '' ? ' '.$pickupDateText : '' }} à l'heure qui vous sera indiquée.
+{!! $bodyText !!}
 
-Au nom du comité de Sapin Solidaire
+{!! $signatureText !!}
 @if($responsibleName)
-{{ $responsibleName }}
+{!! $responsibleName !!}
 @endif
 @if($responsiblePhone)
-Téléphone : {{ $responsiblePhone }}
+Téléphone : {!! $responsiblePhone !!}
 @endif
 @if($responsibleEmail)
-{{ $responsibleEmail }}
+{!! $responsibleEmail !!}
 @endif
 
-Cet e-mail a été envoyé automatiquement. Vous pouvez y répondre directement si vous avez des questions.
+{!! $footerText !!}

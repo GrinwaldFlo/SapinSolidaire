@@ -5,6 +5,7 @@ namespace App\Mail;
 use App\Models\GiftRequest;
 use App\Models\Season;
 use App\Models\Setting;
+use App\Services\CustomText;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -32,7 +33,7 @@ class GiftReceivedMail extends Mailable implements ShouldQueue
         $replyTo = $this->season->responsible_email ?? Setting::getReplyToEmail();
 
         return new Envelope(
-            subject: "Les cadeaux sont prêts ! - ".Setting::getSiteName(),
+            subject: CustomText::get(CustomText::MAIL_GIFT_RECEIVED_SUBJECT),
             replyTo: $replyTo ? [$replyTo] : [],
         );
     }
@@ -45,6 +46,7 @@ class GiftReceivedMail extends Mailable implements ShouldQueue
         $start = $this->giftRequest->slot_start_datetime;
         $end = $this->giftRequest->slot_end_datetime;
         $googleCalendarUrl = null;
+        $familyName = $this->giftRequest->family->last_name ?? '';
 
         if ($start && $end) {
             $googleCalendarUrl = 'https://calendar.google.com/calendar/render?' . http_build_query([
@@ -60,7 +62,10 @@ class GiftReceivedMail extends Mailable implements ShouldQueue
             view: 'emails.gift-received',
             text: 'emails.gift-received-text',
             with: [
-                'familyName' => $this->giftRequest->family->last_name ?? '',
+                'familyName' => $familyName,
+                'introText' => CustomText::get(CustomText::MAIL_GIFT_RECEIVED_INTRO, ['famille' => $familyName]),
+                'remindersText' => CustomText::get(CustomText::MAIL_GIFT_RECEIVED_REMINDERS),
+                'closingText' => CustomText::get(CustomText::MAIL_GIFT_RECEIVED_CLOSING, ['famille' => $familyName]),
                 'slotDate' => $start?->translatedFormat('l d F Y'),
                 'slotStartTime' => $start?->format('H:i'),
                 'slotEndTime' => $end?->format('H:i'),
@@ -70,6 +75,8 @@ class GiftReceivedMail extends Mailable implements ShouldQueue
                 'responsibleEmail' => $this->season->responsible_email,
                 'siteName' => Setting::getSiteName(),
                 'googleCalendarUrl' => $googleCalendarUrl,
+                'signatureText' => CustomText::get(CustomText::MAIL_SIGNATURE),
+                'footerText' => CustomText::get(CustomText::MAIL_FOOTER_REPLY),
             ],
         );
     }

@@ -108,13 +108,13 @@
         <div class="card text-center">
             <span class="text-6xl mb-4 block">📅</span>
             <h2 class="section-title">Bientôt disponible</h2>
-            <p class="text-muted">{{ $statusMessage }}</p>
+            <p class="text-muted text-multiline">{{ $statusMessage }}</p>
         </div>
     @else
         <div class="card text-center">
             <span class="text-6xl mb-4 block">🎄</span>
             <h2 class="section-title">À bientôt !</h2>
-            <p class="text-muted">{{ $statusMessage }}</p>
+            <p class="text-muted text-multiline">{{ $statusMessage }}</p>
         </div>
     @endif
 
@@ -149,9 +149,7 @@
                             <span class="text-lg mt-0.5">🎁</span>
                             <div>
                                 <p class="detail-value">Créneaux de récupération des cadeaux</p>
-                                <p class="text-sm text-muted mt-1">
-                                    Vous devrez être disponible lors de l'un de ces créneaux. Vous recevrez une invitation précisant le créneau auquel vous devrez vous présenter.
-                                </p>
+                                <p class="field-help text-multiline">{{ $pickupSlotsInfo }}</p>
                             </div>
                         </div>
 

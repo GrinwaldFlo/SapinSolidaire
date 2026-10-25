@@ -6,7 +6,7 @@ use App\Mail\AccessLinkMail;
 use App\Models\EmailToken;
 use App\Models\Season;
 use App\Models\SentMailLog;
-use App\Models\Setting;
+use App\Services\CustomText;
 use App\Services\SeasonService;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
@@ -80,7 +80,8 @@ class Home extends Component
     public function render()
     {
         return view('livewire.family.home', [
-            'introductionText' => Setting::getIntroductionText(),
+            'introductionText' => CustomText::get(CustomText::HOME_INTRODUCTION),
+            'pickupSlotsInfo' => CustomText::get(CustomText::HOME_PICKUP_SLOTS_INFO),
             'pickupSlots' => $this->season
                 ? $this->season->pickupSlots()->orderBy('start_datetime')->get()
                 : collect(),

@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\Setting;
+use App\Services\CustomText;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -31,7 +32,7 @@ class CorrectionRequestMail extends Mailable implements ShouldQueue
         $replyTo = Setting::getReplyToEmail();
 
         return new Envelope(
-            subject: 'Votre demande nécessite une correction - '.Setting::getSiteName(),
+            subject: CustomText::get(CustomText::MAIL_CORRECTION_SUBJECT),
             replyTo: $replyTo ? [$replyTo] : [],
         );
     }
@@ -48,6 +49,9 @@ class CorrectionRequestMail extends Mailable implements ShouldQueue
                 'accessUrl' => url("/cadeau/{$this->token}"),
                 'comment' => $this->comment,
                 'siteName' => Setting::getSiteName(),
+                'introText' => CustomText::get(CustomText::MAIL_CORRECTION_INTRO),
+                'closingText' => CustomText::get(CustomText::MAIL_CORRECTION_CLOSING),
+                'footerText' => CustomText::get(CustomText::MAIL_FOOTER_NO_REPLY),
             ],
         );
     }

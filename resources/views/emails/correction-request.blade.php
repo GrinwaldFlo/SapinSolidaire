@@ -56,7 +56,7 @@
     <div class="content">
         <p>Bonjour,</p>
         
-        <p>Nous avons examiné votre demande de cadeau et nous avons besoin que vous apportiez une correction.</p>
+        <p>@multiline($introText)</p>
         
         <div class="comment-box">
             <strong>Motif :</strong><br>
@@ -69,12 +69,12 @@
             <a href="{{ $accessUrl }}" class="button" style="display:inline-block;background-color:#2d5a27;color:#ffffff!important;padding:15px 30px;text-decoration:none;border-radius:5px;font-weight:bold;">Modifier ma demande</a>
         </p>
         
-        <p>Si vous avez des questions, n'hésitez pas à nous contacter.</p>
+        <p>@multiline($closingText)</p>
         
         <p>Cordialement,<br>L'équipe {{ $siteName }}</p>
     </div>
     <div class="footer">
-        <p>Cet e-mail a été envoyé automatiquement. Merci de ne pas y répondre directement.</p>
+        <p>@multiline($footerText)</p>
     </div>
 </body>
 </html>

@@ -18,35 +18,29 @@ beforeEach(function () {
 test('registrations are not blocked by default', function () {
     Livewire::test(SettingsManagement::class)
         ->assertSet('registrationBlocked', false)
-        ->assertSet('registrationBlockedReason', '')
         ->assertDontSee('Motif du blocage');
 });
 
-test('reason field is shown only when blocking is enabled', function () {
+test('admin can block registrations', function () {
     Livewire::test(SettingsManagement::class)
         ->set('registrationBlocked', true)
-        ->assertSee('Motif du blocage');
-});
-
-test('admin can block registrations with a multiline reason', function () {
-    Livewire::test(SettingsManagement::class)
-        ->set('registrationBlocked', true)
-        ->set('registrationBlockedReason', "  Quota atteint.\nMerci.  ")
         ->call('save')
         ->assertHasNoErrors();
 
     Setting::clearCache();
     expect(Setting::isRegistrationBlocked())->toBeTrue();
-    expect(Setting::getRegistrationBlockedReason())->toBe("Quota atteint.\nMerci.");
 });
 
-test('settings page loads the stored block values', function () {
+test('settings page loads the stored block value', function () {
     Setting::setValue(Setting::REGISTRATION_BLOCKED, '1');
-    Setting::setValue(Setting::REGISTRATION_BLOCKED_REASON, 'Fermé');
 
     Livewire::test(SettingsManagement::class)
-        ->assertSet('registrationBlocked', true)
-        ->assertSet('registrationBlockedReason', 'Fermé');
+        ->assertSet('registrationBlocked', true);
+});
+
+test('settings page links to the custom texts page for the block reason', function () {
+    Livewire::test(SettingsManagement::class)
+        ->assertSee(route('admin.texts-management'));
 });
 
 test('admin can unblock registrations', function () {

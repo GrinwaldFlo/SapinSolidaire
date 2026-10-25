@@ -10,6 +10,7 @@ use App\Models\Family;
 use App\Models\GiftRequest;
 use App\Models\Season;
 use App\Models\Setting;
+use App\Services\CustomText;
 use App\Services\PhoneValidationService;
 use App\Services\SeasonService;
 use Livewire\Attributes\Computed;
@@ -241,6 +242,25 @@ class GiftRequestForm extends Component
 
     public function render()
     {
-        return view('livewire.family.gift-request-form');
+        return view('livewire.family.gift-request-form', [
+            'statusText' => $this->statusText(),
+        ]);
+    }
+
+    /**
+     * Custom text of the final state shown instead of the form (same precedence as the view),
+     * built only for that state to avoid loading unused texts on every request.
+     */
+    private function statusText(): string
+    {
+        return match (true) {
+            ! $this->tokenValid => '',
+            $this->isPermanentlyRejected => CustomText::get(CustomText::FORM_PERMANENTLY_REJECTED),
+            $this->consecutiveYearsLimitReached => CustomText::get(CustomText::FORM_CONSECUTIVE_YEARS_REACHED, [
+                'annees' => implode(' et en ', $this->years),
+            ]),
+            $this->submitted => CustomText::get(CustomText::FORM_SUBMITTED),
+            default => '',
+        };
     }
 }

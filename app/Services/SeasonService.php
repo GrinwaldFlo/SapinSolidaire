@@ -30,14 +30,16 @@ class SeasonService
             return [
                 'status' => 'future',
                 'season' => $futureSeason,
-                'message' => 'La prochaine période de demandes ouvrira le '.$futureSeason->start_date->format('d/m/Y').'. Revenez à cette date pour faire votre demande.',
+                'message' => CustomText::get(CustomText::SEASON_FUTURE, [
+                    'date_ouverture' => $futureSeason->start_date->format('d/m/Y'),
+                ]),
             ];
         }
 
         return [
             'status' => 'none',
             'season' => null,
-            'message' => 'Aucune période de demandes n\'est actuellement programmée. Veuillez revenir plus tard.',
+            'message' => CustomText::get(CustomText::SEASON_NONE),
         ];
     }
 
@@ -48,12 +50,13 @@ class SeasonService
     public function getRegistrationClosedMessage(Season $season): ?string
     {
         if (Setting::isRegistrationBlocked()) {
-            return Setting::getRegistrationBlockedReason()
-                ?: 'Les inscriptions sont momentanément fermées.';
+            return CustomText::get(CustomText::REGISTRATION_BLOCKED);
         }
 
         if (! $season->canModify()) {
-            return 'Les inscriptions sont closes. La date limite était fixée au '.$season->modification_deadline->format('d/m/Y').'.';
+            return CustomText::get(CustomText::REGISTRATION_DEADLINE_PASSED, [
+                'date_limite' => $season->modification_deadline->format('d/m/Y'),
+            ]);
         }
 
         return null;

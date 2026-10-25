@@ -52,7 +52,7 @@
     <div class="content">
         <p>Chère famille {{ $familyName }},</p>
 
-        <p>Vous avez inscrit vos enfants au Sapin solidaire afin qu'ils reçoivent un cadeau de Noël.</p>
+        <p>@multiline($introText)</p>
 
         @if($childNames->isNotEmpty())
         <p>Enfant(s) concerné(s) :</p>
@@ -64,11 +64,11 @@
         @endif
 
         <div class="info-box">
-            <p>Votre demande est à présent complète et ne peut plus être modifiée. Vous recevrez prochainement un message pour venir chercher les cadeaux souhaités{{ $pickupDateText !== '' ? ' '.$pickupDateText : '' }} à l'heure qui vous sera indiquée.</p>
+            <p>@multiline($bodyText)</p>
         </div>
 
         <div class="signature">
-            <p>Au nom du comité de Sapin Solidaire</p>
+            <p>@multiline($signatureText)</p>
             @if($responsibleName)
                 <p><strong>{{ $responsibleName }}</strong></p>
             @endif
@@ -81,7 +81,7 @@
         </div>
     </div>
     <div class="footer">
-        <p>Cet e-mail a été envoyé automatiquement. Vous pouvez y répondre directement si vous avez des questions.</p>
+        <p>@multiline($footerText)</p>
     </div>
 </body>
 </html>

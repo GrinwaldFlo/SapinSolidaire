@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\Setting;
+use App\Services\CustomText;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -29,7 +30,7 @@ class FinalRejectionMail extends Mailable implements ShouldQueue
         $replyTo = Setting::getReplyToEmail();
 
         return new Envelope(
-            subject: 'Information concernant votre demande - '.Setting::getSiteName(),
+            subject: CustomText::get(CustomText::MAIL_REJECTION_SUBJECT),
             replyTo: $replyTo ? [$replyTo] : [],
         );
     }
@@ -45,6 +46,9 @@ class FinalRejectionMail extends Mailable implements ShouldQueue
             with: [
                 'comment' => $this->comment,
                 'siteName' => Setting::getSiteName(),
+                'introText' => CustomText::get(CustomText::MAIL_REJECTION_INTRO),
+                'closingText' => CustomText::get(CustomText::MAIL_REJECTION_CLOSING),
+                'footerText' => CustomText::get(CustomText::MAIL_FOOTER_NO_REPLY),
             ],
         );
     }

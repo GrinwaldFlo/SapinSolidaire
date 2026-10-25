@@ -5,6 +5,7 @@ namespace App\Mail;
 use App\Models\GiftRequest;
 use App\Models\Season;
 use App\Models\Setting;
+use App\Services\CustomText;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -34,7 +35,7 @@ class RequestCompleteMail extends Mailable implements ShouldQueue
         $replyTo = $this->season->responsible_email ?? Setting::getReplyToEmail();
 
         return new Envelope(
-            subject: 'Votre demande est complète - '.Setting::getSiteName(),
+            subject: CustomText::get(CustomText::MAIL_REQUEST_COMPLETE_SUBJECT),
             replyTo: $replyTo ? [$replyTo] : [],
         );
     }
@@ -44,17 +45,25 @@ class RequestCompleteMail extends Mailable implements ShouldQueue
      */
     public function content(): Content
     {
+        $familyName = $this->giftRequest->family->last_name ?? '';
+
         return new Content(
             view: 'emails.request-complete',
             text: 'emails.request-complete-text',
             with: [
-                'familyName' => $this->giftRequest->family->last_name ?? '',
+                'familyName' => $familyName,
                 'childNames' => $this->children->pluck('first_name')->filter()->values(),
-                'pickupDateText' => $this->season->pickupDateText(),
+                'introText' => CustomText::get(CustomText::MAIL_REQUEST_COMPLETE_INTRO, ['famille' => $familyName]),
+                'bodyText' => CustomText::get(CustomText::MAIL_REQUEST_COMPLETE_BODY, [
+                    'famille' => $familyName,
+                    'date_retrait' => $this->season->pickupDateText(),
+                ]),
                 'responsibleName' => $this->season->responsible_name,
                 'responsiblePhone' => $this->season->responsible_phone,
                 'responsibleEmail' => $this->season->responsible_email,
                 'siteName' => Setting::getSiteName(),
+                'signatureText' => CustomText::get(CustomText::MAIL_SIGNATURE),
+                'footerText' => CustomText::get(CustomText::MAIL_FOOTER_REPLY),
             ],
         );
     }
