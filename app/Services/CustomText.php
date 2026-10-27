@@ -18,6 +18,8 @@ class CustomText
 
     public const REGISTRATION_DEADLINE_PASSED = 'text_registration_deadline_passed';
 
+    public const REGISTRATION_GIFT_LIMIT_REACHED = 'text_registration_gift_limit_reached';
+
     public const SEASON_FUTURE = 'text_season_future';
 
     public const SEASON_NONE = 'text_season_none';
@@ -131,6 +133,12 @@ class CustomText
                         'default' => 'Les inscriptions sont closes. La date limite était fixée au {date_limite}.',
                         'multiline' => true,
                         'placeholders' => ['{date_limite}' => 'Date limite de modification de la saison'],
+                    ],
+                    self::REGISTRATION_GIFT_LIMIT_REACHED => [
+                        'label' => 'Nombre maximum de cadeaux atteint',
+                        'default' => 'Les inscriptions sont closes : le nombre maximum de cadeaux pour cette saison a été atteint.',
+                        'multiline' => true,
+                        'help' => "Affiché sur la page d'accueil et le formulaire lorsque le nombre maximum de cadeaux de la saison est atteint. Les familles déjà inscrites peuvent modifier leur demande, mais pas ajouter d'enfant.",
                     ],
                 ],
             ],

@@ -47,9 +47,18 @@
                     </div>
                 </div>
 
-                <div>
-                    <label class="field-label">Date limite d'inscription et modification</label>
-                    <input type="date" wire:model="modificationDeadline" class="field-input">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="field-label">Date limite d'inscription et modification</label>
+                        <input type="date" wire:model="modificationDeadline" class="field-input">
+                    </div>
+
+                    <div>
+                        <label class="field-label">Nombre de cadeaux maximum</label>
+                        <input type="number" wire:model="maxGifts" min="1" class="field-input">
+                        <p class="field-help">Une fois atteint, les nouvelles inscriptions sont bloquées. Les enfants refusés ne sont pas comptés. Laissez vide pour ne pas limiter.</p>
+                        @error('maxGifts') <p class="field-error">{{ $message }}</p> @enderror
+                    </div>
                 </div>
 
                 <div>

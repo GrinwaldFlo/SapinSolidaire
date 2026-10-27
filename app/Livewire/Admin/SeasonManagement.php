@@ -19,6 +19,7 @@ class SeasonManagement extends Component
     public string $startDate = '';
     public string $endDate = '';
     public ?string $modificationDeadline = null;
+    public ?int $maxGifts = null;
     public ?string $pickupAddress = null;
     public ?int $familyLimitPerSlot = null;
     public ?int $slotDurationMinutes = null;
@@ -36,11 +37,12 @@ class SeasonManagement extends Component
             'startDate' => ['required', 'date'],
             'endDate' => ['required', 'date', 'after:startDate'],
             'modificationDeadline' => ['nullable', 'date'],
+            'maxGifts' => ['nullable', 'integer', 'min:1'],
             'pickupAddress' => ['nullable', 'string'],
             'familyLimitPerSlot' => ['nullable', 'integer', 'min:1'],
             'slotDurationMinutes' => ['nullable', 'integer', 'min:5'],
             'responsibleName' => ['nullable', 'string', 'max:255'],
-            'responsiblePhone' => ['nullable', 'string', 'max:20'],
+            'responsiblePhone' => ['nullable', 'string', 'max:100'],
             'responsibleEmail' => ['nullable', 'email', 'max:255'],
             'pickupEntries.*.start_datetime' => ['required', 'date'],
             'pickupEntries.*.end_datetime' => ['required', 'date', 'after:pickupEntries.*.start_datetime'],
@@ -68,6 +70,7 @@ class SeasonManagement extends Component
         $this->startDate = $season->start_date->format('Y-m-d');
         $this->endDate = $season->end_date->format('Y-m-d');
         $this->modificationDeadline = $season->modification_deadline?->format('Y-m-d');
+        $this->maxGifts = $season->max_gifts;
         $this->pickupAddress = $season->pickup_address;
         $this->familyLimitPerSlot = $season->family_limit_per_slot;
         $this->slotDurationMinutes = $season->slot_duration_minutes;
@@ -107,6 +110,7 @@ class SeasonManagement extends Component
             'start_date' => $this->startDate,
             'end_date' => $this->endDate,
             'modification_deadline' => $this->modificationDeadline ?: null,
+            'max_gifts' => $this->maxGifts ?: null,
             'pickup_address' => $this->pickupAddress ?: null,
             'family_limit_per_slot' => $this->familyLimitPerSlot ?: null,
             'slot_duration_minutes' => $this->slotDurationMinutes ?: null,
@@ -160,6 +164,7 @@ class SeasonManagement extends Component
         $this->startDate = '';
         $this->endDate = '';
         $this->modificationDeadline = null;
+        $this->maxGifts = null;
         $this->pickupAddress = null;
         $this->familyLimitPerSlot = null;
         $this->slotDurationMinutes = null;

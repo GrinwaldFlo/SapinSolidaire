@@ -40,6 +40,15 @@ trait HandlesGiftRequestShared
 
     public function addChild(): void
     {
+        if ($this->giftLimitMessage !== null) {
+            return;
+        }
+
+        $this->appendEmptyChild();
+    }
+
+    protected function appendEmptyChild(): void
+    {
         $this->children[] = [
             'id' => null,
             'first_name' => '',
@@ -416,21 +425,56 @@ trait HandlesGiftRequestShared
 
     /**
      * Switch the form to read-only when registrations are closed for the season
-     * (blocked by an admin or modification deadline passed).
+     * (blocked by an admin, modification deadline passed, or gift limit reached for a new family).
+     * When the gift limit is reached, a registered family keeps editing but cannot add children.
      */
     protected function blockIfRegistrationClosed(): bool
     {
+        $seasonService = app(SeasonService::class);
+        $hasRequest = $this->hasRequestForSeason();
+
         $this->registrationClosedMessage = $this->season
-            ? app(SeasonService::class)->getRegistrationClosedMessage($this->season)
+            ? $seasonService->getRegistrationClosedMessage($this->season, $hasRequest)
             : 'Aucune période de demandes n\'est actuellement ouverte.';
         $this->canModify = $this->registrationClosedMessage === null;
+
+        $this->giftLimitMessage = $this->canModify && $hasRequest
+            ? $seasonService->getGiftLimitReachedMessage($this->season)
+            : null;
 
         return ! $this->canModify;
     }
 
+    protected function hasRequestForSeason(): bool
+    {
+        return $this->season !== null && GiftRequest::where('season_id', $this->season->id)
+            ->whereHas('family', fn ($query) => $query->where('email', $this->email))
+            ->exists();
+    }
+
+    /**
+     * Refuse new children once the season gift limit is reached (children may have been
+     * added while the form was open). The form shows the gift limit notice.
+     */
+    protected function blockIfGiftLimitReached(): bool
+    {
+        return $this->giftLimitMessage !== null && $this->hasNewChildren();
+    }
+
+    public function hasNewChildren(): bool
+    {
+        foreach ($this->children as $child) {
+            if (empty($child['id'])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function submit(): void
     {
-        if ($this->blockIfRegistrationClosed()) {
+        if ($this->blockIfRegistrationClosed() || $this->blockIfGiftLimitReached()) {
             return;
         }
 

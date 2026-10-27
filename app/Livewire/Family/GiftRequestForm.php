@@ -55,6 +55,10 @@ class GiftRequestForm extends Component
     #[Locked]
     public ?string $registrationClosedMessage = null;
 
+    /** Set when the season gift limit is reached: a registered family can no longer add children. */
+    #[Locked]
+    public ?string $giftLimitMessage = null;
+
     public bool $submitted = false;
 
     #[Locked]
@@ -221,7 +225,7 @@ class GiftRequestForm extends Component
             }
 
             if (empty($this->children)) {
-                $this->addChild();
+                $this->appendEmptyChild();
             }
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('GiftRequestForm mount error: '.$e->getMessage(), [

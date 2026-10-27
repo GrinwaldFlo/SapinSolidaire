@@ -176,6 +176,8 @@
             </div>
 
             <form wire:submit="submit" class="space-y-8">
+                @include('livewire.family.partials.gift-limit-notice')
+
                 {{-- Email display --}}
                 <div class="bg-gray-50 dark:bg-zinc-700 rounded-lg p-4">
                     <label class="detail-label">Adresse e-mail</label>
@@ -517,9 +519,11 @@
                         </div>
                     @endforeach
 
-                    <button type="button" wire:click="addChild" class="w-full py-3 border-2 border-dashed border-gray-300 dark:border-zinc-600 rounded-lg text-green-600 hover:text-green-700 hover:border-green-300 dark:hover:border-green-700 font-medium text-sm flex items-center justify-center gap-1 transition duration-200">
-                        <span>+</span> Ajouter un enfant
-                    </button>
+                    @unless($giftLimitMessage)
+                        <button type="button" wire:click="addChild" class="w-full py-3 border-2 border-dashed border-gray-300 dark:border-zinc-600 rounded-lg text-green-600 hover:text-green-700 hover:border-green-300 dark:hover:border-green-700 font-medium text-sm flex items-center justify-center gap-1 transition duration-200">
+                            <span>+</span> Ajouter un enfant
+                        </button>
+                    @endunless
                 </div>
 
                 {{-- Submit --}}
