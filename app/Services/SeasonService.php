@@ -46,8 +46,11 @@ class SeasonService
     /**
      * Get the message explaining why registrations are closed for the season,
      * or null when families can still register and modify their request.
+     *
+     * The gift limit only closes registrations for families without a request this season:
+     * registered families keep editing their request (see getGiftLimitReachedMessage()).
      */
-    public function getRegistrationClosedMessage(Season $season): ?string
+    public function getRegistrationClosedMessage(Season $season, bool $hasRequest = false): ?string
     {
         if (Setting::isRegistrationBlocked()) {
             return CustomText::get(CustomText::REGISTRATION_BLOCKED);
@@ -59,7 +62,18 @@ class SeasonService
             ]);
         }
 
-        return null;
+        return $hasRequest ? null : $this->getGiftLimitReachedMessage($season);
+    }
+
+    /**
+     * Get the message shown when the maximum number of gifts for the season is reached
+     * (no new child can be added), or null when gifts are still available.
+     */
+    public function getGiftLimitReachedMessage(Season $season): ?string
+    {
+        return $season->hasReachedMaxGifts()
+            ? CustomText::get(CustomText::REGISTRATION_GIFT_LIMIT_REACHED)
+            : null;
     }
 
     /**

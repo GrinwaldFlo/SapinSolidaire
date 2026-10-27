@@ -19,6 +19,8 @@
     </div>
 
     <form wire:submit="submit" class="space-y-6 mt-6">
+        @include('livewire.family.partials.gift-limit-notice')
+
         <div class="bg-gray-50 dark:bg-zinc-700 rounded-lg p-4">
             <label class="detail-label">Adresse e-mail</label>
             <p class="detail-value">{{ $email }}</p>
@@ -372,14 +374,16 @@
                     </button>
                 @elseif($currentChildIndex !== null)
                     @if($isLastChild)
-                        <button
-                            type="button"
-                            wire:click="addChildAndContinue"
-                            class="btn-secondary w-full py-3 {{ !$canProceedFromChildStep ? 'opacity-50 cursor-not-allowed' : '' }}"
-                            {{ !$canProceedFromChildStep ? 'disabled' : '' }}
-                        >
-                            Ajouter un autre enfant
-                        </button>
+                        @unless($giftLimitMessage)
+                            <button
+                                type="button"
+                                wire:click="addChildAndContinue"
+                                class="btn-secondary w-full py-3 {{ !$canProceedFromChildStep ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                {{ !$canProceedFromChildStep ? 'disabled' : '' }}
+                            >
+                                Ajouter un autre enfant
+                            </button>
+                        @endunless
                         <button
                             type="button"
                             wire:click="nextFamilyFormStep"

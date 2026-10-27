@@ -21,6 +21,7 @@ class Season extends Model
         'start_date',
         'end_date',
         'modification_deadline',
+        'max_gifts',
         'pickup_address',
         'family_limit_per_slot',
         'slot_duration_minutes',
@@ -37,6 +38,7 @@ class Season extends Model
         'start_date' => 'date',
         'end_date' => 'date',
         'modification_deadline' => 'date',
+        'max_gifts' => 'integer',
         'family_limit_per_slot' => 'integer',
         'slot_duration_minutes' => 'integer',
         'next_family_number' => 'integer',
@@ -48,6 +50,32 @@ class Season extends Model
     public function giftRequests(): HasMany
     {
         return $this->hasMany(GiftRequest::class);
+    }
+
+    /**
+     * Get children (gifts) requested for this season.
+     */
+    public function children(): HasManyThrough
+    {
+        return $this->hasManyThrough(Child::class, GiftRequest::class);
+    }
+
+    /**
+     * Number of gifts counted against the season limit: every child except rejected ones.
+     */
+    public function countedGiftsCount(): int
+    {
+        return $this->children()
+            ->whereNotIn('children.status', [Child::STATUS_REJECTED, Child::STATUS_REJECTED_FINAL])
+            ->count();
+    }
+
+    /**
+     * Check if the maximum number of gifts for the season is reached (never when no limit is set).
+     */
+    public function hasReachedMaxGifts(): bool
+    {
+        return $this->max_gifts !== null && $this->countedGiftsCount() >= $this->max_gifts;
     }
 
     /**

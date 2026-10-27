@@ -149,6 +149,7 @@ Child:
 Season:
 
 - Defines request window and optional modification deadline
+- Optional max_gifts limit: countedGiftsCount() counts children of the season in every status except rejected/rejected_final; hasReachedMaxGifts()
 - Scheduling settings: family_limit_per_slot, slot_duration_minutes, responsible contact
 - Atomic assignNextFamilyNumber() with lockForUpdate
 
@@ -212,7 +213,7 @@ Validation:
 
 ## Services Overview
 
-- SeasonService: current season status + overlap checks + getRegistrationClosedMessage() (closed when admin block setting is on or modification_deadline passed; new families blocked, registered families see their request read-only).
+- SeasonService: current season status + overlap checks + getRegistrationClosedMessage() (closed when admin block setting is on or modification_deadline passed; new families blocked, registered families see their request read-only). When the season max_gifts is reached, only families without a request this season are blocked; registered families keep editing but cannot add children (getGiftLimitReachedMessage(), GiftRequestForm::$giftLimitMessage). Submissions are accepted even if they go over the limit, as long as it was not already reached.
 - SlotAssignmentService: lazy, capacity-aware assignment and recalculation of pickup slot windows.
 - AddressValidationService: Swiss Post API validation.
 - PhoneValidationService: CH parsing/validation/formatting.
