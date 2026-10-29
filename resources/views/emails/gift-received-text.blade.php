@@ -26,7 +26,7 @@ Ajouter à mon agenda Google :
 {!! $responsibleName !!}
 @endif
 @if($responsiblePhone)
-Téléphone : {!! $responsiblePhone !!}
+{!! $responsiblePhone !!}
 @endif
 @if($responsibleEmail)
 {!! $responsibleEmail !!}

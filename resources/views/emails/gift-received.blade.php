@@ -88,7 +88,7 @@
                 <p><strong>{{ $responsibleName }}</strong></p>
             @endif
             @if($responsiblePhone)
-                <p>Téléphone : {{ $responsiblePhone }}</p>
+                <p>{{ $responsiblePhone }}</p>
             @endif
             @if($responsibleEmail)
                 <p>{{ $responsibleEmail }}</p>

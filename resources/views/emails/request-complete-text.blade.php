@@ -15,7 +15,7 @@ Enfant(s) concerné(s) :
 {!! $responsibleName !!}
 @endif
 @if($responsiblePhone)
-Téléphone : {!! $responsiblePhone !!}
+{!! $responsiblePhone !!}
 @endif
 @if($responsibleEmail)
 {!! $responsibleEmail !!}
