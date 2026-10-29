@@ -51,7 +51,7 @@ class CorrectionRequestMail extends Mailable implements ShouldQueue
                 'siteName' => Setting::getSiteName(),
                 'introText' => CustomText::get(CustomText::MAIL_CORRECTION_INTRO),
                 'closingText' => CustomText::get(CustomText::MAIL_CORRECTION_CLOSING),
-                'footerText' => CustomText::get(CustomText::MAIL_FOOTER_NO_REPLY),
+                'footerText' => CustomText::get(CustomText::MAIL_FOOTER),
             ],
         );
     }

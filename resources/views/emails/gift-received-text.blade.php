@@ -22,7 +22,6 @@ Ajouter à mon agenda Google :
 
 {!! $closingText !!}
 
-{!! $signatureText !!}
 @if($responsibleName)
 {!! $responsibleName !!}
 @endif

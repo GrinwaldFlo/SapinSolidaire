@@ -257,7 +257,7 @@ Admin components:
 - SendConfirmations: slot computation + confirmation email queue.
 - SeasonManagement: season CRUD + pickup window CRUD + overlap prevention.
 - SettingsManagement: application settings + city validation + code regeneration on prefix/padding changes.
-- TextsManagement: customizable texts (home intro, registration block reason, season messages, form messages, email subjects/paragraphs/signature/footers) backed by CustomText.
+- TextsManagement: customizable texts (home intro, registration block reason, season messages, form messages, email subjects/paragraphs, single footer shared by all emails) backed by CustomText.
 - UserManagement: role editing.
 - FamilyManagement: searchable and sortable household view.
 - FamilyDuplicates: duplicate scan + merge UI.

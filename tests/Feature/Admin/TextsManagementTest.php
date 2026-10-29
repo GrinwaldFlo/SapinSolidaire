@@ -80,8 +80,8 @@ test('clearing a text restores the default one', function () {
 
 test('admin can start editing from the default text', function () {
     Livewire::test(TextsManagement::class)
-        ->call('useDefault', CustomText::MAIL_SIGNATURE)
-        ->assertSet('texts.'.CustomText::MAIL_SIGNATURE, CustomText::default(CustomText::MAIL_SIGNATURE));
+        ->call('useDefault', CustomText::MAIL_FOOTER)
+        ->assertSet('texts.'.CustomText::MAIL_FOOTER, CustomText::default(CustomText::MAIL_FOOTER));
 });
 
 test('subject length is validated', function () {

@@ -49,7 +49,7 @@ class AccessLinkMail extends Mailable implements ShouldQueue
                 'siteName' => Setting::getSiteName(),
                 'introText' => CustomText::get(CustomText::MAIL_ACCESS_LINK_INTRO),
                 'closingText' => CustomText::get(CustomText::MAIL_ACCESS_LINK_CLOSING),
-                'footerText' => CustomText::get(CustomText::MAIL_FOOTER_NO_REPLY),
+                'footerText' => CustomText::get(CustomText::MAIL_FOOTER),
             ],
         );
     }

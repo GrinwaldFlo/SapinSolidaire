@@ -57,10 +57,12 @@ test('access link mail uses default texts', function () {
 
     expect($mail->envelope()->subject)->toBe('Votre demande de cadeau - Sapin Solidaire');
     $mail->assertSeeInHtml(CustomText::default(CustomText::MAIL_ACCESS_LINK_INTRO), false)
-        ->assertSeeInHtml(CustomText::default(CustomText::MAIL_FOOTER_NO_REPLY), false);
+        ->assertSeeInHtml('Au nom du comité de Sapin Solidaire<br />', false)
+        ->assertSeeInHtml('Vous pouvez y répondre directement si vous avez des questions.', false);
 
     expect(renderMailText($mail))
-        ->toContain("Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail.");
+        ->toContain("Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail.")
+        ->toContain(CustomText::default(CustomText::MAIL_FOOTER));
 });
 
 test('access link mail uses custom texts with escaped html and kept line breaks', function () {
@@ -94,7 +96,7 @@ test('gift received mail uses custom texts with family placeholder', function ()
     [$giftRequest, $season] = makeGiftRequestWithSeason();
     Setting::setValue(CustomText::MAIL_GIFT_RECEIVED_INTRO, 'Bonjour famille {famille} !');
     Setting::setValue(CustomText::MAIL_GIFT_RECEIVED_REMINDERS, 'Prenez un sac.');
-    Setting::setValue(CustomText::MAIL_SIGNATURE, 'Le comité de {site}');
+    Setting::setValue(CustomText::MAIL_FOOTER, 'Le comité de {site}');
 
     $mail = new GiftReceivedMail($giftRequest, $season);
 
@@ -103,7 +105,26 @@ test('gift received mail uses custom texts with family placeholder', function ()
         ->assertSeeInHtml('Le comité de Sapin Solidaire')
         ->assertDontSeeInHtml("N'oubliez pas de prendre", false);
 
-    expect(renderMailText($mail))->toContain('Bonjour famille Martin !');
+    expect(renderMailText($mail))->toContain('Bonjour famille Martin !')
+        ->toContain('Le comité de Sapin Solidaire');
+});
+
+test('all mails share the same footer', function () {
+    Setting::setValue(CustomText::MAIL_FOOTER, 'Pied commun {site}');
+    [$giftRequest, $season] = makeGiftRequestWithSeason();
+
+    $mails = [
+        new AccessLinkMail('family@example.com', 'token'),
+        new CorrectionRequestMail('family@example.com', 'token', 'Adresse'),
+        new FinalRejectionMail('Hors zone'),
+        new RequestCompleteMail($giftRequest, $season, collect()),
+        new GiftReceivedMail($giftRequest, $season),
+    ];
+
+    foreach ($mails as $mail) {
+        $mail->assertSeeInHtml('Pied commun Sapin Solidaire');
+        expect(renderMailText($mail))->toContain('Pied commun Sapin Solidaire');
+    }
 });
 
 test('text parts contain raw text without html entities', function () {

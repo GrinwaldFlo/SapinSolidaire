@@ -48,7 +48,7 @@ class FinalRejectionMail extends Mailable implements ShouldQueue
                 'siteName' => Setting::getSiteName(),
                 'introText' => CustomText::get(CustomText::MAIL_REJECTION_INTRO),
                 'closingText' => CustomText::get(CustomText::MAIL_REJECTION_CLOSING),
-                'footerText' => CustomText::get(CustomText::MAIL_FOOTER_NO_REPLY),
+                'footerText' => CustomText::get(CustomText::MAIL_FOOTER),
             ],
         );
     }

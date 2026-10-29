@@ -11,7 +11,6 @@ Enfant(s) concerné(s) :
 
 {!! $bodyText !!}
 
-{!! $signatureText !!}
 @if($responsibleName)
 {!! $responsibleName !!}
 @endif

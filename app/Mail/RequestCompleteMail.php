@@ -62,8 +62,7 @@ class RequestCompleteMail extends Mailable implements ShouldQueue
                 'responsiblePhone' => $this->season->responsible_phone,
                 'responsibleEmail' => $this->season->responsible_email,
                 'siteName' => Setting::getSiteName(),
-                'signatureText' => CustomText::get(CustomText::MAIL_SIGNATURE),
-                'footerText' => CustomText::get(CustomText::MAIL_FOOTER_REPLY),
+                'footerText' => CustomText::get(CustomText::MAIL_FOOTER),
             ],
         );
     }
