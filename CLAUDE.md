@@ -330,7 +330,10 @@ Text helpers: text-multiline (free text keeping line breaks, e.g. custom texts o
 
 Form helpers: field-help (help text under a field), placeholder-tag (inline token such as {site}).
 
-Blade directive @multiline($text): escaped text with line breaks as <br> (used for custom texts in HTML emails).
+Blade directives (App\Services\TextLinkifier), for every custom text and rejection comment, escaping the text and turning URLs (http(s)://, www.) into links:
+
+- @multiline($text): line breaks as <br> (HTML emails).
+- @linkify($text): links with the link class, line breaks kept by CSS (notice-text / text-multiline / whitespace-pre-line) on pages.
 
 Live visual reference remains available at /admin/css-showcase.
 

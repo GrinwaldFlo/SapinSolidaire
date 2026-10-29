@@ -33,8 +33,11 @@ class AppServiceProvider extends ServiceProvider
 
     protected function configureBladeDirectives(): void
     {
-        // Escaped multiline text with line breaks as <br>, e.g. custom texts in HTML emails.
-        Blade::directive('multiline', fn (string $expression): string => "<?php echo \\App\\Services\\CustomText::toHtml({$expression}); ?>");
+        // Escaped multiline text with URLs as links and line breaks as <br>, e.g. custom texts in HTML emails.
+        Blade::directive('multiline', fn (string $expression): string => "<?php echo \\App\\Services\\TextLinkifier::toMultilineHtml({$expression}); ?>");
+
+        // Escaped free text with URLs as links, e.g. custom texts on pages (keep line breaks with CSS).
+        Blade::directive('linkify', fn (string $expression): string => "<?php echo \\App\\Services\\TextLinkifier::toHtml({$expression}, 'link'); ?>");
     }
 
     protected function configureDefaults(): void

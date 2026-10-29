@@ -21,6 +21,18 @@ test('home page shows the custom introduction text', function () {
     Livewire::test(Home::class)->assertSee('Bienvenue chez Sapin Solidaire');
 });
 
+test('urls in custom texts are shown as links on family pages', function () {
+    Season::create([
+        'name' => 'Active',
+        'start_date' => now()->subDay(),
+        'end_date' => now()->addMonth(),
+    ]);
+    Setting::setValue(CustomText::HOME_INTRODUCTION, 'Infos sur www.e-f-y.ch');
+
+    Livewire::test(Home::class)
+        ->assertSeeHtml('<a href="https://www.e-f-y.ch" class="link"');
+});
+
 test('home page shows the custom pickup slots explanation', function () {
     $season = Season::create([
         'name' => 'Active',

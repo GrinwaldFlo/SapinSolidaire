@@ -75,6 +75,13 @@ test('family excluded without any request cannot request in the active season', 
         ->assertSee(CustomText::get(CustomText::FORM_PERMANENTLY_REJECTED));
 });
 
+test('rejection comment urls are shown as links', function () {
+    $this->family->exclude('Voir https://www.e-f-y.ch');
+
+    Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
+        ->assertSeeHtml('<a href="https://www.e-f-y.ch" class="link"');
+});
+
 test('submit is refused when the family is excluded after the form was opened', function () {
     $component = Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
         ->assertSet('isPermanentlyRejected', false);

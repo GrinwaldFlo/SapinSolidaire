@@ -15,12 +15,12 @@
             <span class="text-6xl mb-4 block">🚫</span>
             <h2 class="section-title">Demande impossible</h2>
             <div class="notice-error">
-                <p class="notice-text">{{ $statusText }}</p>
+                <p class="notice-text">@linkify($statusText)</p>
             </div>
             @if($rejectionComment)
                 <div class="notice-warning mt-4 text-left">
-                    <p class="text-sm font-semibold mb-1">Motif du refus :</p>
-                    <p class="text-sm">{{ $rejectionComment }}</p>
+                    <p class="notice-title">Motif du refus :</p>
+                    <p class="notice-text">@linkify($rejectionComment)</p>
                 </div>
             @endif
             @include('livewire.family.partials.organizer-contact')
@@ -30,7 +30,7 @@
             <span class="text-6xl mb-4 block">🎄</span>
             <h2 class="section-title">Pas de demande cette année</h2>
             <div class="notice-info">
-                <p class="notice-text">{{ $statusText }}</p>
+                <p class="notice-text">@linkify($statusText)</p>
             </div>
             @include('livewire.family.partials.organizer-contact')
         </div>
@@ -41,14 +41,14 @@
             <p class="notice-success">
                 Votre demande a bien été {{ $isModifying ? 'mise à jour' : 'enregistrée' }}.
             </p>
-            <p class="text-muted text-sm text-multiline">{{ $statusText }}</p>
+            <p class="text-muted text-sm text-multiline">@linkify($statusText)</p>
         </div>
     @elseif(!$canModify)
         <div class="card text-center">
             <span class="text-6xl mb-4 block">🔒</span>
             <h2 class="section-title">{{ $giftRequest ? 'Modification impossible' : 'Inscriptions closes' }}</h2>
             <div class="notice-warning">
-                <p class="notice-text">{{ $registrationClosedMessage }}</p>
+                <p class="notice-text">@linkify($registrationClosedMessage)</p>
                 <p class="notice-text">
                     {{ $giftRequest ? 'Vous pouvez consulter votre demande, mais vous ne pouvez plus la modifier.' : 'Il n\'est plus possible de faire une nouvelle demande.' }}
                 </p>

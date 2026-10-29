@@ -392,14 +392,6 @@ class CustomText
         );
     }
 
-    /**
-     * Escape a text for HTML (quotes kept readable) and turn line breaks into <br>.
-     */
-    public static function toHtml(?string $text): string
-    {
-        return nl2br(htmlspecialchars((string) $text, ENT_NOQUOTES, 'UTF-8'));
-    }
-
     public static function set(string $key, ?string $value): void
     {
         Setting::setValue($key, trim((string) $value));

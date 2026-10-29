@@ -92,6 +92,13 @@ test('correction and rejection mails use custom texts', function () {
         ->assertDontSeeInHtml('Nous vous remercions de votre compréhension.');
 });
 
+test('urls in custom texts are links in html mails', function () {
+    Setting::setValue(CustomText::MAIL_FOOTER, "Le comité\nhttps://www.e-f-y.ch");
+
+    (new FinalRejectionMail('Hors zone'))
+        ->assertSeeInHtml("Le comité<br />\n<a href=\"https://www.e-f-y.ch\"", false);
+});
+
 test('gift received mail uses custom texts with family placeholder', function () {
     [$giftRequest, $season] = makeGiftRequestWithSeason();
     Setting::setValue(CustomText::MAIL_GIFT_RECEIVED_INTRO, 'Bonjour famille {famille} !');

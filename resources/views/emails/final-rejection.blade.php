@@ -51,7 +51,7 @@
         
         <div class="comment-box">
             <strong>Motif :</strong><br>
-            {!! nl2br(e($comment)) !!}
+            @multiline($comment)
         </div>
         
         <p>@multiline($closingText)</p>
