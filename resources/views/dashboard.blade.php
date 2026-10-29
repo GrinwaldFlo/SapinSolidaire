@@ -1,7 +1,7 @@
 <x-layouts::app :title="__('Dashboard')">
     <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl p-6">
         <div class="text-center">
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Bienvenue sur Sapin Solidaire</h1>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Bienvenue sur {{ \App\Models\Setting::getSiteName() }}</h1>
             
             @can('access-admin')
                 <p class="text-gray-600 dark:text-gray-400 mb-6">

@@ -60,7 +60,7 @@
         
         <div class="comment-box">
             <strong>Motif :</strong><br>
-            {!! nl2br(e($comment)) !!}
+            @multiline($comment)
         </div>
         
         <p>Cliquez sur le bouton ci-dessous pour modifier votre demande :</p>
@@ -70,8 +70,6 @@
         </p>
         
         <p>@multiline($closingText)</p>
-        
-        <p>Cordialement,<br>L'équipe {{ $siteName }}</p>
     </div>
     <div class="footer">
         <p>@multiline($footerText)</p>

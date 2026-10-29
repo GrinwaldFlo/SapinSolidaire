@@ -217,6 +217,11 @@ select:focus[data-flux-control] {
         @apply whitespace-pre-line;
     }
 
+    /* Introduction paragraph on public pages */
+    .intro-text {
+        @apply text-gray-600 dark:text-gray-300 mb-6;
+    }
+
     /* Detail field label (e.g. "Prénom :") */
     .detail-label {
         @apply text-sm text-gray-500 dark:text-gray-400;

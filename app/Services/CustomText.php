@@ -32,11 +32,7 @@ class CustomText
 
     public const FORM_CONSECUTIVE_YEARS_REACHED = 'text_form_consecutive_years_reached';
 
-    public const MAIL_SIGNATURE = 'text_mail_signature';
-
-    public const MAIL_FOOTER_NO_REPLY = 'text_mail_footer_no_reply';
-
-    public const MAIL_FOOTER_REPLY = 'text_mail_footer_reply';
+    public const MAIL_FOOTER = 'text_mail_footer';
 
     public const MAIL_ACCESS_LINK_SUBJECT = 'text_mail_access_link_subject';
 
@@ -167,22 +163,12 @@ class CustomText
             'mail_common' => [
                 'title' => 'E-mails : éléments communs',
                 'texts' => [
-                    self::MAIL_SIGNATURE => [
-                        'label' => 'Signature',
-                        'default' => 'Au nom du comité de Sapin Solidaire',
+                    self::MAIL_FOOTER => [
+                        'label' => 'Pied de page',
+                        'default' => "Au nom du comité de Sapin Solidaire\nCet e-mail a été envoyé automatiquement. Vous pouvez y répondre directement si vous avez des questions.",
                         'multiline' => true,
-                        'help' => 'Utilisée dans les e-mails « Demande complète » et « Cadeaux prêts », suivie du contact responsable de la saison.',
+                        'help' => 'Ajouté à la fin de tous les e-mails envoyés par le site.',
                         'placeholders' => self::PLACEHOLDER_SITE,
-                    ],
-                    self::MAIL_FOOTER_NO_REPLY => [
-                        'label' => 'Pied de page (lien, correction, refus)',
-                        'default' => 'Cet e-mail a été envoyé automatiquement. Merci de ne pas y répondre directement.',
-                        'multiline' => true,
-                    ],
-                    self::MAIL_FOOTER_REPLY => [
-                        'label' => 'Pied de page (demande complète, cadeaux prêts)',
-                        'default' => 'Cet e-mail a été envoyé automatiquement. Vous pouvez y répondre directement si vous avez des questions.',
-                        'multiline' => true,
                     ],
                 ],
             ],
@@ -404,14 +390,6 @@ class CustomText
             static fn (array $m): string => $m[1] !== '' && $m[2] !== '' ? ' ' : $m[1].$m[2],
             $text
         );
-    }
-
-    /**
-     * Escape a text for HTML (quotes kept readable) and turn line breaks into <br>.
-     */
-    public static function toHtml(?string $text): string
-    {
-        return nl2br(htmlspecialchars((string) $text, ENT_NOQUOTES, 'UTF-8'));
     }
 
     public static function set(string $key, ?string $value): void

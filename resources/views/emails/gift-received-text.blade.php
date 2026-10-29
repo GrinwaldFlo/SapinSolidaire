@@ -22,12 +22,11 @@ Ajouter à mon agenda Google :
 
 {!! $closingText !!}
 
-{!! $signatureText !!}
 @if($responsibleName)
 {!! $responsibleName !!}
 @endif
 @if($responsiblePhone)
-Téléphone : {!! $responsiblePhone !!}
+{!! $responsiblePhone !!}
 @endif
 @if($responsibleEmail)
 {!! $responsibleEmail !!}

@@ -67,18 +67,19 @@
             <p>@multiline($bodyText)</p>
         </div>
 
+        @if($responsibleName || $responsiblePhone || $responsibleEmail)
         <div class="signature">
-            <p>@multiline($signatureText)</p>
             @if($responsibleName)
                 <p><strong>{{ $responsibleName }}</strong></p>
             @endif
             @if($responsiblePhone)
-                <p>Téléphone : {{ $responsiblePhone }}</p>
+                <p>{{ $responsiblePhone }}</p>
             @endif
             @if($responsibleEmail)
                 <p>{{ $responsibleEmail }}</p>
             @endif
         </div>
+        @endif
     </div>
     <div class="footer">
         <p>@multiline($footerText)</p>

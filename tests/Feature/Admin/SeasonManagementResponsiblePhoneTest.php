@@ -53,6 +53,8 @@ test('gift received mail shows the full responsible phone text', function () {
 
     $mail = new GiftReceivedMail($giftRequest, $season);
 
-    $mail->assertSeeInHtml('Téléphone : Réception 076 455 55 55', false);
-    $mail->assertSeeInText('Téléphone : Réception 076 455 55 55');
+    $mail->assertSeeInHtml('Réception 076 455 55 55', false)
+        ->assertDontSeeInHtml('Téléphone :', false);
+    $mail->assertSeeInText('Réception 076 455 55 55')
+        ->assertDontSeeInText('Téléphone :');
 });

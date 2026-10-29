@@ -49,14 +49,12 @@
                     @if($registrationClosedMessage)
                         <div class="notice-warning notice-spaced text-left">
                             <p class="notice-title">Inscriptions closes</p>
-                            <p class="notice-text">{{ $registrationClosedMessage }}</p>
+                            <p class="notice-text">@linkify($registrationClosedMessage)</p>
                         </div>
                     @endif
 
                     @if($introductionText)
-                        <div class="text-gray-600 dark:text-gray-300 mb-6 whitespace-pre-line">
-                            {{ $introductionText }}
-                        </div>
+                        <div class="intro-text text-multiline">@linkify($introductionText)</div>
                     @endif
                 </div>
 
@@ -108,13 +106,13 @@
         <div class="card text-center">
             <span class="text-6xl mb-4 block">📅</span>
             <h2 class="section-title">Bientôt disponible</h2>
-            <p class="text-muted text-multiline">{{ $statusMessage }}</p>
+            <p class="text-muted text-multiline">@linkify($statusMessage)</p>
         </div>
     @else
         <div class="card text-center">
             <span class="text-6xl mb-4 block">🎄</span>
             <h2 class="section-title">À bientôt !</h2>
-            <p class="text-muted text-multiline">{{ $statusMessage }}</p>
+            <p class="text-muted text-multiline">@linkify($statusMessage)</p>
         </div>
     @endif
 
@@ -149,7 +147,7 @@
                             <span class="text-lg mt-0.5">🎁</span>
                             <div>
                                 <p class="detail-value">Créneaux de récupération des cadeaux</p>
-                                <p class="field-help text-multiline">{{ $pickupSlotsInfo }}</p>
+                                <p class="field-help text-multiline">@linkify($pickupSlotsInfo)</p>
                             </div>
                         </div>
 

@@ -49,10 +49,10 @@ class GiftReceivedMail extends Mailable implements ShouldQueue
         $familyName = $this->giftRequest->family->last_name ?? '';
 
         if ($start && $end) {
-            $googleCalendarUrl = 'https://calendar.google.com/calendar/render?' . http_build_query([
+            $googleCalendarUrl = 'https://calendar.google.com/calendar/render?'.http_build_query([
                 'action' => 'TEMPLATE',
-                'text' => 'Retrait des cadeaux - ' . Setting::getSiteName(),
-                'dates' => $start->utc()->format('Ymd\THis\Z') . '/' . $end->utc()->format('Ymd\THis\Z'),
+                'text' => 'Retrait des cadeaux - '.Setting::getSiteName(),
+                'dates' => $start->utc()->format('Ymd\THis\Z').'/'.$end->utc()->format('Ymd\THis\Z'),
                 'location' => $this->season->pickup_address ?? '',
                 'details' => 'N\'oubliez pas votre pièce d\'identité et celles de vos enfants. Pensez à prendre un grand sac.',
             ]);
@@ -75,8 +75,7 @@ class GiftReceivedMail extends Mailable implements ShouldQueue
                 'responsibleEmail' => $this->season->responsible_email,
                 'siteName' => Setting::getSiteName(),
                 'googleCalendarUrl' => $googleCalendarUrl,
-                'signatureText' => CustomText::get(CustomText::MAIL_SIGNATURE),
-                'footerText' => CustomText::get(CustomText::MAIL_FOOTER_REPLY),
+                'footerText' => CustomText::get(CustomText::MAIL_FOOTER),
             ],
         );
     }
@@ -89,7 +88,7 @@ class GiftReceivedMail extends Mailable implements ShouldQueue
         $start = $this->giftRequest->slot_start_datetime;
         $end = $this->giftRequest->slot_end_datetime;
 
-        if (!$start || !$end) {
+        if (! $start || ! $end) {
             return [];
         }
 
@@ -104,24 +103,24 @@ class GiftReceivedMail extends Mailable implements ShouldQueue
 
     private function generateIcs($start, $end, string $siteName): string
     {
-        $uid = uniqid('sapin-', true) . '@' . parse_url(config('app.url'), PHP_URL_HOST);
-        $location = str_replace(["\r\n", "\n", ","], [' ', ' ', '\,'], $this->season->pickup_address ?? '');
-        $summary = str_replace(["\r\n", "\n", ","], [' ', ' ', '\,'], 'Retrait des cadeaux - ' . $siteName);
-        $description = str_replace(["\r\n", "\n", ","], [' ', ' ', '\,'], "N'oubliez pas votre pièce d'identité et celles de vos enfants. Pensez à prendre un grand sac.");
+        $uid = uniqid('sapin-', true).'@'.parse_url(config('app.url'), PHP_URL_HOST);
+        $location = str_replace(["\r\n", "\n", ','], [' ', ' ', '\,'], $this->season->pickup_address ?? '');
+        $summary = str_replace(["\r\n", "\n", ','], [' ', ' ', '\,'], 'Retrait des cadeaux - '.$siteName);
+        $description = str_replace(["\r\n", "\n", ','], [' ', ' ', '\,'], "N'oubliez pas votre pièce d'identité et celles de vos enfants. Pensez à prendre un grand sac.");
 
         return "BEGIN:VCALENDAR\r\n"
-            . "VERSION:2.0\r\n"
-            . "PRODID:-//{$siteName}//FR\r\n"
-            . "METHOD:PUBLISH\r\n"
-            . "BEGIN:VEVENT\r\n"
-            . "UID:{$uid}\r\n"
-            . "DTSTAMP:" . now()->utc()->format('Ymd\THis\Z') . "\r\n"
-            . "DTSTART:" . $start->utc()->format('Ymd\THis\Z') . "\r\n"
-            . "DTEND:" . $end->utc()->format('Ymd\THis\Z') . "\r\n"
-            . "SUMMARY:{$summary}\r\n"
-            . "LOCATION:{$location}\r\n"
-            . "DESCRIPTION:{$description}\r\n"
-            . "END:VEVENT\r\n"
-            . "END:VCALENDAR\r\n";
+            ."VERSION:2.0\r\n"
+            ."PRODID:-//{$siteName}//FR\r\n"
+            ."METHOD:PUBLISH\r\n"
+            ."BEGIN:VEVENT\r\n"
+            ."UID:{$uid}\r\n"
+            .'DTSTAMP:'.now()->utc()->format('Ymd\THis\Z')."\r\n"
+            .'DTSTART:'.$start->utc()->format('Ymd\THis\Z')."\r\n"
+            .'DTEND:'.$end->utc()->format('Ymd\THis\Z')."\r\n"
+            ."SUMMARY:{$summary}\r\n"
+            ."LOCATION:{$location}\r\n"
+            ."DESCRIPTION:{$description}\r\n"
+            ."END:VEVENT\r\n"
+            ."END:VCALENDAR\r\n";
     }
 }

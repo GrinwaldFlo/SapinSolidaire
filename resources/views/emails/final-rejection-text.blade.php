@@ -7,7 +7,4 @@ Motif :
 
 {!! $closingText !!}
 
-Cordialement,
-L'équipe {!! $siteName !!}
-
 {!! $footerText !!}

@@ -257,7 +257,7 @@ Admin components:
 - SendConfirmations: slot computation + confirmation email queue.
 - SeasonManagement: season CRUD + pickup window CRUD + overlap prevention.
 - SettingsManagement: application settings + city validation + code regeneration on prefix/padding changes.
-- TextsManagement: customizable texts (home intro, registration block reason, season messages, form messages, email subjects/paragraphs/signature/footers) backed by CustomText.
+- TextsManagement: customizable texts (home intro, registration block reason, season messages, form messages, email subjects/paragraphs, single footer shared by all emails) backed by CustomText.
 - UserManagement: role editing.
 - FamilyManagement: searchable and sortable household view.
 - FamilyDuplicates: duplicate scan + merge UI.
@@ -326,11 +326,14 @@ Notice banners: notice-info / notice-warning / notice-success / notice-error, wi
 
 Layout helpers: badge-row (wrapping badges), family-actions (stacked per-row action controls), contact-list (stacked contact lines), inline-form + inline-form-field (single-line field + submit button), button-row (wrapping row of buttons under content). Button size modifier: btn-sm (combine with any btn-* class).
 
-Text helpers: text-multiline (free text keeping line breaks, e.g. custom texts outside notices).
+Text helpers: text-multiline (free text keeping line breaks, e.g. custom texts outside notices), intro-text (introduction paragraph on public pages, combine with text-multiline for custom texts).
 
 Form helpers: field-help (help text under a field), placeholder-tag (inline token such as {site}).
 
-Blade directive @multiline($text): escaped text with line breaks as <br> (used for custom texts in HTML emails).
+Blade directives (App\Services\TextLinkifier), for every custom text and rejection comment, escaping the text and turning URLs (http(s)://, www.) into links:
+
+- @multiline($text): line breaks as <br> (HTML emails).
+- @linkify($text): links with the link class, line breaks kept by CSS (notice-text / text-multiline / whitespace-pre-line) on pages.
 
 Live visual reference remains available at /admin/css-showcase.
 

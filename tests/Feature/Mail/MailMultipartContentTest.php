@@ -47,3 +47,13 @@ test('gift received mail defines html and text parts', function () {
     expect($content->view)->toBe('emails.gift-received')
         ->and($content->text)->toBe('emails.gift-received-text');
 });
+
+test('rejection comments in html mails have clickable urls and line breaks', function (\Illuminate\Mail\Mailable $mail) {
+    $content = $mail->content();
+    $html = view($content->view, $content->with)->render();
+
+    expect($html)->toContain("Hors zone.<br />\nVoir <a href=\"https://www.e-f-y.ch\"");
+})->with([
+    'correction' => fn () => new CorrectionRequestMail('family@example.com', 'token', "Hors zone.\nVoir https://www.e-f-y.ch"),
+    'final rejection' => fn () => new FinalRejectionMail("Hors zone.\nVoir https://www.e-f-y.ch"),
+]);

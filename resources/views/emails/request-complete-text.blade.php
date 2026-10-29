@@ -11,12 +11,11 @@ Enfant(s) concerné(s) :
 
 {!! $bodyText !!}
 
-{!! $signatureText !!}
 @if($responsibleName)
 {!! $responsibleName !!}
 @endif
 @if($responsiblePhone)
-Téléphone : {!! $responsiblePhone !!}
+{!! $responsiblePhone !!}
 @endif
 @if($responsibleEmail)
 {!! $responsibleEmail !!}
