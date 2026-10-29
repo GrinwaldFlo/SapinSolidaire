@@ -9,7 +9,4 @@ Ce lien est valable pendant 48 heures.
 
 {!! $closingText !!}
 
-Cordialement,
-L'équipe {!! $siteName !!}
-
 {!! $footerText !!}

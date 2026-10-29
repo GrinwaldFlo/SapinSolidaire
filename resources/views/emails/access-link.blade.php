@@ -60,8 +60,6 @@
         <p><strong>Ce lien est valable pendant 48 heures.</strong></p>
         
         <p>@multiline($closingText)</p>
-        
-        <p>Cordialement,<br>L'équipe {{ $siteName }}</p>
     </div>
     <div class="footer">
         <p>@multiline($footerText)</p>

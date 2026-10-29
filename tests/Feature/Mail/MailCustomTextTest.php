@@ -134,6 +134,19 @@ test('all mails share the same footer', function () {
     }
 });
 
+test('mails are signed only by the shared footer', function () {
+    $mails = [
+        new AccessLinkMail('family@example.com', 'token'),
+        new CorrectionRequestMail('family@example.com', 'token', 'Adresse'),
+        new FinalRejectionMail('Hors zone'),
+    ];
+
+    foreach ($mails as $mail) {
+        $mail->assertDontSeeInHtml('Cordialement');
+        expect(renderMailText($mail))->not->toContain('Cordialement');
+    }
+});
+
 test('text parts contain raw text without html entities', function () {
     $comment = "L'adresse <rue> & le numéro";
 

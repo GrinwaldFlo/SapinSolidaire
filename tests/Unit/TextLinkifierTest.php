@@ -42,3 +42,9 @@ test('multiline html keeps line breaks, links and readable quotes', function () 
     expect(TextLinkifier::toMultilineHtml("L'équipe\nhttps://e-f-y.ch"))
         ->toBe("L'équipe<br />\n<a href=\"https://e-f-y.ch\" target=\"_blank\" rel=\"noopener noreferrer\">https://e-f-y.ch</a>");
 });
+
+test('invalid utf-8 is scrubbed instead of failing', function () {
+    expect(TextLinkifier::toHtml("Texte \xC3( https://e-f-y.ch"))
+        ->toBe('Texte ?( <a href="https://e-f-y.ch" target="_blank" rel="noopener noreferrer">https://e-f-y.ch</a>')
+        ->and(TextLinkifier::toMultilineHtml("Texte \xC3("))->toBe('Texte ?(');
+});

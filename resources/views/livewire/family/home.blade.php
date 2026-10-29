@@ -54,9 +54,7 @@
                     @endif
 
                     @if($introductionText)
-                        <div class="text-gray-600 dark:text-gray-300 mb-6 whitespace-pre-line">
-                            @linkify($introductionText)
-                        </div>
+                        <div class="intro-text text-multiline">@linkify($introductionText)</div>
                     @endif
                 </div>
 

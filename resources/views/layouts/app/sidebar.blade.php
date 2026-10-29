@@ -8,7 +8,7 @@
             <flux:sidebar.header>
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 px-2" wire:navigate>
                     <span class="text-2xl">🎄</span>
-                    <span class="font-semibold text-zinc-900 dark:text-white">Sapin Solidaire</span>
+                    <span class="font-semibold text-zinc-900 dark:text-white">{{ \App\Models\Setting::getSiteName() }}</span>
                 </a>
                 <flux:sidebar.collapse class="lg:hidden" />
             </flux:sidebar.header>

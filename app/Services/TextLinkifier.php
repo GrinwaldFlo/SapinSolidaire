@@ -30,7 +30,9 @@ class TextLinkifier
 
     private static function render(?string $text, ?string $class, int $escapeFlags): string
     {
-        $parts = preg_split(self::URL_PATTERN, (string) $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+        // Invalid UTF-8 makes preg_split (/u) fail: replace bad bytes instead.
+        $text = mb_scrub((string) $text, 'UTF-8');
+        $parts = preg_split(self::URL_PATTERN, $text, -1, PREG_SPLIT_DELIM_CAPTURE);
 
         $html = '';
 
