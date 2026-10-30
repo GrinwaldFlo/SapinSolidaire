@@ -6,7 +6,7 @@
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-zinc-900 dark:to-zinc-800">
+<body class="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-zinc-900 dark:to-zinc-800 @envBodyClass">
 <div class="min-h-screen flex flex-col">
         <!-- Header -->
         <header class="bg-header text-white py-4 px-6 shadow-lg">

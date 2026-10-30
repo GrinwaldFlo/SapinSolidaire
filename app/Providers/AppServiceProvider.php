@@ -63,6 +63,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Escaped free text with URLs as links, e.g. custom texts on pages (keep line breaks with CSS).
         Blade::directive('linkify', fn (string $expression): string => "<?php echo \\App\\Services\\TextLinkifier::toHtml({$expression}, 'link'); ?>");
+
+        // Body class turning the whole background pink on the test website (APP_ENV=test).
+        Blade::directive('envBodyClass', fn (): string => "<?php echo app()->environment('test') ? 'env-test' : ''; ?>");
     }
 
     protected function configureDefaults(): void
