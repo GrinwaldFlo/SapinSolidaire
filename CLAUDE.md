@@ -91,6 +91,8 @@ Access patterns:
 - /admin guarded by auth.
 - Feature-level pages guarded by role and any.role middleware.
 - Visitors with no operational roles are redirected to dashboard route.
+- CheckRole and CheckAnyRole are Livewire persistent middleware (AppServiceProvider): roles are re-checked on every Livewire action, not only on page load.
+- Never trust IDs or values sent by the browser: mark state that must not change #[Locked] and act on server-side state (e.g. FamilyValidation rejects only $currentRequest).
 
 Fortify behavior:
 
@@ -217,6 +219,7 @@ Validation:
 - SlotAssignmentService: lazy, capacity-aware assignment and recalculation of pickup slot windows.
 - AddressValidationService: Swiss Post API validation.
 - PhoneValidationService: CH parsing/validation/formatting.
+- AccessLinkRequestGuard: limits public access link requests per email, per IP and globally (config mail.access_link_limits); a flood on many IPs blocks all link requests for a while and queues AccessLinkFloodAlertMail to admins once. Client IP needs TRUSTED_PROXIES behind a reverse proxy.
 - FamilyDuplicateService: duplicate scoring and merge transaction.
 - CodeGeneratorService: legacy 4-letter code generator (current production flow uses numeric family/child pattern in Child model).
 
@@ -273,6 +276,7 @@ Mails are queued, not sent synchronously:
 - CorrectionRequestMail
 - FinalRejectionMail
 - GiftReceivedMail
+- AccessLinkFloodAlertMail (admins)
 
 Queue worker is required in dev/prod for expected behavior.
 

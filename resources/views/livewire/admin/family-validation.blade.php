@@ -40,10 +40,10 @@
                         <button wire:click="validateFamily" class="btn-confirm text-sm">
                             ✓ Valider la famille
                         </button>
-                        <button wire:click="openRejectionModal('{{ $currentRequest->id }}', false)" class="btn-warning text-sm">
+                        <button wire:click="openRejectionModal(false)" class="btn-warning text-sm">
                             Demander correction
                         </button>
-                        <button wire:click="openRejectionModal('{{ $currentRequest->id }}', true)" class="btn-danger text-sm">
+                        <button wire:click="openRejectionModal(true)" class="btn-danger text-sm">
                             Refuser définitivement
                         </button>
                         <button wire:click="skip" class="btn-gray text-sm ml-auto">

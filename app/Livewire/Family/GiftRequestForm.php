@@ -27,9 +27,11 @@ class GiftRequestForm extends Component
     use HandlesGiftRequestWizard;
     use WithFileUploads;
 
-    // Token and email
+    // Token and email: locked, the email identifies the family that submit() overwrites
+    #[Locked]
     public string $token;
 
+    #[Locked]
     public string $email = '';
 
     // States

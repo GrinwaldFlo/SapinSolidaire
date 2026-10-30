@@ -2,14 +2,18 @@
 
 namespace App\Providers;
 
+use App\Http\Middleware\CheckAnyRole;
+use App\Http\Middleware\CheckRole;
 use App\Models\Role;
 use Carbon\CarbonImmutable;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -29,6 +33,27 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         $this->configureGates();
         $this->configureBladeDirectives();
+        $this->configureLivewire();
+        $this->configureTrustedProxies();
+    }
+
+    protected function configureLivewire(): void
+    {
+        // Re-check roles on every Livewire action, not only when the page is first loaded.
+        Livewire::addPersistentMiddleware([
+            CheckRole::class,
+            CheckAnyRole::class,
+        ]);
+    }
+
+    protected function configureTrustedProxies(): void
+    {
+        // Behind a reverse proxy, trust it so request()->ip() is the client IP (used by IP rate limits).
+        $proxies = config('app.trusted_proxies');
+
+        if ($proxies) {
+            TrustProxies::at($proxies === '*' ? '*' : array_map('trim', explode(',', $proxies)));
+        }
     }
 
     protected function configureBladeDirectives(): void

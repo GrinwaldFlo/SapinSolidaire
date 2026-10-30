@@ -6,10 +6,10 @@ use App\Mail\AccessLinkMail;
 use App\Models\EmailToken;
 use App\Models\Season;
 use App\Models\SentMailLog;
+use App\Services\AccessLinkRequestGuard;
 use App\Services\CustomText;
 use App\Services\SeasonService;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -40,7 +40,7 @@ class Home extends Component
         }
     }
 
-    public function sendLink(): void
+    public function sendLink(AccessLinkRequestGuard $guard): void
     {
         $this->validate([
             'email' => ['required', 'email'],
@@ -49,18 +49,14 @@ class Home extends Component
             'email.email' => 'Veuillez entrer une adresse e-mail valide.',
         ]);
 
-        // Rate limiting
-        $rateLimitSeconds = (int) config('mail.rate_limit_seconds', 5);
-        $key = 'email-request:'.$this->email;
+        // Rate limiting (per email, per IP, global flood)
+        $error = $guard->attempt($this->email, (string) request()->ip());
 
-        if (RateLimiter::tooManyAttempts($key, 1)) {
-            $seconds = RateLimiter::availableIn($key);
-            $this->addError('email', "Veuillez attendre {$seconds} secondes avant de réessayer.");
+        if ($error !== null) {
+            $this->addError('email', $error);
 
             return;
         }
-
-        RateLimiter::hit($key, $rateLimitSeconds);
 
         // Create token and send email
         $token = EmailToken::createForEmail($this->email);

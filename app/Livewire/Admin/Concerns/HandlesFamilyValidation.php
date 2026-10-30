@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Mail;
 trait HandlesFamilyValidation
 {
     public bool $showRejectionModal = false;
-    public ?string $rejectionTargetId = null;
     public bool $isFinalRejection = false;
     public string $rejectionComment = '';
 
@@ -61,7 +60,6 @@ trait HandlesFamilyValidation
     public function closeRejectionModal(): void
     {
         $this->showRejectionModal = false;
-        $this->rejectionTargetId = null;
         $this->isFinalRejection = false;
         $this->rejectionComment = '';
 
