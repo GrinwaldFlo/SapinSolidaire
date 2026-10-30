@@ -339,6 +339,8 @@ Blade directives (App\Services\TextLinkifier), for every custom text and rejecti
 - @multiline($text): line breaks as <br> (HTML emails).
 - @linkify($text): links with the link class, line breaks kept by CSS (notice-text / text-multiline / whitespace-pre-line) on pages.
 
+Test website: every layout <body> carries @envBodyClass, which adds env-test (pink page background) when APP_ENV=test. Add it to any new layout.
+
 Live visual reference remains available at /admin/css-showcase.
 
 ## Common Agent Tasks

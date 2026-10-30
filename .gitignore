@@ -26,4 +26,4 @@ yarn-error.log
 /_doc/Extra
 /_extra/SapinImport/bin/Debug/net10.0
 /_extra/SapinImport/obj
-docs/security-review.md
+_doc/security-review.md
