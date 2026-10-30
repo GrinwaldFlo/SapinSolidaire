@@ -27,14 +27,17 @@ class GiftRequestForm extends Component
     use HandlesGiftRequestWizard;
     use WithFileUploads;
 
-    // Token and email
+    // Token and email: locked, the email identifies the family that submit() overwrites
+    #[Locked]
     public string $token;
 
+    #[Locked]
     public string $email = '';
 
     // States
     public int $step = 1; // 1: eligibility, 2: form
 
+    #[Locked]
     public bool $tokenValid = false;
 
     public bool $consecutiveYearsAccepted = false;
@@ -91,8 +94,11 @@ class GiftRequestForm extends Component
     // Proof of habitation
     public $proofOfHabitation = null;
 
+    // Locked: either one would let the browser skip the required proof
+    #[Locked]
     public bool $proofOfHabitationEnabled = false;
 
+    #[Locked]
     public ?string $existingProofPath = null;
 
     // Real-time validation tracking

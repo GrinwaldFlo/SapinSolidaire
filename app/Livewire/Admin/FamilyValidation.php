@@ -87,9 +87,8 @@ class FamilyValidation extends Component
             ->count();
     }
 
-    public function openRejectionModal(string $id, bool $isFinal = false): void
+    public function openRejectionModal(bool $isFinal = false): void
     {
-        $this->rejectionTargetId = $id;
         $this->isFinalRejection = $isFinal;
         $this->rejectionComment = '';
         $this->selectedRejectionMessageKey = '';
@@ -116,10 +115,20 @@ class FamilyValidation extends Component
             'rejectionComment.min' => 'Le commentaire doit contenir au moins 10 caractères.',
         ]);
 
+        if (! $this->currentRequest) {
+            return;
+        }
+
         $status = $this->isFinalRejection ? GiftRequest::STATUS_REJECTED_FINAL : GiftRequest::STATUS_REJECTED;
 
+        // Only the request assigned to this validator, while still pending, can be rejected
         $email = DB::transaction(function () use ($status) {
-            $request = GiftRequest::with('family')->lockForUpdate()->findOrFail($this->rejectionTargetId);
+            $request = GiftRequest::with('family')->lockForUpdate()->find($this->currentRequest->id);
+
+            if (! $request || $request->status !== GiftRequest::STATUS_PENDING) {
+                return null;
+            }
+
             $request->setStatus($status, $this->rejectionComment);
 
             if ($this->isFinalRejection) {
@@ -133,7 +142,9 @@ class FamilyValidation extends Component
             return (string) $request->family->email;
         });
 
-        $this->sendRejectionEmail($email, $this->isFinalRejection, $this->rejectionComment);
+        if ($email !== null) {
+            $this->sendRejectionEmail($email, $this->isFinalRejection, $this->rejectionComment);
+        }
 
         $this->closeRejectionModal();
         $this->loadNextRequest();

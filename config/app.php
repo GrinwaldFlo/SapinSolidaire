@@ -56,6 +56,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Trusted Proxies
+    |--------------------------------------------------------------------------
+    |
+    | Comma-separated IPs/CIDRs of the reverse proxies in front of the app, or
+    | "*" to trust any. Needed behind a proxy so that the client IP (used by
+    | the access-link IP rate limit) is not the proxy IP. Empty: no proxy.
+    |
+    */
+
+    'trusted_proxies' => env('TRUSTED_PROXIES'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

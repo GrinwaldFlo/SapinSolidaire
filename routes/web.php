@@ -80,7 +80,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         ->middleware('any.role:'.Role::ORGANIZER.','.Role::ADMIN)
         ->name('admin.families');
 
-    // Proof of habitation image - Validator or Admin
+    // Proof of habitation image - Family validator, Validator or Admin
     Route::get('/justificatif/{giftRequest}', function (GiftRequest $giftRequest) {
         if (!$giftRequest->proof_of_habitation_path || !Storage::disk('local')->exists($giftRequest->proof_of_habitation_path)) {
             abort(404);
@@ -88,7 +88,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
 
         return Storage::disk('local')->response($giftRequest->proof_of_habitation_path);
     })
-        ->middleware('any.role:'.Role::VALIDATOR.','.Role::ADMIN)
+        ->middleware('any.role:'.Role::FAMILY_VALIDATOR.','.Role::VALIDATOR.','.Role::ADMIN)
         ->name('admin.proof-of-habitation');
 
     // Download generated PDF - Organizer or Admin

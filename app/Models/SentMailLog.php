@@ -17,6 +17,7 @@ class SentMailLog extends Model
     public const PURPOSE_FINAL_REJECTION = 'Refus définitif';
     public const PURPOSE_GIFT_CONFIRMATION = 'Confirmation de réception des cadeaux';
     public const PURPOSE_REQUEST_COMPLETE = 'Demande complète (cartes imprimées)';
+    public const PURPOSE_ACCESS_LINK_FLOOD_ALERT = 'Alerte : demandes de liens bloquées';
 
     /**
      * @var array<int, string>

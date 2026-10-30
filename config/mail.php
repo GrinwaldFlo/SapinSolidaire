@@ -129,6 +129,27 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Access Link Request Limits
+    |--------------------------------------------------------------------------
+    |
+    | Per IP: at most per_ip_max link requests every per_ip_decay_minutes
+    | (keep it high enough for social services submitting several families).
+    | Flood (bot swarm on many IPs): more than flood_max link requests in total
+    | within flood_decay_minutes blocks every link request for
+    | flood_block_minutes and emails the administrators once.
+    |
+    */
+
+    'access_link_limits' => [
+        'per_ip_max' => (int) env('MAIL_LINK_PER_IP_MAX', 10),
+        'per_ip_decay_minutes' => (int) env('MAIL_LINK_PER_IP_DECAY_MINUTES', 60),
+        'flood_max' => (int) env('MAIL_LINK_FLOOD_MAX', 60),
+        'flood_decay_minutes' => (int) env('MAIL_LINK_FLOOD_DECAY_MINUTES', 10),
+        'flood_block_minutes' => (int) env('MAIL_LINK_FLOOD_BLOCK_MINUTES', 30),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | IMAP Copy Of Sent Emails
     |--------------------------------------------------------------------------
     |

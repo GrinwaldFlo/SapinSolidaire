@@ -91,6 +91,8 @@ Access patterns:
 - /admin guarded by auth.
 - Feature-level pages guarded by role and any.role middleware.
 - Visitors with no operational roles are redirected to dashboard route.
+- CheckRole and CheckAnyRole are Livewire persistent middleware (AppServiceProvider): roles are re-checked on every Livewire action, not only on page load.
+- Never trust IDs or values sent by the browser: mark state that must not change #[Locked] and act on server-side state (e.g. FamilyValidation rejects only $currentRequest).
 
 Fortify behavior:
 
@@ -217,6 +219,7 @@ Validation:
 - SlotAssignmentService: lazy, capacity-aware assignment and recalculation of pickup slot windows.
 - AddressValidationService: Swiss Post API validation.
 - PhoneValidationService: CH parsing/validation/formatting.
+- AccessLinkRequestGuard: limits public access link requests per email, per IP and globally (config mail.access_link_limits); a flood on many IPs blocks all link requests for a while and queues AccessLinkFloodAlertMail to admins once. Client IP needs TRUSTED_PROXIES behind a reverse proxy.
 - FamilyDuplicateService: duplicate scoring and merge transaction.
 - CodeGeneratorService: legacy 4-letter code generator (current production flow uses numeric family/child pattern in Child model).
 
@@ -258,7 +261,7 @@ Admin components:
 - SeasonManagement: season CRUD + pickup window CRUD + overlap prevention.
 - SettingsManagement: application settings + city validation + code regeneration on prefix/padding changes.
 - TextsManagement: customizable texts (home intro, registration block reason, season messages, form messages, email subjects/paragraphs, single footer shared by all emails) backed by CustomText.
-- UserManagement: role editing.
+- UserManagement: role editing + page access matrix per role (App\Services\RoleAccessMap, read from the routes' role / any.role middleware; add new admin pages to RoleAccessMap::PAGES).
 - FamilyManagement: searchable and sortable household view.
 - FamilyDuplicates: duplicate scan + merge UI.
 - ValidationMessageTemplates: reusable rejection/correction templates.
@@ -273,6 +276,7 @@ Mails are queued, not sent synchronously:
 - CorrectionRequestMail
 - FinalRejectionMail
 - GiftReceivedMail
+- AccessLinkFloodAlertMail (admins)
 
 Queue worker is required in dev/prod for expected behavior.
 
@@ -326,6 +330,8 @@ Notice banners: notice-info / notice-warning / notice-success / notice-error, wi
 
 Layout helpers: badge-row (wrapping badges), family-actions (stacked per-row action controls), contact-list (stacked contact lines), inline-form + inline-form-field (single-line field + submit button), button-row (wrapping row of buttons under content). Button size modifier: btn-sm (combine with any btn-* class).
 
+Table helpers: table-header-center + table-cell-center (centered matrix columns), access-granted / access-denied (✓ / — marks of the role access matrix).
+
 Text helpers: text-multiline (free text keeping line breaks, e.g. custom texts outside notices), intro-text (introduction paragraph on public pages, combine with text-multiline for custom texts).
 
 Form helpers: field-help (help text under a field), placeholder-tag (inline token such as {site}).
@@ -334,6 +340,8 @@ Blade directives (App\Services\TextLinkifier), for every custom text and rejecti
 
 - @multiline($text): line breaks as <br> (HTML emails).
 - @linkify($text): links with the link class, line breaks kept by CSS (notice-text / text-multiline / whitespace-pre-line) on pages.
+
+Test website: every layout <body> carries @envBodyClass, which adds env-test (pink page background) when APP_ENV=test. Add it to any new layout.
 
 Live visual reference remains available at /admin/css-showcase.
 

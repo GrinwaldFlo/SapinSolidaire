@@ -61,4 +61,35 @@
     <div class="mt-4">
         {{ $users->links() }}
     </div>
+
+    <h2 class="section-title">Accès aux pages par rôle</h2>
+
+    <div class="table-container">
+        <table class="min-w-full table-divider">
+            <thead>
+                <tr>
+                    <th class="table-header">Page</th>
+                    @foreach($accessRoles as $role)
+                        <th class="table-header-center">{{ ucfirst($role) }}</th>
+                    @endforeach
+                </tr>
+            </thead>
+            <tbody class="table-divider">
+                @foreach($accessPages as $page)
+                    <tr>
+                        <td class="table-cell">{{ $page['label'] }}</td>
+                        @foreach($accessRoles as $role)
+                            <td class="table-cell-center">
+                                @if(in_array($role, $page['roles'], true))
+                                    <span class="access-granted" title="Accès autorisé">✓</span>
+                                @else
+                                    <span class="access-denied" title="Accès refusé">—</span>
+                                @endif
+                            </td>
+                        @endforeach
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
 </div>

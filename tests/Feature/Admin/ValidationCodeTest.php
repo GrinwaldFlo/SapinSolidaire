@@ -419,7 +419,7 @@ test('final family rejection in family validation final-rejects all children', f
     $this->actingAs($this->admin);
 
     Livewire::test(FamilyValidation::class)
-        ->call('openRejectionModal', $this->giftRequest->id, true)
+        ->call('openRejectionModal', true)
         ->set('rejectionComment', 'Refus définitif de la famille pour dossier incomplet.')
         ->call('confirmRejection');
 

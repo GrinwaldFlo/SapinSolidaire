@@ -474,6 +474,11 @@ trait HandlesGiftRequestShared
 
     public function submit(): void
     {
+        // mount() leaves tokenValid false for an invalid token or an inactive season
+        if (! $this->tokenValid || ! $this->season) {
+            return;
+        }
+
         if ($this->blockIfRegistrationClosed() || $this->blockIfGiftLimitReached()) {
             return;
         }

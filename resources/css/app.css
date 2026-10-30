@@ -62,6 +62,11 @@ select:focus[data-flux-control] {
 }
 
 @layer components {
+    /* Whole page background on the test website (APP_ENV=test, see @envBodyClass), overriding layout backgrounds */
+    .env-test {
+        @apply !bg-pink-200 !bg-none dark:!bg-pink-900;
+    }
+
     /* Card */
     .card {
         @apply bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-8;
@@ -195,6 +200,25 @@ select:focus[data-flux-control] {
     /* Table cell - muted text */
     .table-cell-muted {
         @apply px-6 py-4 text-gray-600 dark:text-gray-300;
+    }
+
+    /* Table header cell - centered (e.g. matrix columns) */
+    .table-header-center {
+        @apply px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase;
+    }
+
+    /* Table cell - centered (e.g. matrix values) */
+    .table-cell-center {
+        @apply px-6 py-4 text-center text-gray-900 dark:text-white;
+    }
+
+    /* Access matrix marks */
+    .access-granted {
+        @apply font-semibold text-green-600 dark:text-green-400;
+    }
+
+    .access-denied {
+        @apply text-gray-300 dark:text-zinc-600;
     }
 
     /* Footer/hint card */
