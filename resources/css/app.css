@@ -202,6 +202,25 @@ select:focus[data-flux-control] {
         @apply px-6 py-4 text-gray-600 dark:text-gray-300;
     }
 
+    /* Table header cell - centered (e.g. matrix columns) */
+    .table-header-center {
+        @apply px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase;
+    }
+
+    /* Table cell - centered (e.g. matrix values) */
+    .table-cell-center {
+        @apply px-6 py-4 text-center text-gray-900 dark:text-white;
+    }
+
+    /* Access matrix marks */
+    .access-granted {
+        @apply font-semibold text-green-600 dark:text-green-400;
+    }
+
+    .access-denied {
+        @apply text-gray-300 dark:text-zinc-600;
+    }
+
     /* Footer/hint card */
     .card-footer {
         @apply bg-white dark:bg-zinc-800 rounded-xl shadow-lg px-6 py-4 text-sm text-gray-600 dark:text-gray-400 text-center;

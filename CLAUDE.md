@@ -261,7 +261,7 @@ Admin components:
 - SeasonManagement: season CRUD + pickup window CRUD + overlap prevention.
 - SettingsManagement: application settings + city validation + code regeneration on prefix/padding changes.
 - TextsManagement: customizable texts (home intro, registration block reason, season messages, form messages, email subjects/paragraphs, single footer shared by all emails) backed by CustomText.
-- UserManagement: role editing.
+- UserManagement: role editing + page access matrix per role (App\Services\RoleAccessMap, read from the routes' role / any.role middleware; add new admin pages to RoleAccessMap::PAGES).
 - FamilyManagement: searchable and sortable household view.
 - FamilyDuplicates: duplicate scan + merge UI.
 - ValidationMessageTemplates: reusable rejection/correction templates.
@@ -329,6 +329,8 @@ If a class is missing:
 Notice banners: notice-info / notice-warning / notice-success / notice-error, with notice-title, notice-list and notice-text (free text keeping line breaks) for structured content inside them. Add notice-spaced for bottom spacing above following content.
 
 Layout helpers: badge-row (wrapping badges), family-actions (stacked per-row action controls), contact-list (stacked contact lines), inline-form + inline-form-field (single-line field + submit button), button-row (wrapping row of buttons under content). Button size modifier: btn-sm (combine with any btn-* class).
+
+Table helpers: table-header-center + table-cell-center (centered matrix columns), access-granted / access-denied (✓ / — marks of the role access matrix).
 
 Text helpers: text-multiline (free text keeping line breaks, e.g. custom texts outside notices), intro-text (introduction paragraph on public pages, combine with text-multiline for custom texts).
 

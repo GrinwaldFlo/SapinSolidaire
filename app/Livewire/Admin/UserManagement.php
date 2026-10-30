@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\Role;
 use App\Models\User;
+use App\Services\RoleAccessMap;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -48,10 +49,12 @@ class UserManagement extends Component
         $this->selectedRoles = [];
     }
 
-    public function render()
+    public function render(RoleAccessMap $roleAccessMap)
     {
         return view('livewire.admin.user-management', [
             'users' => User::with('roles')->paginate(200),
+            'accessRoles' => RoleAccessMap::ROLES,
+            'accessPages' => $roleAccessMap->pages(),
         ]);
     }
 }
