@@ -57,3 +57,27 @@ test('rejection comments in html mails have clickable urls and line breaks', fun
     'correction' => fn () => new CorrectionRequestMail('family@example.com', 'token', "Hors zone.\nVoir https://www.e-f-y.ch"),
     'final rejection' => fn () => new FinalRejectionMail("Hors zone.\nVoir https://www.e-f-y.ch"),
 ]);
+
+test('gift received ics and calendar link convert local slot times to utc', function (string $date, string $expectedStart, string $expectedEnd) {
+    config(['app.local_timezone' => 'Europe/Zurich']);
+
+    $giftRequest = new GiftRequest([
+        'slot_start_datetime' => "{$date} 10:00:00",
+        'slot_end_datetime' => "{$date} 10:30:00",
+    ]);
+    $giftRequest->setRelation('family', new Family(['last_name' => 'Dupont']));
+    $season = new Season(['pickup_address' => 'Rue de Test 1, 1000 Lausanne']);
+    $mail = new GiftReceivedMail($giftRequest, $season);
+
+    $ics = $mail->attachments()[0]->attachWith(fn () => null, fn ($data) => $data());
+    $content = $mail->content();
+
+    expect($ics)->toContain("DTSTART:{$expectedStart}\r\n")
+        ->and($ics)->toContain("DTEND:{$expectedEnd}\r\n")
+        ->and($content->with['googleCalendarUrl'])->toContain(urlencode("{$expectedStart}/{$expectedEnd}"))
+        ->and($content->with['slotStartTime'])->toBe('10:00')
+        ->and($content->with['slotEndTime'])->toBe('10:30');
+})->with([
+    'winter time' => ['2026-12-15', '20261215T090000Z', '20261215T093000Z'],
+    'summer time' => ['2026-07-01', '20260701T080000Z', '20260701T083000Z'],
+]);

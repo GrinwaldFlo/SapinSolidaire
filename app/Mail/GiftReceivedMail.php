@@ -6,12 +6,14 @@ use App\Models\GiftRequest;
 use App\Models\Season;
 use App\Models\Setting;
 use App\Services\CustomText;
+use Carbon\CarbonInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Carbon;
 
 class GiftReceivedMail extends Mailable implements ShouldQueue
 {
@@ -52,7 +54,7 @@ class GiftReceivedMail extends Mailable implements ShouldQueue
             $googleCalendarUrl = 'https://calendar.google.com/calendar/render?'.http_build_query([
                 'action' => 'TEMPLATE',
                 'text' => 'Retrait des cadeaux - '.Setting::getSiteName(),
-                'dates' => $start->utc()->format('Ymd\THis\Z').'/'.$end->utc()->format('Ymd\THis\Z'),
+                'dates' => $this->formatUtc($start).'/'.$this->formatUtc($end),
                 'location' => $this->season->pickup_address ?? '',
                 'details' => 'N\'oubliez pas votre pièce d\'identité et celles de vos enfants. Pensez à prendre un grand sac.',
             ]);
@@ -115,12 +117,23 @@ class GiftReceivedMail extends Mailable implements ShouldQueue
             ."BEGIN:VEVENT\r\n"
             ."UID:{$uid}\r\n"
             .'DTSTAMP:'.now()->utc()->format('Ymd\THis\Z')."\r\n"
-            .'DTSTART:'.$start->utc()->format('Ymd\THis\Z')."\r\n"
-            .'DTEND:'.$end->utc()->format('Ymd\THis\Z')."\r\n"
+            .'DTSTART:'.$this->formatUtc($start)."\r\n"
+            .'DTEND:'.$this->formatUtc($end)."\r\n"
             ."SUMMARY:{$summary}\r\n"
             ."LOCATION:{$location}\r\n"
             ."DESCRIPTION:{$description}\r\n"
             ."END:VEVENT\r\n"
             ."END:VCALENDAR\r\n";
+    }
+
+    /**
+     * Slot datetimes hold local wall-clock times (app timezone is UTC):
+     * read them in the local timezone before converting to real UTC.
+     */
+    private function formatUtc(CarbonInterface $dateTime): string
+    {
+        return Carbon::parse($dateTime->format('Y-m-d H:i:s'), config('app.local_timezone'))
+            ->utc()
+            ->format('Ymd\THis\Z');
     }
 }
