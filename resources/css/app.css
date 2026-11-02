@@ -396,6 +396,23 @@ select:focus[data-flux-control] {
         @apply text-sm text-gray-500 dark:text-gray-400;
     }
 
+    /* Horizontal bar of a statistic (<progress> element) */
+    .stat-bar {
+        @apply block w-full h-2 rounded-full overflow-hidden appearance-none bg-gray-200 dark:bg-zinc-700;
+    }
+
+    .stat-bar::-webkit-progress-bar {
+        @apply bg-gray-200 dark:bg-zinc-700;
+    }
+
+    .stat-bar::-webkit-progress-value {
+        @apply bg-green-600 dark:bg-green-500;
+    }
+
+    .stat-bar::-moz-progress-bar {
+        @apply bg-green-600 dark:bg-green-500;
+    }
+
     /* Stat value (big number, neutral) */
     .label-value {
         @apply text-3xl font-bold text-gray-900 dark:text-white;

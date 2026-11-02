@@ -87,6 +87,16 @@ class Season extends Model
     }
 
     /**
+     * Check if the family with this email has a gift request in this season.
+     */
+    public function hasRequestFromEmail(string $email): bool
+    {
+        return $this->giftRequests()
+            ->whereHas('family', fn ($query) => $query->where('email', $email))
+            ->exists();
+    }
+
+    /**
      * Check if the season is currently active.
      */
     public function isActive(): bool

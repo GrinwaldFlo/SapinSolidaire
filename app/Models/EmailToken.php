@@ -18,6 +18,7 @@ class EmailToken extends Model
         'email',
         'token',
         'expires_at',
+        'funnel_steps',
     ];
 
     /**
@@ -25,6 +26,7 @@ class EmailToken extends Model
      */
     protected $casts = [
         'expires_at' => 'datetime',
+        'funnel_steps' => 'array',
     ];
 
     /**
@@ -48,6 +50,9 @@ class EmailToken extends Model
      */
     public static function createForEmail(string $email): self
     {
+        // A new link continues the same registration for the anonymous statistics
+        $funnelSteps = self::where('email', $email)->value('funnel_steps');
+
         // Delete any existing tokens for this email
         self::where('email', $email)->delete();
 
@@ -55,6 +60,7 @@ class EmailToken extends Model
             'email' => $email,
             'token' => Str::random(64),
             'expires_at' => now()->addHours(48),
+            'funnel_steps' => $funnelSteps,
         ]);
     }
 

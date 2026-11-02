@@ -65,6 +65,10 @@
                     <flux:sidebar.item icon="home" :href="route('admin.families')" :current="request()->routeIs('admin.families')" wire:navigate>
                         Familles
                     </flux:sidebar.item>
+
+                    <flux:sidebar.item icon="chart-bar" :href="route('admin.registration-funnel')" :current="request()->routeIs('admin.registration-funnel')" wire:navigate>
+                        Suivi des inscriptions
+                    </flux:sidebar.item>
                     @endcan
                 </flux:sidebar.group>
                 @endcan

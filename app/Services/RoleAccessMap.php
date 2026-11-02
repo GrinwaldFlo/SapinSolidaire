@@ -36,6 +36,7 @@ class RoleAccessMap
         'admin.delivery' => 'Remise',
         'admin.monitoring' => 'Suivi enfants',
         'admin.families' => 'Familles',
+        'admin.registration-funnel' => 'Suivi des inscriptions',
         'admin.seasons' => 'Saisons',
         'admin.family-duplicates' => 'Doublons familles',
         'admin.users' => 'Utilisateurs',

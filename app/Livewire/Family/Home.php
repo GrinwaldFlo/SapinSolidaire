@@ -4,10 +4,12 @@ namespace App\Livewire\Family;
 
 use App\Mail\AccessLinkMail;
 use App\Models\EmailToken;
+use App\Models\RegistrationFunnelCounter;
 use App\Models\Season;
 use App\Models\SentMailLog;
 use App\Services\AccessLinkRequestGuard;
 use App\Services\CustomText;
+use App\Services\RegistrationFunnel;
 use App\Services\SeasonService;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Attributes\Layout;
@@ -40,7 +42,7 @@ class Home extends Component
         }
     }
 
-    public function sendLink(AccessLinkRequestGuard $guard): void
+    public function sendLink(AccessLinkRequestGuard $guard, RegistrationFunnel $funnel): void
     {
         $this->validate([
             'email' => ['required', 'email'],
@@ -69,6 +71,11 @@ class Home extends Component
             mailable: $mail,
             senderLabel: 'Famille'
         );
+
+        // A family with a request this season is not registering anymore
+        if ($this->seasonStatus === 'active' && ! $this->season->hasRequestFromEmail($this->email)) {
+            $funnel->record($this->season, $this->email, RegistrationFunnelCounter::STEP_LINK_REQUESTED);
+        }
 
         $this->emailSent = true;
     }
