@@ -81,6 +81,13 @@ return [
     'timezone' => 'UTC',
 
     /*
+    | Timezone of the wall-clock times entered by admins (e.g. pickup slots),
+    | used when exporting them as absolute times (ICS, calendar links).
+    */
+
+    'local_timezone' => env('APP_LOCAL_TIMEZONE', 'Europe/Zurich'),
+
+    /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration
     |--------------------------------------------------------------------------
