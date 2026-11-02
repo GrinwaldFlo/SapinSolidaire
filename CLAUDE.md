@@ -118,6 +118,7 @@ Admin modules under /admin:
 - ChildrenMonitoring
 - SendConfirmations
 - FamilyManagement
+- RegistrationFunnelStats
 - FamilyDuplicates
 - SeasonManagement
 - UserManagement
@@ -220,6 +221,7 @@ Validation:
 - AddressValidationService: Swiss Post API validation.
 - PhoneValidationService: CH parsing/validation/formatting.
 - AccessLinkRequestGuard: limits public access link requests per email, per IP and globally (config mail.access_link_limits); a flood on many IPs blocks all link requests for a while and queues AccessLinkFloodAlertMail to admins once. Client IP needs TRUSTED_PROXIES behind a reverse proxy.
+- RegistrationFunnel: anonymous per season/step counters (RegistrationFunnelCounter, no timestamps, no family data) of the family registration flow, read on the RegistrationFunnelStats page. A step is counted once per registration thanks to email_tokens.funnel_steps, which is carried to a new link and deleted with the expired token (a family returning after expiry counts as a new registration). Families that already have a request this season are not counted. Add a step: constant on the model, RegistrationFunnel::STEPS (flow order), recordFunnelStep() in the form. Recording never throws.
 - FamilyDuplicateService: duplicate scoring and merge transaction.
 - CodeGeneratorService: legacy 4-letter code generator (current production flow uses numeric family/child pattern in Child model).
 
@@ -263,6 +265,7 @@ Admin components:
 - TextsManagement: customizable texts (home intro, registration block reason, season messages, form messages, email subjects/paragraphs, single footer shared by all emails) backed by CustomText.
 - UserManagement: role editing + page access matrix per role (App\Services\RoleAccessMap, read from the routes' role / any.role middleware; add new admin pages to RoleAccessMap::PAGES).
 - FamilyManagement: searchable and sortable household view.
+- RegistrationFunnelStats: anonymous statistics of the step where families stop registering, per season.
 - FamilyDuplicates: duplicate scan + merge UI.
 - ValidationMessageTemplates: reusable rejection/correction templates.
 - DevTools: non-production helper operations (seed, batch transitions, cleanup, access links).
@@ -328,9 +331,11 @@ If a class is missing:
 
 Notice banners: notice-info / notice-warning / notice-success / notice-error, with notice-title, notice-list and notice-text (free text keeping line breaks) for structured content inside them. Add notice-spaced for bottom spacing above following content.
 
-Layout helpers: badge-row (wrapping badges), family-actions (stacked per-row action controls), contact-list (stacked contact lines), inline-form + inline-form-field (single-line field + submit button), button-row (wrapping row of buttons under content). Button size modifier: btn-sm (combine with any btn-* class).
+Layout helpers: badge-row (wrapping badges), family-actions (stacked per-row action controls), contact-list (stacked contact lines), inline-form + inline-form-field (single-line field + submit button), button-row (wrapping row of buttons under content), page-stack (vertical spacing between page sections). Button size modifier: btn-sm (combine with any btn-* class).
 
-Table helpers: table-header-center + table-cell-center (centered matrix columns), access-granted / access-denied (✓ / — marks of the role access matrix).
+Table helpers: table-full (full width table with row dividers), table-head (thead background), table-divider (tbody row dividers), table-header-center + table-cell-center (centered matrix columns), access-granted / access-denied (✓ / — marks of the role access matrix).
+
+Statistic helpers: stat-bar (horizontal bar on a progress element, no inline width needed), stat-grid (responsive three-column grid, stat-grid--spaced adds top spacing), stat-item (centered statistic inside a stat-grid).
 
 Text helpers: text-multiline (free text keeping line breaks, e.g. custom texts outside notices), intro-text (introduction paragraph on public pages, combine with text-multiline for custom texts).
 

@@ -8,6 +8,7 @@ use App\Livewire\Family\Concerns\HandlesGiftRequestWizard;
 use App\Models\EmailToken;
 use App\Models\Family;
 use App\Models\GiftRequest;
+use App\Models\RegistrationFunnelCounter;
 use App\Models\Season;
 use App\Models\Setting;
 use App\Services\CustomText;
@@ -39,6 +40,10 @@ class GiftRequestForm extends Component
 
     #[Locked]
     public bool $tokenValid = false;
+
+    /** A family that already has a request this season is not counted in the registration statistics. */
+    #[Locked]
+    public bool $tracksRegistrationFunnel = false;
 
     public bool $consecutiveYearsAccepted = false;
 
@@ -184,16 +189,24 @@ class GiftRequestForm extends Component
             $this->proofOfHabitationEnabled = Setting::isProofOfHabitationEnabled();
             $this->familyFormMultiStepEnabled = Setting::isFamilyFormMultiStepEnabled();
 
-            $this->blockIfRegistrationClosed();
+            $hasRequest = $this->hasRequestForSeason();
+            $this->tracksRegistrationFunnel = ! $hasRequest;
+            $this->recordFunnelStep(RegistrationFunnelCounter::STEP_LINK_OPENED);
+
+            $this->blockIfRegistrationClosed($hasRequest);
 
             $this->family = Family::where('email', $this->email)->first();
 
             if ($this->family) {
                 if ($this->blockIfExcluded($this->family)) {
+                    $this->recordFunnelStep(RegistrationFunnelCounter::BLOCKED_EXCLUDED);
+
                     return;
                 }
 
                 if ($this->blockIfConsecutiveYearsLimitReached($this->family)) {
+                    $this->recordFunnelStep(RegistrationFunnelCounter::BLOCKED_CONSECUTIVE_YEARS);
+
                     return;
                 }
 
@@ -228,6 +241,10 @@ class GiftRequestForm extends Component
                     $this->cityAccepted = true;
                     $this->cityConfirmed = true;
                 }
+            }
+
+            if (! $this->canModify) {
+                $this->recordFunnelStep(RegistrationFunnelCounter::BLOCKED_REGISTRATION_CLOSED);
             }
 
             if (empty($this->children)) {

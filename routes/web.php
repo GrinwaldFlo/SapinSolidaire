@@ -13,6 +13,7 @@ use App\Livewire\Admin\GiftDelivery;
 use App\Livewire\Admin\GiftReception;
 use App\Livewire\Admin\GiftsManagement;
 use App\Livewire\Admin\LabelGeneration;
+use App\Livewire\Admin\RegistrationFunnelStats;
 use App\Livewire\Admin\SentMailsLog;
 use App\Livewire\Admin\SeasonManagement;
 use App\Livewire\Admin\SendConfirmations;
@@ -79,6 +80,11 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('/familles', FamilyManagement::class)
         ->middleware('any.role:'.Role::ORGANIZER.','.Role::ADMIN)
         ->name('admin.families');
+
+    // Registration funnel statistics - Organizer or Admin
+    Route::get('/suivi-inscriptions', RegistrationFunnelStats::class)
+        ->middleware('any.role:'.Role::ORGANIZER.','.Role::ADMIN)
+        ->name('admin.registration-funnel');
 
     // Proof of habitation image - Family validator, Validator or Admin
     Route::get('/justificatif/{giftRequest}', function (GiftRequest $giftRequest) {

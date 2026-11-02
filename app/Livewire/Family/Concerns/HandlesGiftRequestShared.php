@@ -6,10 +6,12 @@ use App\Models\Child;
 use App\Models\Family;
 use App\Models\FamilySubmissionLog;
 use App\Models\GiftRequest;
+use App\Models\RegistrationFunnelCounter;
 use App\Models\Setting;
 use App\Services\AddressValidationService;
 use App\Services\GiftKeywordMatcher;
 use App\Services\PhoneValidationService;
+use App\Services\RegistrationFunnel;
 use App\Services\SeasonService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -428,10 +430,10 @@ trait HandlesGiftRequestShared
      * (blocked by an admin, modification deadline passed, or gift limit reached for a new family).
      * When the gift limit is reached, a registered family keeps editing but cannot add children.
      */
-    protected function blockIfRegistrationClosed(): bool
+    protected function blockIfRegistrationClosed(?bool $hasRequest = null): bool
     {
         $seasonService = app(SeasonService::class);
-        $hasRequest = $this->hasRequestForSeason();
+        $hasRequest ??= $this->hasRequestForSeason();
 
         $this->registrationClosedMessage = $this->season
             ? $seasonService->getRegistrationClosedMessage($this->season, $hasRequest)
@@ -447,9 +449,14 @@ trait HandlesGiftRequestShared
 
     protected function hasRequestForSeason(): bool
     {
-        return $this->season !== null && GiftRequest::where('season_id', $this->season->id)
-            ->whereHas('family', fn ($query) => $query->where('email', $this->email))
-            ->exists();
+        return $this->season?->hasRequestFromEmail($this->email) ?? false;
+    }
+
+    protected function recordFunnelStep(string $step): void
+    {
+        if ($this->tracksRegistrationFunnel) {
+            app(RegistrationFunnel::class)->record($this->season, $this->email, $step);
+        }
     }
 
     /**
@@ -494,6 +501,7 @@ trait HandlesGiftRequestShared
         }
 
         $this->hasAttemptedSubmit = true;
+        $this->recordFunnelStep(RegistrationFunnelCounter::STEP_SUBMIT_ATTEMPTED);
 
         foreach (array_keys($this->children) as $index) {
             $this->validateChild($index, true);
@@ -607,6 +615,8 @@ trait HandlesGiftRequestShared
         if ($oldProofPath && $oldProofPath !== $proofPath) {
             Storage::disk('local')->delete($oldProofPath);
         }
+
+        $this->recordFunnelStep(RegistrationFunnelCounter::STEP_SUBMITTED);
 
         $this->submitted = true;
     }

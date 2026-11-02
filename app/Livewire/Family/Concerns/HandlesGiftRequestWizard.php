@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Family\Concerns;
 
+use App\Models\RegistrationFunnelCounter;
+
 trait HandlesGiftRequestWizard
 {
     public function nextFamilyFormStep(): void
@@ -17,6 +19,8 @@ trait HandlesGiftRequestWizard
             if (isset($this->fieldErrors['firstName']) || isset($this->fieldErrors['lastName']) || isset($this->fieldErrors['phone']) || isset($this->fieldErrors['address']) || isset($this->fieldErrors['city'])) {
                 return;
             }
+
+            $this->recordFunnelStep(RegistrationFunnelCounter::STEP_FAMILY_INFO_COMPLETED);
         } elseif ($this->isFamilyFormOnProofStep()) {
             $this->validateProofOfHabitation();
             $this->validateProofFile();
@@ -24,6 +28,8 @@ trait HandlesGiftRequestWizard
             if (isset($this->fieldErrors['proofOfHabitation'])) {
                 return;
             }
+
+            $this->recordFunnelStep(RegistrationFunnelCounter::STEP_PROOF_COMPLETED);
         } elseif (($childIndex = $this->getFamilyFormCurrentChildIndex()) !== null) {
             $this->validateChild($childIndex, true);
             $this->validateChildrenDuplicates();
@@ -42,6 +48,10 @@ trait HandlesGiftRequestWizard
 
         $maxStep = $this->getFamilyFormSummaryStep();
         $this->familyFormCurrentStep = min($this->familyFormCurrentStep + 1, $maxStep);
+
+        if ($this->isFamilyFormOnSummaryStep()) {
+            $this->recordFunnelStep(RegistrationFunnelCounter::STEP_CHILDREN_COMPLETED);
+        }
     }
 
     public function previousFamilyFormStep(): void
@@ -58,6 +68,8 @@ trait HandlesGiftRequestWizard
 
             return $child;
         }, $this->children);
+
+        $this->recordFunnelStep(RegistrationFunnelCounter::STEP_ANONYMOUS_CHOICE_MADE);
 
         $this->familyFormCurrentStep = min($this->familyFormCurrentStep + 1, $this->getFamilyFormSummaryStep());
     }

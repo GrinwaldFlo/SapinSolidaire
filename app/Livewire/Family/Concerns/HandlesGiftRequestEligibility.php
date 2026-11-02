@@ -2,11 +2,14 @@
 
 namespace App\Livewire\Family\Concerns;
 
+use App\Models\RegistrationFunnelCounter;
+
 trait HandlesGiftRequestEligibility
 {
     public function acceptConsecutiveYears(): void
     {
         $this->consecutiveYearsAccepted = true;
+        $this->recordFunnelStep(RegistrationFunnelCounter::STEP_CONSECUTIVE_YEARS_ACCEPTED);
 
         if ($this->consecutiveYearsAccepted && $this->pickupCommitmentAccepted && $this->cityAccepted) {
             $this->step = 2;
@@ -16,6 +19,7 @@ trait HandlesGiftRequestEligibility
     public function acceptPickupCommitment(): void
     {
         $this->pickupCommitmentAccepted = true;
+        $this->recordFunnelStep(RegistrationFunnelCounter::STEP_PICKUP_ACCEPTED);
 
         if ($this->consecutiveYearsAccepted && $this->pickupCommitmentAccepted && $this->cityAccepted) {
             $this->step = 2;
@@ -31,6 +35,7 @@ trait HandlesGiftRequestEligibility
         }
 
         $this->cityAccepted = true;
+        $this->recordFunnelStep(RegistrationFunnelCounter::STEP_CITY_ACCEPTED);
 
         if (! empty($this->selectedCity)) {
             $this->city = $this->selectedCity;
