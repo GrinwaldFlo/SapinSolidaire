@@ -189,10 +189,11 @@ class GiftRequestForm extends Component
             $this->proofOfHabitationEnabled = Setting::isProofOfHabitationEnabled();
             $this->familyFormMultiStepEnabled = Setting::isFamilyFormMultiStepEnabled();
 
-            $this->tracksRegistrationFunnel = ! $this->hasRequestForSeason();
+            $hasRequest = $this->hasRequestForSeason();
+            $this->tracksRegistrationFunnel = ! $hasRequest;
             $this->recordFunnelStep(RegistrationFunnelCounter::STEP_LINK_OPENED);
 
-            $this->blockIfRegistrationClosed();
+            $this->blockIfRegistrationClosed($hasRequest);
 
             $this->family = Family::where('email', $this->email)->first();
 

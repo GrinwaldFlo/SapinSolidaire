@@ -50,8 +50,8 @@ class EmailToken extends Model
      */
     public static function createForEmail(string $email): self
     {
-        // A new link continues the same registration for the anonymous statistics
-        $funnelSteps = self::where('email', $email)->value('funnel_steps');
+        // A new link continues the same registration for the anonymous statistics, unless it expired
+        $funnelSteps = self::where('email', $email)->where('expires_at', '>', now())->value('funnel_steps');
 
         // Delete any existing tokens for this email
         self::where('email', $email)->delete();

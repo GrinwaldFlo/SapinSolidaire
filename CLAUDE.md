@@ -331,11 +331,11 @@ If a class is missing:
 
 Notice banners: notice-info / notice-warning / notice-success / notice-error, with notice-title, notice-list and notice-text (free text keeping line breaks) for structured content inside them. Add notice-spaced for bottom spacing above following content.
 
-Layout helpers: badge-row (wrapping badges), family-actions (stacked per-row action controls), contact-list (stacked contact lines), inline-form + inline-form-field (single-line field + submit button), button-row (wrapping row of buttons under content). Button size modifier: btn-sm (combine with any btn-* class).
+Layout helpers: badge-row (wrapping badges), family-actions (stacked per-row action controls), contact-list (stacked contact lines), inline-form + inline-form-field (single-line field + submit button), button-row (wrapping row of buttons under content), page-stack (vertical spacing between page sections). Button size modifier: btn-sm (combine with any btn-* class).
 
-Table helpers: table-header-center + table-cell-center (centered matrix columns), access-granted / access-denied (✓ / — marks of the role access matrix).
+Table helpers: table-full (full width table with row dividers), table-head (thead background), table-divider (tbody row dividers), table-header-center + table-cell-center (centered matrix columns), access-granted / access-denied (✓ / — marks of the role access matrix).
 
-Statistic helpers: stat-bar (horizontal bar on a progress element, no inline width needed).
+Statistic helpers: stat-bar (horizontal bar on a progress element, no inline width needed), stat-grid (responsive three-column grid, stat-grid--spaced adds top spacing), stat-item (centered statistic inside a stat-grid).
 
 Text helpers: text-multiline (free text keeping line breaks, e.g. custom texts outside notices), intro-text (introduction paragraph on public pages, combine with text-multiline for custom texts).
 

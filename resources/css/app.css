@@ -413,6 +413,35 @@ select:focus[data-flux-control] {
         @apply bg-green-600 dark:bg-green-500;
     }
 
+    /* Grid of statistics (one column on mobile, three from md) */
+    .stat-grid {
+        @apply grid grid-cols-1 md:grid-cols-3 gap-4;
+    }
+
+    .stat-grid--spaced {
+        @apply mt-4;
+    }
+
+    /* Centered statistic inside a stat-grid */
+    .stat-item {
+        @apply text-center;
+    }
+
+    /* Vertical spacing between the sections of a page */
+    .page-stack {
+        @apply space-y-6;
+    }
+
+    /* Full width table with row dividers */
+    .table-full {
+        @apply min-w-full divide-y divide-gray-200 dark:divide-zinc-700;
+    }
+
+    /* Table head background */
+    .table-head {
+        @apply bg-gray-50 dark:bg-zinc-700;
+    }
+
     /* Stat value (big number, neutral) */
     .label-value {
         @apply text-3xl font-bold text-gray-900 dark:text-white;

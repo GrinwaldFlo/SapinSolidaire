@@ -13,6 +13,7 @@ use App\Services\RegistrationFunnel;
 use App\Services\SeasonService;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 #[Layout('layouts.family')]
@@ -24,6 +25,7 @@ class Home extends Component
 
     public string $statusMessage = '';
 
+    #[Locked]
     public string $seasonStatus = '';
 
     public ?Season $season = null;

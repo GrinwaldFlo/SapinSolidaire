@@ -430,10 +430,10 @@ trait HandlesGiftRequestShared
      * (blocked by an admin, modification deadline passed, or gift limit reached for a new family).
      * When the gift limit is reached, a registered family keeps editing but cannot add children.
      */
-    protected function blockIfRegistrationClosed(): bool
+    protected function blockIfRegistrationClosed(?bool $hasRequest = null): bool
     {
         $seasonService = app(SeasonService::class);
-        $hasRequest = $this->hasRequestForSeason();
+        $hasRequest ??= $this->hasRequestForSeason();
 
         $this->registrationClosedMessage = $this->season
             ? $seasonService->getRegistrationClosedMessage($this->season, $hasRequest)

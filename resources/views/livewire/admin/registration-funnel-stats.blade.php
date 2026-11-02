@@ -1,4 +1,4 @@
-<div class="space-y-6">
+<div class="page-stack">
     <h1 class="section-title">Suivi des inscriptions</h1>
 
     <div class="notice-info">
@@ -20,7 +20,7 @@
     @elseif($report['started'] === 0)
         <div class="notice-info">Aucune donnée pour cette saison.</div>
     @else
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="stat-grid">
             <div class="stat-card">
                 <div class="label-title">Parcours commencés</div>
                 <div class="label-value">{{ $report['started'] }}</div>
@@ -43,8 +43,8 @@
         </div>
 
         <div class="table-container">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
-                <thead class="bg-gray-50 dark:bg-zinc-700">
+            <table class="table-full">
+                <thead class="table-head">
                     <tr>
                         <th class="table-header">Étape atteinte</th>
                         <th class="table-header-center">Parcours</th>
@@ -52,7 +52,7 @@
                         <th class="table-header-center">Arrêts après cette étape</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
+                <tbody class="table-divider">
                     @foreach($report['steps'] as $step)
                         <tr>
                             <td class="table-cell">{{ $step['label'] }}</td>
@@ -71,9 +71,9 @@
         <div class="stat-card">
             <h2 class="section-title">Bloquées à l'ouverture du lien</h2>
             <p class="field-help">Ces familles n'ont pas abandonné : une règle les a arrêtées. Elles ne sont pas incluses dans les arrêts après « Lien ouvert ».</p>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <div class="stat-grid stat-grid--spaced">
                 @foreach($report['blocked'] as $blocked)
-                    <div class="text-center">
+                    <div class="stat-item">
                         <div class="label-value--warning">{{ $blocked['count'] }}</div>
                         <div class="label-title">{{ $blocked['label'] }}</div>
                     </div>

@@ -166,14 +166,12 @@ class RegistrationFunnel
 
     private function increment(Season $season, string $step): void
     {
-        Counter::insertOrIgnore([
-            'id' => (string) Str::uuid(),
-            'season_id' => $season->id,
-            'step' => $step,
-            'count' => 0,
-        ]);
-
-        Counter::where('season_id', $season->id)->where('step', $step)->increment('count');
+        // A single statement: an insert followed by an update can deadlock on InnoDB
+        Counter::upsert(
+            ['id' => (string) Str::uuid(), 'season_id' => $season->id, 'step' => $step, 'count' => 1],
+            ['season_id', 'step'],
+            ['count' => DB::raw('count + 1')],
+        );
     }
 
     private function percent(int $count, int $total): int

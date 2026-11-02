@@ -15,6 +15,7 @@ use App\Services\AddressValidationService;
 use App\Services\RegistrationFunnel;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
+use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -306,11 +307,35 @@ test('statistics page is limited to organizers and admins and scoped to the seas
 
     Livewire::actingAs($organizer)->test(RegistrationFunnelStats::class)
         ->assertSet('selectedSeasonId', $this->season->id)
-        ->assertSee('42')
+        ->assertViewHas('report', fn (array $report) => $report['started'] === 42)
         ->set('selectedSeasonId', $other->id)
         ->assertSee('Lien demandé')
-        ->assertDontSee('42');
+        ->assertViewHas('report', fn (array $report) => $report['started'] === 7);
 });
+
+test('different families increment the same counter', function () {
+    foreach (['first@example.com', 'second@example.com'] as $email) {
+        Livewire::test(GiftRequestForm::class, ['token' => EmailToken::createForEmail($email)->token]);
+    }
+
+    expect(funnelCount($this->season, Counter::STEP_LINK_OPENED))->toBe(2)
+        ->and(Counter::where('season_id', $this->season->id)->where('step', Counter::STEP_LINK_OPENED)->count())->toBe(1);
+});
+
+test('a family returning with an expired token not cleaned yet counts as a new registration', function () {
+    $token = EmailToken::createForEmail('returning@example.com');
+    Livewire::test(GiftRequestForm::class, ['token' => $token->token]);
+
+    $this->travel(49)->hours();
+    $newToken = EmailToken::createForEmail('returning@example.com');
+    Livewire::test(GiftRequestForm::class, ['token' => $newToken->token]);
+
+    expect(funnelCount($this->season, Counter::STEP_LINK_OPENED))->toBe(2);
+});
+
+test('the season status of the home page cannot be changed by the browser', function () {
+    Livewire::test(Home::class)->set('seasonStatus', 'none');
+})->throws(CannotUpdateLockedPropertyException::class);
 
 test('counters survive the deletion of the expired token holding the steps', function () {
     $token = EmailToken::createForEmail('expired@example.com');
