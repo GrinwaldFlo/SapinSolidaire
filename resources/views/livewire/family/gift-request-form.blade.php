@@ -288,14 +288,11 @@
                 @if($proofOfHabitationEnabled)
                     {{-- Proof of habitation --}}
                     <div class="space-y-4">
-                        <h3 class="section-title">Justificatif de domicile</h3>
+                        <h3 class="section-title">Veuillez télécharger un pdf ou une photo prouvant votre adresse (facture de téléphone, courrier, etc.)</h3>
 
                         <div class="notice-info">
-                            <p class="text-sm text-blue-800 dark:text-blue-200">
-                                📎 Veuillez télécharger une photo de justificatif de domicile (facture de téléphone, courrier, etc.)
-                            </p>
                             <p class="text-xs text-blue-600 dark:text-blue-300 mt-2">
-                                ℹ️ Formats acceptés : image (jpg, png, webp) ou PDF, maximum 10 Mo. Ce justificatif sera supprimé en fin de saison et ne sera utilisé que pour vérifier votre adresse.
+                                ℹ️ Ce justificatif sera supprimé en fin de saison et ne sera utilisé que pour vérifier votre adresse.
                             </p>
                         </div>
 
@@ -470,7 +467,7 @@
                                 </div>
 
                                 <div>
-                                    <label class="field-label">Cadeau souhaité *</label>
+                                    <label class="field-label">Cadeau souhaité (texte libre ou menu déroulant) *</label>
                                     @php $giftKey = "children.{$index}.gift"; @endphp
                                     <x-combobox
                                         :suggestions="$giftSuggestions"

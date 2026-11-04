@@ -89,7 +89,7 @@ main() {
     # Step 7: Flush sessions (forces re-login, clears stale session data)
     print_info "Flushing sessions..."
     if [ -d "storage/framework/sessions" ]; then
-        find storage/framework/sessions -type f -delete 2>/dev/null
+        find storage/framework/sessions -type f ! -name .gitignore -delete 2>/dev/null
         print_success "File sessions flushed"
     fi
     php artisan tinker --execute="try { DB::table('sessions')->truncate(); echo 'DB sessions flushed'; } catch (\Throwable \$e) {}" 2>/dev/null || true
