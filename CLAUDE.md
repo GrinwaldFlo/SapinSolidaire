@@ -216,7 +216,7 @@ Validation:
 
 ## Services Overview
 
-- SeasonService: current season status + overlap checks + getRegistrationClosedMessage() (closed when admin block setting is on or modification_deadline passed; new families blocked, registered families see their request read-only). When the season max_gifts is reached, only families without a request this season are blocked; registered families keep editing but cannot add children (getGiftLimitReachedMessage(), GiftRequestForm::$giftLimitMessage). Submissions are accepted even if they go over the limit, as long as it was not already reached.
+- SeasonService: current season status + overlap checks + getRegistrationClosedMessage() (closed when admin block setting is on or modification_deadline passed; new families blocked, registered families see their request read-only; once modification_deadline has passed, Home also hides the access link form and sendLink refuses requests, even if the admin block is on too). When the season max_gifts is reached, only families without a request this season are blocked; registered families keep editing but cannot add children (getGiftLimitReachedMessage(), GiftRequestForm::$giftLimitMessage). Submissions are accepted even if they go over the limit, as long as it was not already reached.
 - SlotAssignmentService: lazy, capacity-aware assignment and recalculation of pickup slot windows.
 - AddressValidationService: Swiss Post API validation.
 - PhoneValidationService: CH parsing/validation/formatting.

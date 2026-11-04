@@ -470,7 +470,7 @@
                                 </div>
 
                                 <div>
-                                    <label class="field-label">Cadeau souhaité *</label>
+                                    <label class="field-label">Cadeau souhaité (texte libre ou menu déroulant) *</label>
                                     @php $giftKey = "children.{$index}.gift"; @endphp
                                     <x-combobox
                                         :suggestions="$giftSuggestions"

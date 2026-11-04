@@ -301,7 +301,7 @@
                     </div>
 
                     <div>
-                        <label class="field-label">Cadeau souhaité *</label>
+                        <label class="field-label">Cadeau souhaité (texte libre ou menu déroulant) *</label>
                         <div wire:key="wizard-child-gift-{{ $currentChildIndex }}">
                             <x-combobox
                                 :suggestions="$giftSuggestions"

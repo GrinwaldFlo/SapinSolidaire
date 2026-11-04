@@ -8,6 +8,7 @@ use App\Models\Family;
 use App\Models\GiftRequest;
 use App\Models\Season;
 use App\Models\Setting;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -93,6 +94,49 @@ test('home page shows the closed message after the modification deadline', funct
     Livewire::test(Home::class)
         ->assertSee('Inscriptions closes')
         ->assertSee($this->season->fresh()->modification_deadline->format('d/m/Y'));
+});
+
+test('home page hides the access link form after the modification deadline', function () {
+    passModificationDeadline($this->season);
+
+    Livewire::test(Home::class)
+        ->assertDontSee('Entrez votre adresse e-mail pour la consulter')
+        ->assertDontSee('Recevoir le lien');
+});
+
+test('home page hides the access link form when blocked and the modification deadline has passed', function () {
+    blockRegistrations('Fermé');
+    passModificationDeadline($this->season);
+
+    Livewire::test(Home::class)
+        ->assertSee('Fermé')
+        ->assertDontSee('Recevoir le lien');
+});
+
+test('home page keeps the access link form when the maximum number of gifts is reached', function () {
+    $this->season->update(['max_gifts' => 1]);
+
+    Livewire::test(Home::class)
+        ->assertSee('Inscriptions closes')
+        ->assertSee('Entrez votre adresse e-mail pour la consulter')
+        ->assertSee('Recevoir le lien');
+});
+
+test('access link is refused after the modification deadline', function () {
+    Mail::fake();
+
+    $component = Livewire::test(Home::class)
+        ->assertSee('Recevoir le lien');
+
+    passModificationDeadline($this->season);
+
+    $component->set('email', 'late@example.com')
+        ->call('sendLink')
+        ->assertSet('emailSent', false)
+        ->assertDontSee('Recevoir le lien');
+
+    expect(EmailToken::where('email', 'late@example.com')->exists())->toBeFalse();
+    Mail::assertNothingQueued();
 });
 
 test('home page still sends an access link when registrations are closed', function () {

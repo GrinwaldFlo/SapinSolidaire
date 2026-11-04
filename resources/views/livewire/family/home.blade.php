@@ -58,34 +58,36 @@
                     @endif
                 </div>
 
-                <form wire:submit="sendLink" class="space-y-6">
-                    <div>
-                        <label for="email" class="field-label !mb-2">
-                            {{ $registrationClosedMessage ? 'Vous avez déjà fait une demande ? Entrez votre adresse e-mail pour la consulter' : 'Votre adresse e-mail' }}
-                        </label>
-                        <input
-                            type="email"
-                            id="email"
-                            wire:model="email"
-                            class="field-input"
-                            placeholder="exemple@email.com"
-                            required
-                        >
-                        @error('email')
-                            <p class="field-error mt-2">{{ $message }}</p>
-                        @enderror
-                    </div>
+                @if($canRequestAccessLink)
+                    <form wire:submit="sendLink" class="space-y-6">
+                        <div>
+                            <label for="email" class="field-label !mb-2">
+                                {{ $registrationClosedMessage ? 'Vous avez déjà fait une demande ? Entrez votre adresse e-mail pour la consulter' : 'Votre adresse e-mail' }}
+                            </label>
+                            <input
+                                type="email"
+                                id="email"
+                                wire:model="email"
+                                class="field-input"
+                                placeholder="exemple@email.com"
+                                required
+                            >
+                            @error('email')
+                                <p class="field-error mt-2">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-                    <button
-                        type="submit"
-                        class="btn-primary"
-                        wire:loading.attr="disabled"
-                        wire:loading.class="opacity-50 cursor-not-allowed"
-                    >
-                        <span wire:loading.remove>Recevoir le lien d'accès</span>
-                        <span wire:loading>Envoi en cours...</span>
-                    </button>
-                </form>
+                        <button
+                            type="submit"
+                            class="btn-primary"
+                            wire:loading.attr="disabled"
+                            wire:loading.class="opacity-50 cursor-not-allowed"
+                        >
+                            <span wire:loading.remove>Recevoir le lien d'accès</span>
+                            <span wire:loading>Envoi en cours...</span>
+                        </button>
+                    </form>
+                @endif
             @else
                 <div class="text-center">
                     <span class="text-6xl mb-4 block">✉️</span>

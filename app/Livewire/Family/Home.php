@@ -46,6 +46,10 @@ class Home extends Component
 
     public function sendLink(AccessLinkRequestGuard $guard, RegistrationFunnel $funnel): void
     {
+        if ($this->isModificationDeadlinePassed()) {
+            return;
+        }
+
         $this->validate([
             'email' => ['required', 'email'],
         ], [
@@ -82,9 +86,18 @@ class Home extends Component
         $this->emailSent = true;
     }
 
+    /**
+     * Once the deadline has passed, access links can no longer be requested.
+     */
+    private function isModificationDeadlinePassed(): bool
+    {
+        return $this->seasonStatus === 'active' && ! $this->season->canModify();
+    }
+
     public function render()
     {
         return view('livewire.family.home', [
+            'canRequestAccessLink' => ! $this->isModificationDeadlinePassed(),
             'introductionText' => CustomText::get(CustomText::HOME_INTRODUCTION),
             'pickupSlotsInfo' => CustomText::get(CustomText::HOME_PICKUP_SLOTS_INFO),
             'pickupSlots' => $this->season
