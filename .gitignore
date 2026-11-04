@@ -27,3 +27,4 @@ yarn-error.log
 /_extra/SapinImport/bin/Debug/net10.0
 /_extra/SapinImport/obj
 _doc/security-review.md
+storage/framework/sessions/*
