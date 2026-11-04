@@ -148,7 +148,7 @@
             </div>
         @elseif($this->isFamilyFormOnProofStep())
             <div class="space-y-4">
-                <h3 class="section-title">Veuillez télécharger une photo prouvant votre adresse (facture de téléphone, courrier, etc.)</h3>
+                <h3 class="section-title">Veuillez télécharger un pdf ou une photo prouvant votre adresse (facture de téléphone, courrier, etc.)</h3>
                 <div class="notice-info">
                     <p class="text-xs text-blue-600 dark:text-blue-300 mt-2">
                         ℹ️ Ce justificatif sera supprimé en fin de saison et ne sera utilisé que pour vérifier votre adresse.
