@@ -12,7 +12,7 @@
         ({{ $activeSeason->start_date->format('d/m/Y') }} - {{ $activeSeason->end_date->format('d/m/Y') }})
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <div class="stat-card">
             <div class="label-title">Familles (total hors refus définitifs)</div>
             <div class="label-value">{{ $totalFamilies }}</div>
@@ -31,6 +31,11 @@
         <div class="stat-card">
             <div class="label-title">Enfants en attente</div>
             <div class="label-value--warning">{{ $pendingChildren }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="label-title">Enfants refusés (cadeau à corriger)</div>
+            <div class="label-value--warning">{{ $rejectedChildren }}</div>
         </div>
     </div>
 
