@@ -3,7 +3,6 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Child;
-use App\Models\Family;
 use App\Models\GiftRequest;
 use App\Models\Season;
 use Livewire\Component;
@@ -11,15 +10,27 @@ use Livewire\Component;
 class Dashboard extends Component
 {
     public ?Season $activeSeason = null;
+
     public int $totalFamilies = 0;
+
     public int $totalChildren = 0;
+
     public int $rejectedFinalFamilies = 0;
+
     public int $rejectedFinalChildren = 0;
+
     public int $pendingFamilies = 0;
+
     public int $pendingChildren = 0;
+
+    public int $rejectedChildren = 0;
+
     public int $validatedChildren = 0;
+
     public int $printedChildren = 0;
+
     public int $receivedChildren = 0;
+
     public int $givenChildren = 0;
 
     public function mount(): void
@@ -61,6 +72,7 @@ class Dashboard extends Component
             ->count();
 
         $this->pendingChildren = (clone $childrenQuery)->where('status', Child::STATUS_PENDING)->count();
+        $this->rejectedChildren = (clone $childrenQuery)->where('status', Child::STATUS_REJECTED)->count();
         $this->validatedChildren = (clone $childrenQuery)->where('status', Child::STATUS_VALIDATED)->count();
         $this->printedChildren = (clone $childrenQuery)->where('status', Child::STATUS_PRINTED)->count();
         $this->receivedChildren = (clone $childrenQuery)->where('status', Child::STATUS_RECEIVED)->count();
