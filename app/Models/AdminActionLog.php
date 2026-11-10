@@ -40,6 +40,27 @@ class AdminActionLog extends Model
         ];
     }
 
+    /**
+     * Record an action made by the authenticated admin.
+     */
+    public static function record(
+        string $actionType,
+        string $description,
+        ?string $familyId = null,
+        ?string $giftRequestId = null,
+        ?string $childId = null,
+    ): self {
+        return self::create([
+            'user_id' => auth()->id(),
+            'user_label' => auth()->user()?->name,
+            'action_type' => $actionType,
+            'description' => $description,
+            'family_id' => $familyId,
+            'gift_request_id' => $giftRequestId,
+            'child_id' => $childId,
+        ]);
+    }
+
     public function getActionLabelAttribute(): string
     {
         return self::actionLabels()[$this->action_type] ?? $this->action_type;

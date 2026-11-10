@@ -23,8 +23,11 @@ class GiftDelivery extends Component
     ];
 
     public ?Season $activeSeason = null;
+
     public string $searchName = '';
+
     public ?string $selectedFamilyId = null;
+
     public bool $showMobileDetail = false;
 
     public function mount(): void
@@ -64,13 +67,13 @@ class GiftDelivery extends Component
 
     public function markAllAsGiven(string $familyId): void
     {
-        if (!$this->activeSeason) {
+        if (! $this->activeSeason) {
             return;
         }
 
         $children = Child::whereHas('giftRequest', function ($q) use ($familyId) {
             $q->where('season_id', $this->activeSeason->id)
-              ->where('family_id', $familyId);
+                ->where('family_id', $familyId);
         })
             ->where('status', Child::STATUS_RECEIVED)
             ->get();
@@ -139,7 +142,7 @@ class GiftDelivery extends Component
         $filename = 'listing-mise-en-place-'.now()->format('Y-m-d-His').'.pdf';
 
         return response()->streamDownload(
-            fn () => print($pdf->output()),
+            fn () => print ($pdf->output()),
             $filename
         );
     }
@@ -151,7 +154,7 @@ class GiftDelivery extends Component
         $selectedChildren = collect();
 
         if ($this->activeSeason && $this->searchName !== '') {
-            $families = Family::where('last_name', 'like', '%' . $this->searchName . '%')
+            $families = Family::where('last_name', 'like', '%'.$this->searchName.'%')
                 ->whereHas('giftRequests', function ($q) {
                     $q->where('season_id', $this->activeSeason->id);
                 })
@@ -169,7 +172,7 @@ class GiftDelivery extends Component
                 $selectedChildren = Child::with('giftRequest')
                     ->whereHas('giftRequest', function ($q) {
                         $q->where('season_id', $this->activeSeason->id)
-                          ->where('family_id', $this->selectedFamilyId);
+                            ->where('family_id', $this->selectedFamilyId);
                     })
                     ->where('status', Child::STATUS_RECEIVED)
                     ->orderBy('child_number')

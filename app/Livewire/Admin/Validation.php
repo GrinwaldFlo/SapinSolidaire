@@ -28,7 +28,7 @@ class Validation extends Component
 
     public ?GiftRequest $currentRequest = null;
 
-    public int $pendingFamiliesCount = 0;
+    public int $queuedFamiliesCount = 0;
 
     public int $pendingChildrenCount = 0;
 
@@ -144,7 +144,7 @@ class Validation extends Component
             return;
         }
 
-        $this->pendingFamiliesCount = $this->queueQuery()->count();
+        $this->queuedFamiliesCount = $this->queueQuery()->count();
 
         $this->pendingChildrenCount = Child::whereHas('giftRequest', function ($q) {
             $q->where('season_id', $this->activeSeason->id)
@@ -168,12 +168,12 @@ class Validation extends Component
         $combinedComments = [];
         $validatedChildren = [];
 
-        DB::transaction(function () use (&$combinedComments, &$validatedChildren) {
+        $saved = DB::transaction(function () use (&$combinedComments, &$validatedChildren) {
             $request = GiftRequest::lockForUpdate()->find($this->currentRequest->id);
 
             // The family may have changed its request (back to pending) in the meantime
             if (! $request || $request->status !== GiftRequest::STATUS_VALIDATED) {
-                return;
+                return false;
             }
 
             foreach ($this->currentRequest->children as $childModel) {
@@ -201,14 +201,24 @@ class Validation extends Component
                     $combinedComments[] = "Refus pour l'enfant {$child->first_name} :\n - ".$comment;
                 }
             }
+
+            return true;
         });
+
+        if (! $saved) {
+            session()->flash('error', "La famille a modifié sa demande pendant la validation : vos décisions n'ont pas été enregistrées. La demande doit d'abord être revalidée sur la page Validation des familles.");
+            $this->loadNextRequest();
+            $this->loadCounts();
+
+            return;
+        }
 
         $this->logValidatedChildren($validatedChildren);
 
         if (! empty($combinedComments)) {
             $finalComment = implode("\n-------------------\n", $combinedComments);
             // The family stays validated: it receives a correction email (with access link), never a final rejection
-            $this->sendRejectionEmail($this->currentRequest->family->email, false, $finalComment);
+            $this->sendRejectionEmail($this->currentRequest, false, $finalComment);
         }
 
         $this->loadNextRequest();
@@ -228,15 +238,13 @@ class Validation extends Component
             : ($family?->email ?? 'Famille inconnue');
 
         foreach ($children as $child) {
-            AdminActionLog::create([
-                'user_id' => auth()->id(),
-                'user_label' => auth()->user()?->name,
-                'action_type' => AdminActionLog::ACTION_CHILD_VALIDATED,
-                'description' => "Validation enfant: {$child->first_name} (famille: {$familyName})",
-                'family_id' => $this->currentRequest?->family_id,
-                'gift_request_id' => $child->gift_request_id,
-                'child_id' => $child->id,
-            ]);
+            AdminActionLog::record(
+                AdminActionLog::ACTION_CHILD_VALIDATED,
+                "Validation enfant: {$child->first_name} (famille: {$familyName})",
+                $this->currentRequest?->family_id,
+                $child->gift_request_id,
+                $child->id,
+            );
         }
     }
 

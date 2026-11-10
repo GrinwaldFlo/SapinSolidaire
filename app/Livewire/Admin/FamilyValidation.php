@@ -21,9 +21,13 @@ class FamilyValidation extends Component
     private const LOCK_TTL_SECONDS = 300;
 
     public ?Season $activeSeason = null;
+
     public ?GiftRequest $currentRequest = null;
+
     public int $pendingFamiliesCount = 0;
+
     public array $predefinedRejectionMessages = [];
+
     public string $selectedRejectionMessageKey = '';
 
     public function mount(): void
@@ -122,7 +126,7 @@ class FamilyValidation extends Component
         $status = $this->isFinalRejection ? GiftRequest::STATUS_REJECTED_FINAL : GiftRequest::STATUS_REJECTED;
 
         // Only the request assigned to this validator, while still pending, can be rejected
-        $email = DB::transaction(function () use ($status) {
+        $rejectedRequest = DB::transaction(function () use ($status) {
             $request = GiftRequest::with('family')->lockForUpdate()->find($this->currentRequest->id);
 
             if (! $request || $request->status !== GiftRequest::STATUS_PENDING) {
@@ -139,11 +143,11 @@ class FamilyValidation extends Component
                 ]);
             }
 
-            return (string) $request->family->email;
+            return $request;
         });
 
-        if ($email !== null) {
-            $this->sendRejectionEmail($email, $this->isFinalRejection, $this->rejectionComment);
+        if ($rejectedRequest instanceof GiftRequest) {
+            $this->sendRejectionEmail($rejectedRequest, $this->isFinalRejection, $this->rejectionComment);
         }
 
         $this->closeRejectionModal();

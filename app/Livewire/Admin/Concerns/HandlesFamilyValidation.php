@@ -42,14 +42,12 @@ trait HandlesFamilyValidation
         });
 
         if ($validatedRequest instanceof GiftRequest) {
-            AdminActionLog::create([
-                'user_id' => auth()->id(),
-                'user_label' => auth()->user()?->name,
-                'action_type' => AdminActionLog::ACTION_FAMILY_VALIDATED,
-                'description' => 'Validation famille: '.$validatedRequest->family?->full_name,
-                'family_id' => $validatedRequest->family_id,
-                'gift_request_id' => $validatedRequest->id,
-            ]);
+            AdminActionLog::record(
+                AdminActionLog::ACTION_FAMILY_VALIDATED,
+                'Validation famille: '.$validatedRequest->family?->full_name,
+                $validatedRequest->family_id,
+                $validatedRequest->id,
+            );
         }
 
         $this->loadNextRequest();

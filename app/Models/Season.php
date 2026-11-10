@@ -119,7 +119,7 @@ class Season extends Model
      */
     public function canModify(): bool
     {
-        if (!$this->modification_deadline) {
+        if (! $this->modification_deadline) {
             return true;
         }
 

@@ -138,17 +138,7 @@
                                 </button>
                             </td>
                             <td class="table-cell">
-                                <span class="
-                                    @switch($child->status)
-                                        @case('pending') badge--pending @break
-                                        @case('validated') badge--validated @break
-                                        @case('rejected') badge--warning @break
-                                        @case('rejected_final') badge--rejected @break
-                                        @case('printed') badge--printed @break
-                                        @case('received') badge--received @break
-                                        @case('given') badge--given @break
-                                    @endswitch
-                                ">
+                                <span class="{{ $child->status_badge_class }}">
                                     {{ $child->status_label }}
                                 </span>
                             </td>
@@ -168,17 +158,7 @@
                 <div class="card-sm space-y-3">
                     <div class="flex items-center justify-between gap-2">
                         <span class="font-mono font-bold detail-value">{{ $child->code ?? '—' }}</span>
-                        <span class="
-                            @switch($child->status)
-                                @case('pending') badge--pending @break
-                                @case('validated') badge--validated @break
-                                @case('rejected') badge--warning @break
-                                @case('rejected_final') badge--rejected @break
-                                @case('printed') badge--printed @break
-                                @case('received') badge--received @break
-                                @case('given') badge--given @break
-                            @endswitch
-                        ">
+                        <span class="{{ $child->status_badge_class }}">
                             {{ $child->status_label }}
                         </span>
                     </div>
@@ -188,17 +168,17 @@
                             <span class="ml-1 text-xs text-orange-600 dark:text-orange-400">(A)</span>
                         @endif
                     </div>
-                    <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-muted">
-                        <div><span class="detail-value text-sm">Genre :</span> @if($child->gender !== 'unspecified') {{ $child->gender_label }} @else - @endif</div>
-                        <div><span class="detail-value text-sm">Âge :</span> {{ $child->formatted_age }}</div>
-                        <div class="col-span-2 inline-edit">
-                            <span><span class="detail-value text-sm">Cadeau :</span> {{ $child->gift }}</span>
+                    <div class="mobile-detail-grid">
+                        <div><span class="detail-value">Genre :</span> @if($child->gender !== 'unspecified') {{ $child->gender_label }} @else - @endif</div>
+                        <div><span class="detail-value">Âge :</span> {{ $child->formatted_age }}</div>
+                        <div class="mobile-detail-full inline-edit">
+                            <span><span class="detail-value">Cadeau :</span> {{ $child->gift }}</span>
                             @if($canEditGift)
                                 <x-admin.gift-edit-button :childId="$child->id" />
                             @endif
                         </div>
-                        <div class="col-span-2">
-                            <span class="detail-value text-sm">Famille :</span>
+                        <div class="mobile-detail-full">
+                            <span class="detail-value">Famille :</span>
                             <button wire:click="showFamilyDetails('{{ $child->giftRequest->family->id }}')" class="link font-medium">
                                 {{ $child->giftRequest->family->last_name }}
                             </button>

@@ -12,6 +12,7 @@ class FamilySubmissionLog extends Model
     use HasFactory, HasUuids;
 
     public const ACTION_CREATED = 'created';
+
     public const ACTION_UPDATED = 'updated';
 
     /**

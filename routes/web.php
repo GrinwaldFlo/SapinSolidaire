@@ -1,9 +1,9 @@
 <?php
 
-use App\Livewire\Admin\ChildrenMonitoring;
-use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\AdminActionLogs;
+use App\Livewire\Admin\ChildrenMonitoring;
 use App\Livewire\Admin\CssShowcase;
+use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\DevTools;
 use App\Livewire\Admin\FamilyDuplicates;
 use App\Livewire\Admin\FamilyManagement;
@@ -14,9 +14,9 @@ use App\Livewire\Admin\GiftReception;
 use App\Livewire\Admin\GiftsManagement;
 use App\Livewire\Admin\LabelGeneration;
 use App\Livewire\Admin\RegistrationFunnelStats;
-use App\Livewire\Admin\SentMailsLog;
 use App\Livewire\Admin\SeasonManagement;
 use App\Livewire\Admin\SendConfirmations;
+use App\Livewire\Admin\SentMailsLog;
 use App\Livewire\Admin\SettingsManagement;
 use App\Livewire\Admin\TextsManagement;
 use App\Livewire\Admin\UserManagement;
@@ -88,7 +88,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
 
     // Proof of habitation image - Family validator, Validator or Admin
     Route::get('/justificatif/{giftRequest}', function (GiftRequest $giftRequest) {
-        if (!$giftRequest->proof_of_habitation_path || !Storage::disk('local')->exists($giftRequest->proof_of_habitation_path)) {
+        if (! $giftRequest->proof_of_habitation_path || ! Storage::disk('local')->exists($giftRequest->proof_of_habitation_path)) {
             abort(404);
         }
 
@@ -99,7 +99,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
 
     // Download generated PDF - Organizer or Admin
     Route::get('/cartes/telecharger/{generatedPdf}', function (GeneratedPdf $generatedPdf) {
-        if (!Storage::disk('local')->exists($generatedPdf->path)) {
+        if (! Storage::disk('local')->exists($generatedPdf->path)) {
             abort(404);
         }
 

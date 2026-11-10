@@ -120,7 +120,7 @@ test('gift validation does not list requests of families still pending', functio
 
     Livewire::test(Validation::class)
         ->assertSet('currentRequest', null)
-        ->assertSet('pendingFamiliesCount', 0)
+        ->assertSet('queuedFamiliesCount', 0)
         ->assertSet('pendingChildrenCount', 0)
         ->assertDontSee('Alice');
 });
@@ -133,7 +133,7 @@ test('gift validation does not list validated families without pending children'
 
     Livewire::test(Validation::class)
         ->assertSet('currentRequest', null)
-        ->assertSet('pendingFamiliesCount', 0);
+        ->assertSet('queuedFamiliesCount', 0);
 });
 
 test('gift validation has no family decision', function () {
@@ -144,7 +144,7 @@ test('gift validation has no family decision', function () {
 
     Livewire::test(Validation::class)
         ->assertSet('currentRequest.id', $this->giftRequest->id)
-        ->assertSet('pendingFamiliesCount', 1)
+        ->assertSet('queuedFamiliesCount', 1)
         ->assertSet('pendingChildrenCount', 1)
         ->assertDontSee('Décision pour la famille')
         ->assertDontSee('Refuser définitivement');
@@ -269,10 +269,26 @@ test('gift validation ignores a request sent back to pending in the meantime', f
     // The family edits its request: back to the family validation queue
     $this->giftRequest->setStatus(GiftRequest::STATUS_PENDING);
 
-    $component->call('submitValidation');
+    Mail::fake();
+
+    $component->call('submitValidation')
+        ->assertSee("vos décisions n'ont pas été enregistrées");
 
     expect($child->fresh()->status)->toBe(Child::STATUS_PENDING);
     expect($child->fresh()->code)->toBeNull();
+    Mail::assertNothingQueued();
+});
+
+test('gift validation shows the real status badge of already decided children', function () {
+    $this->giftRequest->update(['family_number' => 1, 'status' => GiftRequest::STATUS_VALIDATED]);
+    ($this->makeChild)($this->giftRequest, 'Alice', Child::STATUS_REJECTED_FINAL);
+    ($this->makeChild)($this->giftRequest, 'Bob');
+
+    $this->actingAs($this->admin);
+
+    Livewire::test(Validation::class)
+        ->assertSeeHtml('<span class="badge--rejected">')
+        ->assertSeeHtml('<span class="badge--pending">');
 });
 
 test('child correction keeps the family validated and sends a correction email', function () {

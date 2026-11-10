@@ -11,20 +11,32 @@ use Livewire\Component;
 class SeasonManagement extends Component
 {
     public bool $showForm = false;
+
     public bool $editing = false;
+
     public ?string $editingId = null;
 
     // Form fields
     public string $name = '';
+
     public string $startDate = '';
+
     public string $endDate = '';
+
     public ?string $modificationDeadline = null;
+
     public ?int $maxGifts = null;
+
     public ?string $pickupAddress = null;
+
     public ?int $familyLimitPerSlot = null;
+
     public ?int $slotDurationMinutes = null;
+
     public ?string $responsibleName = null;
+
     public ?string $responsiblePhone = null;
+
     public ?string $responsibleEmail = null;
 
     // Pickup slot entries

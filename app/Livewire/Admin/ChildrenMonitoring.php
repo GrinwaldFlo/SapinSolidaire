@@ -135,11 +135,9 @@ class ChildrenMonitoring extends Component
 
             $family = $child->giftRequest?->family;
 
-            AdminActionLog::create([
-                'user_id' => auth()->id(),
-                'user_label' => auth()->user()?->name,
-                'action_type' => AdminActionLog::ACTION_GIFT_UPDATED,
-                'description' => sprintf(
+            AdminActionLog::record(
+                AdminActionLog::ACTION_GIFT_UPDATED,
+                sprintf(
                     'Cadeau modifié pour %s%s%s : « %s » → « %s »',
                     $child->first_name,
                     $child->code ? ' ('.$child->code.')' : '',
@@ -147,10 +145,10 @@ class ChildrenMonitoring extends Component
                     $previousGift,
                     $newGift
                 ),
-                'family_id' => $family?->id,
-                'gift_request_id' => $child->gift_request_id,
-                'child_id' => $child->id,
-            ]);
+                $family?->id,
+                $child->gift_request_id,
+                $child->id,
+            );
         }
 
         $this->cancelGiftEdit();

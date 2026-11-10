@@ -19,17 +19,17 @@ class SetLocale
         $locale = session('locale');
 
         // If not in session, try to detect from Accept-Language header
-        if (!$locale) {
+        if (! $locale) {
             $locale = $this->getLocaleFromHeader($request);
         }
 
         // Fallback to config default if no locale detected
-        if (!$locale) {
+        if (! $locale) {
             $locale = config('app.locale', 'en');
         }
 
         // Ensure locale is one of supported locales (en, fr)
-        if (!in_array($locale, ['en', 'fr'])) {
+        if (! in_array($locale, ['en', 'fr'])) {
             $locale = config('app.locale', 'en');
         }
 
@@ -49,7 +49,7 @@ class SetLocale
     {
         $acceptLanguage = $request->header('Accept-Language');
 
-        if (!$acceptLanguage) {
+        if (! $acceptLanguage) {
             return null;
         }
 

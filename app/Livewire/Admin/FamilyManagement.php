@@ -208,14 +208,7 @@ class FamilyManagement extends Component
 
     private function logAction(string $type, string $description, Family $family, ?GiftRequest $request): void
     {
-        AdminActionLog::create([
-            'user_id' => auth()->id(),
-            'user_label' => auth()->user()?->name,
-            'action_type' => $type,
-            'description' => $description,
-            'family_id' => $family->id,
-            'gift_request_id' => $request?->id,
-        ]);
+        AdminActionLog::record($type, $description, $family->id, $request?->id);
     }
 
     public function render()

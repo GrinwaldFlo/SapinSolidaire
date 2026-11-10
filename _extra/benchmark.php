@@ -2,13 +2,13 @@
 // Configuration
 $iterations = 1000000;
 $fileIterations = 10000;
-$tempFile = sys_get_temp_dir() . '/benchmark_test_' . uniqid() . '.tmp';
+$tempFile = sys_get_temp_dir().'/benchmark_test_'.uniqid().'.tmp';
 
 $start = microtime(true);
 
 // CPU Test - Math
 $mathStart = microtime(true);
-for($i=0; $i<$iterations; $i++) {
+for ($i = 0; $i < $iterations; $i++) {
     $a = sqrt($i);
     $b = sin($i);
     $c = cos($i);
@@ -18,8 +18,8 @@ $mathTime = $mathEnd - $mathStart;
 
 // CPU Test - String
 $stringStart = microtime(true);
-$string = "benchmark_test_string";
-for($i=0; $i<$iterations; $i++) {
+$string = 'benchmark_test_string';
+for ($i = 0; $i < $iterations; $i++) {
     $x = str_shuffle($string);
     $y = md5($x);
 }
@@ -28,7 +28,7 @@ $stringTime = $stringEnd - $stringStart;
 
 // File Test - Write
 $fileWriteStart = microtime(true);
-for($i=0; $i<$fileIterations; $i++) {
+for ($i = 0; $i < $fileIterations; $i++) {
     file_put_contents($tempFile, "Benchmark test data line $i\n", FILE_APPEND);
 }
 $fileWriteEnd = microtime(true);
@@ -36,14 +36,14 @@ $fileWriteTime = $fileWriteEnd - $fileWriteStart;
 
 // File Test - Read
 $fileReadStart = microtime(true);
-for($i=0; $i<$fileIterations; $i++) {
+for ($i = 0; $i < $fileIterations; $i++) {
     $content = file_get_contents($tempFile);
 }
 $fileReadEnd = microtime(true);
 $fileReadTime = $fileReadEnd - $fileReadStart;
 
 // Cleanup temp file
-if(file_exists($tempFile)) {
+if (file_exists($tempFile)) {
     unlink($tempFile);
 }
 

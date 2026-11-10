@@ -2,9 +2,15 @@
     <div class="flex items-center justify-between">
         <h1 class="section-title">Validation des demandes</h1>
         <div class="text-sm text-muted">
-            {{ $pendingFamiliesCount }} famille(s) validée(s) · {{ $pendingChildrenCount }} enfant(s) en attente
+            {{ $queuedFamiliesCount }} famille(s) validée(s) · {{ $pendingChildrenCount }} enfant(s) en attente
         </div>
     </div>
+
+    @if(session()->has('error'))
+        <div class="notice-error">
+            {{ session('error') }}
+        </div>
+    @endif
 
     @if(!$activeSeason)
         <div class="notice-warning">
@@ -60,11 +66,11 @@
                         </div>
 
                         <div class="flex items-center gap-4">
-                            <span class="{{ $child->status === 'pending' ? 'badge--pending' : 'badge--validated' }}">
+                            <span class="{{ $child->status_badge_class }}">
                                 {{ $child->status_label }}
                             </span>
 
-                            @if($child->status === 'pending')
+                            @if($child->status === \App\Models\Child::STATUS_PENDING)
                             <div class="w-full mt-4 p-3 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg">
                                 <div class="flex flex-wrap gap-4 mb-3">
                                     <label class="flex items-center space-x-2">
@@ -110,9 +116,9 @@
                 <button wire:click="skip" class="btn-secondary">
                     Passer au suivant
                 </button>
-                <button wire:click="submitValidation" 
-                        class="btn-confirm {{ $this->has_pending_decisions ? 'bg-gray-400 opacity-50 cursor-not-allowed' : '' }}"
-                        @if($this->has_pending_decisions) disabled @endif>
+                <button wire:click="submitValidation"
+                        class="btn-confirm"
+                        @disabled($this->has_pending_decisions)>
                     Soumettre la validation
                 </button>
             </div>

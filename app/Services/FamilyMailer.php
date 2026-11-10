@@ -30,13 +30,11 @@ class FamilyMailer
             ? $request->family->full_name
             : $familyEmail;
 
-        AdminActionLog::create([
-            'user_id' => auth()->id(),
-            'user_label' => auth()->user()?->name,
-            'action_type' => AdminActionLog::ACTION_EMAIL_SENT,
-            'description' => "E-mail envoyé ({$mail->envelope()->subject}) à {$familyEmail} (famille: {$familyLabel})",
-            'family_id' => $request->family_id,
-            'gift_request_id' => $request->id,
-        ]);
+        AdminActionLog::record(
+            AdminActionLog::ACTION_EMAIL_SENT,
+            "E-mail envoyé ({$mail->envelope()->subject}) à {$familyEmail} (famille: {$familyLabel})",
+            $request->family_id,
+            $request->id,
+        );
     }
 }

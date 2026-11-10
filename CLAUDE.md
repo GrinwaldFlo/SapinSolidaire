@@ -331,9 +331,11 @@ If a class is missing:
 2. Include dark variants if color is involved.
 3. Document it in this guide.
 
+Disabled confirm buttons: btn-confirm is greyed out automatically with the disabled attribute (use @disabled()).
+
 Notice banners: notice-info / notice-warning / notice-success / notice-error, with notice-title, notice-list and notice-text (free text keeping line breaks) for structured content inside them. Add notice-spaced for bottom spacing above following content.
 
-Layout helpers: badge-row (wrapping badges), family-actions (stacked per-row action controls), contact-list (stacked contact lines), inline-form + inline-form-field (single-line field + submit button), button-row (wrapping row of buttons under content), page-stack (vertical spacing between page sections). Button size modifier: btn-sm (combine with any btn-* class). Icon button: btn-icon + btn-icon-svg (small icon-only button, e.g. pen to edit a value), inline-edit (value followed by its inline edit button).
+Layout helpers: mobile-detail-grid + mobile-detail-full (two-column details of a mobile card, full-width item), badge-row (wrapping badges), family-actions (stacked per-row action controls), contact-list (stacked contact lines), inline-form + inline-form-field (single-line field + submit button), button-row (wrapping row of buttons under content), page-stack (vertical spacing between page sections). Button size modifier: btn-sm (combine with any btn-* class). Icon button: btn-icon + btn-icon-svg (small icon-only button, e.g. pen to edit a value), inline-edit (value followed by its inline edit button).
 
 Modal helpers: modal-backdrop, modal-panel (modal-panel--small for a simple dialog box), modal-header, modal-body, modal-footer (+ modal-actions for right-aligned OK / Annuler buttons).
 

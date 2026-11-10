@@ -16,10 +16,10 @@ beforeEach(function () {
 
 test('gifts management page loads configured values', function () {
     Setting::setValue(Setting::GIFT_SUGGESTIONS, "Livre\nJeu");
-    Setting::setValue(Setting::GIFT_RESTRICTIONS, "arme");
-    Setting::setValue(Setting::GIFTS_WITH_SHOE_SIZE, "basket");
-    Setting::setValue(Setting::GIFTS_WITH_SIZE, "veste");
-    Setting::setValue(Setting::LARGE_GIFTS, "vélo");
+    Setting::setValue(Setting::GIFT_RESTRICTIONS, 'arme');
+    Setting::setValue(Setting::GIFTS_WITH_SHOE_SIZE, 'basket');
+    Setting::setValue(Setting::GIFTS_WITH_SIZE, 'veste');
+    Setting::setValue(Setting::LARGE_GIFTS, 'vélo');
 
     $this->actingAs($this->admin);
 

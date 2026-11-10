@@ -14,12 +14,19 @@ use Livewire\Component;
 class SendConfirmations extends Component
 {
     public ?Season $activeSeason = null;
+
     public int $familyCount = 0;
+
     public bool $sending = false;
+
     public bool $hasEnoughSlots = true;
+
     public int $totalCapacity = 0;
+
     public int $familiesNeeded = 0;
+
     public ?string $previewHtml = null;
+
     public bool $showPreview = false;
 
     public function mount(): void
