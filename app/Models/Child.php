@@ -13,15 +13,23 @@ class Child extends Model
     use HasFactory, HasUuids;
 
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_VALIDATED = 'validated';
+
     public const STATUS_REJECTED = 'rejected';
+
     public const STATUS_REJECTED_FINAL = 'rejected_final';
+
     public const STATUS_PRINTED = 'printed';
+
     public const STATUS_RECEIVED = 'received';
+
     public const STATUS_GIVEN = 'given';
 
     public const GENDER_BOY = 'boy';
+
     public const GENDER_GIRL = 'girl';
+
     public const GENDER_UNSPECIFIED = 'unspecified';
 
     /**
@@ -95,7 +103,20 @@ class Child extends Model
      */
     public function getFormattedAgeAttribute(): string
     {
-        return $this->age === 0 ? 'bébé' : $this->age . ' ans';
+        return $this->age === 0 ? 'bébé' : $this->age.' ans';
+    }
+
+    /**
+     * Height and shoe size summary (e.g. "120 cm / P. 32"), null when neither is set.
+     */
+    public function getSizesSummaryAttribute(): ?string
+    {
+        $parts = array_filter([
+            $this->height ? $this->height.' cm' : null,
+            $this->shoe_size ? 'P. '.$this->shoe_size : null,
+        ]);
+
+        return $parts === [] ? null : implode(' / ', $parts);
     }
 
     /**
@@ -161,6 +182,23 @@ class Child extends Model
     }
 
     /**
+     * Get the badge CSS class matching the status.
+     */
+    public function getStatusBadgeClassAttribute(): string
+    {
+        return match ($this->status) {
+            self::STATUS_PENDING => 'badge--pending',
+            self::STATUS_VALIDATED => 'badge--validated',
+            self::STATUS_REJECTED => 'badge--warning',
+            self::STATUS_REJECTED_FINAL => 'badge--rejected',
+            self::STATUS_PRINTED => 'badge--printed',
+            self::STATUS_RECEIVED => 'badge--received',
+            self::STATUS_GIVEN => 'badge--given',
+            default => 'badge--neutral',
+        };
+    }
+
+    /**
      * Get gender label in French.
      */
     public function getGenderLabelAttribute(): string
@@ -206,7 +244,7 @@ class Child extends Model
      */
     public static function generateCode(string $prefix, int $familyNumber, int $childNumber, int $padding = 4): string
     {
-        return $prefix . str_pad((string) $familyNumber, $padding, '0', STR_PAD_LEFT) . '/' . $childNumber;
+        return $prefix.str_pad((string) $familyNumber, $padding, '0', STR_PAD_LEFT).'/'.$childNumber;
     }
 
     /**

@@ -13,7 +13,9 @@ class UserManagement extends Component
     use WithPagination;
 
     public $roles;
+
     public ?string $editingUserId = null;
+
     public array $selectedRoles = [];
 
     public function mount(): void

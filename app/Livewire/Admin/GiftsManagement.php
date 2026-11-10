@@ -8,9 +8,13 @@ use Livewire\Component;
 class GiftsManagement extends Component
 {
     public string $giftSuggestions = '';
+
     public string $giftRestrictions = '';
+
     public string $giftsWithShoeSize = '';
+
     public string $giftsWithSize = '';
+
     public string $largeGifts = '';
 
     public function mount(): void

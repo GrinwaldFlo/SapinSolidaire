@@ -52,7 +52,7 @@ class SlotAssignmentService
             for ($t = $start; ($t + $durationSec) <= $end; $t += $durationSec) {
                 $slotStart = date('Y-m-d H:i:s', $t);
                 $slotEnd = date('Y-m-d H:i:s', $t + $durationSec);
-                $key = $slotStart . '|' . $slotEnd;
+                $key = $slotStart.'|'.$slotEnd;
 
                 $current = $countMap[$key] ?? 0;
 

@@ -188,13 +188,15 @@ FamilyValidation:
 - Queue of pending family requests ordered by updated_at.
 - Cache locks prevent two admins validating same request simultaneously.
 - Can validate, reject, or final-reject with comment templates.
+- Only page where the family is decided (with duplicate check); assigns the family number on validation.
 
-Validation:
+Validation (gift validation):
 
-- Handles both family and children decisions in one pass.
-- Uses DB transaction and row-level locks for consistency.
-- Assigns family numbers and child codes during validation.
-- Sends correction/final rejection emails from shared concern trait.
+- Only lists validated requests that still have pending children; no family decision.
+- Decides pending children only (validate, correction, final refusal); other children are left untouched.
+- Uses DB transaction and row-level locks for consistency; skips a request sent back to pending in the meantime.
+- Assigns child codes during validation.
+- Sends correction emails from the shared SendsRejectionEmail concern.
 
 ### Label and distribution flow
 
@@ -254,7 +256,7 @@ Admin components:
 
 - Dashboard: season-scoped KPI counters.
 - FamilyValidation: household-level queue validation.
-- Validation: family + child queue validation with lock and transaction semantics.
+- Validation: child (gift) queue validation of validated families, with lock and transaction semantics.
 - LabelGeneration: status transition to printed + PDF generation/history.
 - GiftReception: printed -> received transitions.
 - GiftDelivery: received -> given transitions.
@@ -329,13 +331,17 @@ If a class is missing:
 2. Include dark variants if color is involved.
 3. Document it in this guide.
 
+Disabled confirm buttons: btn-confirm is greyed out automatically with the disabled attribute (use @disabled()).
+
 Notice banners: notice-info / notice-warning / notice-success / notice-error, with notice-title, notice-list and notice-text (free text keeping line breaks) for structured content inside them. Add notice-spaced for bottom spacing above following content.
 
-Layout helpers: badge-row (wrapping badges), family-actions (stacked per-row action controls), contact-list (stacked contact lines), inline-form + inline-form-field (single-line field + submit button), button-row (wrapping row of buttons under content), page-stack (vertical spacing between page sections). Button size modifier: btn-sm (combine with any btn-* class).
+Layout helpers: mobile-detail-grid + mobile-detail-full (two-column details of a mobile card, full-width item), badge-row (wrapping badges), family-actions (stacked per-row action controls), contact-list (stacked contact lines), inline-form + inline-form-field (single-line field + submit button), button-row (wrapping row of buttons under content), page-stack (vertical spacing between page sections). Button size modifier: btn-sm (combine with any btn-* class). Icon button: btn-icon + btn-icon-svg (small icon-only button, e.g. pen to edit a value), inline-edit (value followed by its inline edit button), gift-sizes (muted height / shoe size next to a gift, from Child::sizes_summary).
+
+Modal helpers: modal-backdrop, modal-panel (modal-panel--small for a simple dialog box), modal-header, modal-body, modal-footer (+ modal-actions for right-aligned OK / Annuler buttons).
 
 Table helpers: table-full (full width table with row dividers), table-head (thead background), table-divider (tbody row dividers), table-header-center + table-cell-center (centered matrix columns), access-granted / access-denied (✓ / — marks of the role access matrix).
 
-Statistic helpers: stat-bar (horizontal bar on a progress element, no inline width needed), stat-grid (responsive three-column grid, stat-grid--spaced adds top spacing), stat-item (centered statistic inside a stat-grid).
+Statistic helpers: stat-bar (horizontal bar on a progress element, no inline width needed), stat-grid (responsive three-column grid, stat-grid--spaced adds top spacing), stat-item (centered statistic inside a stat-grid), stat-pair (two statistics side by side inside one stat-card, e.g. families / children).
 
 Text helpers: text-multiline (free text keeping line breaks, e.g. custom texts outside notices), intro-text (introduction paragraph on public pages, combine with text-multiline for custom texts).
 

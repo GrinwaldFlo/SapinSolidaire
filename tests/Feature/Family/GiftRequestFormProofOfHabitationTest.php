@@ -6,7 +6,6 @@ use App\Models\Family;
 use App\Models\GiftRequest;
 use App\Models\Season;
 use App\Models\Setting;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
@@ -104,4 +103,3 @@ test('submit does not require new upload when proof already exists', function ()
         ->call('submit')
         ->assertHasNoErrors('proofOfHabitation');
 });
-

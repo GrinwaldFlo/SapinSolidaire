@@ -55,10 +55,7 @@
                     <td>{{ $child->formatted_age }}</td>
                     <td>{{ $child->gift }}</td>
                     <td>
-                        @if($child->height){{ $child->height }} cm @endif
-                        @if($child->height && $child->shoe_size)/ @endif
-                        @if($child->shoe_size)P. {{ $child->shoe_size }}@endif
-                        @if(!$child->height && !$child->shoe_size)—@endif
+                        {{ $child->sizes_summary ?? '—' }}
                     </td>
                     <td>{{ $child->code ?? '—' }}</td>
                 </tr>

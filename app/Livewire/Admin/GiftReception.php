@@ -9,8 +9,11 @@ use Livewire\Component;
 class GiftReception extends Component
 {
     public ?Season $activeSeason = null;
+
     public ?Child $selectedChild = null;
+
     public string $familyNumber = '';
+
     public bool $showMobileDetail = false;
 
     public function mount(): void
@@ -79,7 +82,7 @@ class GiftReception extends Component
             $children = Child::with('giftRequest.family')
                 ->whereHas('giftRequest', function ($q) use ($familyNum) {
                     $q->where('season_id', $this->activeSeason->id)
-                      ->where('family_number', $familyNum);
+                        ->where('family_number', $familyNum);
                 })
                 ->where('status', Child::STATUS_PRINTED)
                 ->orderBy('child_number')

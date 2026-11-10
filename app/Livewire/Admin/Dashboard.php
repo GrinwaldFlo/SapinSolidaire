@@ -23,6 +23,8 @@ class Dashboard extends Component
 
     public int $pendingChildren = 0;
 
+    public int $rejectedFamilies = 0;
+
     public int $rejectedChildren = 0;
 
     public int $validatedChildren = 0;
@@ -69,6 +71,10 @@ class Dashboard extends Component
 
         $this->pendingFamilies = GiftRequest::where('season_id', $this->activeSeason->id)
             ->where('status', GiftRequest::STATUS_PENDING)
+            ->count();
+
+        $this->rejectedFamilies = (clone $familiesQuery)
+            ->where('status', GiftRequest::STATUS_REJECTED)
             ->count();
 
         $this->pendingChildren = (clone $childrenQuery)->where('status', Child::STATUS_PENDING)->count();

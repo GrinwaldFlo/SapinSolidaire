@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Log;
 class AddressValidationService
 {
     protected ?string $apiUser;
+
     protected ?string $apiPassword;
+
     protected string $apiUrl = 'https://webservices.post.ch:17023/IN_SYNSYN_EXT/REST/v1/';
 
     public function __construct()
@@ -25,30 +27,35 @@ class AddressValidationService
     public function validate(string $streetname, string $houseNo, string $zipcode, string $townname): array
     {
         $streetname = trim($streetname);
-        $houseNo    = trim($houseNo);
-        $zipcode    = trim($zipcode);
-        $townname   = trim($townname);
+        $houseNo = trim($houseNo);
+        $zipcode = trim($zipcode);
+        $townname = trim($townname);
 
-        if (empty($streetname) || empty($houseNo) || empty($zipcode) || empty($townname))
+        if (empty($streetname) || empty($houseNo) || empty($zipcode) || empty($townname)) {
             return ['Valide' => false, 'Message' => "Merci de remplir tous les champs de l'adresse", 'FormatedAddress' => []];
+        }
 
         $verification = $this->buildingverification4($streetname, $houseNo, $zipcode, $townname);
         Log::debug('Swiss Post buildingverification4 result', ['verification' => $verification]);
-        if (empty($verification))
+        if (empty($verification)) {
             return ['Valide' => true, 'Message' => '', 'FormatedAddress' => []];
+        }
 
-        if ($verification["PSTAT"] == 1 || $verification["PSTAT"] == 2)
+        if ($verification['PSTAT'] == 1 || $verification['PSTAT'] == 2) {
             return ['Valide' => true, 'Message' => '', 'FormatedAddress' => $verification];
+        }
 
-        if ($verification["PSTAT"] >= 6 || $verification["PSTAT"] == 4)
+        if ($verification['PSTAT'] >= 6 || $verification['PSTAT'] == 4) {
             return ['Valide' => false, 'Message' => 'Adresse invalide, merci de la contrôler', 'FormatedAddress' => $verification];
+        }
 
-        if ($zipcode != $verification["ZipCode"])
+        if ($zipcode != $verification['ZipCode']) {
             return ['Valide' => false, 'Message' => 'Code postal erroné', 'FormatedAddress' => $verification];
+        }
 
-/* Disabled for now
-        if (!str_contains($verification["TownName"], $townname))
-            return ['Valide' => false, 'Message' => 'Ville erronée', 'FormatedAddress' => $verification];*/
+        /* Disabled for now
+                if (!str_contains($verification["TownName"], $townname))
+                    return ['Valide' => false, 'Message' => 'Ville erronée', 'FormatedAddress' => $verification];*/
 
         return ['Valide' => true, 'Message' => '', 'FormatedAddress' => $verification];
     }
@@ -62,29 +69,30 @@ class AddressValidationService
     {
         $townname = trim($townname);
 
-
-        if (empty($townname))
-            return ['Valide' => false, 'Message' => "Merci de remplir la ville", 'FormatedAddress' => []];
+        if (empty($townname)) {
+            return ['Valide' => false, 'Message' => 'Merci de remplir la ville', 'FormatedAddress' => []];
+        }
 
         $verification = $this->buildingverification4('', '', '', $townname);
         Log::debug('Swiss Post buildingverification4 result', ['verification' => $verification]);
-        if (empty($verification))
+        if (empty($verification)) {
             return ['Valide' => false, 'Message' => 'Erreur de réception', 'FormatedAddress' => []];
+        }
 
+        // TODO Fix needed
+        return ['Valide' => true, 'Message' => '', 'FormatedAddress' => $verification];
 
-        //TODO Fix needed
-        return ['Valide' => true, 'Message' => "", 'FormatedAddress' => $verification];
-
-
-
-        if ($verification["PSTAT"] == 1 || $verification["PSTAT"] == 2)
+        if ($verification['PSTAT'] == 1 || $verification['PSTAT'] == 2) {
             return ['Valide' => true, 'Message' => '', 'FormatedAddress' => $verification];
+        }
 
-        if ($verification["PSTAT"] == 6)
-            return ['Valide' => true, 'Message' => "", 'FormatedAddress' => $verification];
+        if ($verification['PSTAT'] == 6) {
+            return ['Valide' => true, 'Message' => '', 'FormatedAddress' => $verification];
+        }
 
-        if ($verification["PSTAT"] >= 6 || $verification["PSTAT"] == 4)
+        if ($verification['PSTAT'] >= 6 || $verification['PSTAT'] == 4) {
             return ['Valide' => false, 'Message' => "Ville $townname invalide", 'FormatedAddress' => $verification];
+        }
 
         return ['Valide' => true, 'Message' => '', 'FormatedAddress' => $verification];
     }

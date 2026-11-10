@@ -20,8 +20,11 @@ class FamilyDuplicates extends Component
 
     // Merge modal state
     public bool $showMergeModal = false;
+
     public ?string $familyAId = null;
+
     public ?string $familyBId = null;
+
     public ?array $currentPair = null;
 
     /** Which family to keep: 'A' or 'B' */
@@ -42,12 +45,12 @@ class FamilyDuplicates extends Component
 
     private function pairsCacheKey(): string
     {
-        return 'family_pairs_' . $this->getId();
+        return 'family_pairs_'.$this->getId();
     }
 
     private function modalCacheKey(): string
     {
-        return 'merge_modal_' . $this->getId();
+        return 'merge_modal_'.$this->getId();
     }
 
     public function scan(): void
@@ -62,7 +65,7 @@ class FamilyDuplicates extends Component
             return [
                 'familyA' => $this->serializeFamilyLight($pair['familyA']),
                 'familyB' => $this->serializeFamilyLight($pair['familyB']),
-                'score'   => $pair['score'],
+                'score' => $pair['score'],
                 'details' => $pair['details'],
             ];
         })->values()->all();
@@ -121,7 +124,7 @@ class FamilyDuplicates extends Component
 
     public function confirmMerge(): void
     {
-        $keepFamily   = $this->keepSide === 'A'
+        $keepFamily = $this->keepSide === 'A'
             ? Family::findOrFail($this->familyAId)
             : Family::findOrFail($this->familyBId);
 
@@ -133,7 +136,7 @@ class FamilyDuplicates extends Component
         $service->merge($keepFamily, $removeFamily, $this->overrideFields);
 
         // Remove all pairs involving either merged family from the cache.
-        $keepId   = $keepFamily->id;
+        $keepId = $keepFamily->id;
         $removeId = $removeFamily->id;
         $pairs = Cache::get($this->pairsCacheKey(), []);
         $pairs = array_values(array_filter($pairs, function ($pair) use ($keepId, $removeId) {
@@ -150,7 +153,7 @@ class FamilyDuplicates extends Component
 
     public function dismissPair(string $familyAId, string $familyBId): void
     {
-        $this->dismissedKeys[] = $familyAId . '_' . $familyBId;
+        $this->dismissedKeys[] = $familyAId.'_'.$familyBId;
     }
 
     /** Minimal data stored in $pairs to keep Livewire payload small. */
@@ -170,16 +173,16 @@ class FamilyDuplicates extends Component
             ->toArray();
 
         return [
-            'id'          => $family->id,
-            'first_name'  => $family->first_name,
-            'last_name'   => $family->last_name,
-            'email'       => $family->email,
-            'phone'       => $family->formatted_phone,
+            'id' => $family->id,
+            'first_name' => $family->first_name,
+            'last_name' => $family->last_name,
+            'email' => $family->email,
+            'phone' => $family->formatted_phone,
             'street_name' => $family->street_name,
-            'house_no'    => $family->house_no,
+            'house_no' => $family->house_no,
             'postal_code' => $family->postal_code,
-            'city'        => $family->city,
-            'seasons'     => $seasons,
+            'city' => $family->city,
+            'seasons' => $seasons,
         ];
     }
 
@@ -195,25 +198,25 @@ class FamilyDuplicates extends Component
             ->toArray();
 
         return [
-            'id'          => $family->id,
-            'email'       => $family->email,
-            'first_name'  => $family->first_name,
-            'last_name'   => $family->last_name,
-            'phone'       => $family->formatted_phone,
+            'id' => $family->id,
+            'email' => $family->email,
+            'first_name' => $family->first_name,
+            'last_name' => $family->last_name,
+            'phone' => $family->formatted_phone,
             'street_name' => $family->street_name,
-            'house_no'    => $family->house_no,
+            'house_no' => $family->house_no,
             'postal_code' => $family->postal_code,
-            'city'        => $family->city,
-            'seasons'     => $seasons,
-            'requests'    => $family->giftRequests->sortBy(fn ($r) => $r->season?->start_date)->map(fn ($r) => [
-                'id'         => $r->id,
-                'season'     => $r->season?->name ?? '—',
+            'city' => $family->city,
+            'seasons' => $seasons,
+            'requests' => $family->giftRequests->sortBy(fn ($r) => $r->season?->start_date)->map(fn ($r) => [
+                'id' => $r->id,
+                'season' => $r->season?->name ?? '—',
                 'start_date' => $r->season?->start_date,
-                'status'     => $r->status,
-                'children'   => $r->children->map(fn ($c) => [
+                'status' => $r->status,
+                'children' => $r->children->map(fn ($c) => [
                     'first_name' => $c->first_name,
                     'birth_year' => $c->birth_year,
-                    'gender'     => $c->gender,
+                    'gender' => $c->gender,
                 ])->toArray(),
             ])->toArray(),
         ];
@@ -228,7 +231,7 @@ class FamilyDuplicates extends Component
         } else {
             $dismissed = $this->dismissedKeys;
             $pairs = collect($cachedPairs)->filter(function ($pair) use ($dismissed) {
-                $key = $pair['familyA']['id'] . '_' . $pair['familyB']['id'];
+                $key = $pair['familyA']['id'].'_'.$pair['familyB']['id'];
 
                 return ! in_array($key, $dismissed);
             })->values();

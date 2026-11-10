@@ -3,10 +3,12 @@
 namespace App\Livewire\Admin;
 
 use App\Livewire\Admin\Concerns\ShowsFamilyModal;
+use App\Models\AdminActionLog;
 use App\Models\Child;
 use App\Models\Season;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -25,11 +27,21 @@ class ChildrenMonitoring extends Component
     ];
 
     public $seasons;
+
     public ?string $selectedSeasonId = null;
+
     public string $statusFilter = '';
+
     public string $search = '';
+
     public string $sortBy = 'first_name';
+
     public string $sortDirection = 'asc';
+
+    #[Locked]
+    public ?string $editingGiftChildId = null;
+
+    public string $giftDraft = '';
 
     public function mount(): void
     {
@@ -69,6 +81,84 @@ class ChildrenMonitoring extends Component
         $this->resetPage();
     }
 
+    public function editGift(string $childId): void
+    {
+        $this->ensureAdmin();
+
+        $child = Child::find($childId);
+
+        if (! $child) {
+            return;
+        }
+
+        $this->resetErrorBag('giftDraft');
+        $this->editingGiftChildId = $child->id;
+        $this->giftDraft = $child->gift;
+    }
+
+    public function cancelGiftEdit(): void
+    {
+        $this->editingGiftChildId = null;
+        $this->giftDraft = '';
+        $this->resetErrorBag('giftDraft');
+    }
+
+    public function saveGift(): void
+    {
+        $this->ensureAdmin();
+
+        $this->giftDraft = trim($this->giftDraft);
+
+        $this->validate(
+            ['giftDraft' => ['required', 'string', 'max:255']],
+            [
+                'giftDraft.required' => 'Le cadeau est obligatoire.',
+                'giftDraft.max' => 'Le cadeau ne peut pas dépasser 255 caractères.',
+            ]
+        );
+
+        $child = $this->editingGiftChildId
+            ? Child::with('giftRequest.family')->find($this->editingGiftChildId)
+            : null;
+
+        if (! $child) {
+            $this->cancelGiftEdit();
+
+            return;
+        }
+
+        $previousGift = $child->gift;
+        $newGift = $this->giftDraft;
+
+        if ($newGift !== $previousGift) {
+            $child->update(['gift' => $newGift]);
+
+            $family = $child->giftRequest?->family;
+
+            AdminActionLog::record(
+                AdminActionLog::ACTION_GIFT_UPDATED,
+                sprintf(
+                    'Cadeau modifié pour %s%s%s : « %s » → « %s »',
+                    $child->first_name,
+                    $child->code ? ' ('.$child->code.')' : '',
+                    $family ? ', famille '.$family->last_name : '',
+                    $previousGift,
+                    $newGift
+                ),
+                $family?->id,
+                $child->gift_request_id,
+                $child->id,
+            );
+        }
+
+        $this->cancelGiftEdit();
+    }
+
+    private function ensureAdmin(): void
+    {
+        abort_unless(auth()->user()?->isAdmin(), 403);
+    }
+
     public function exportPdf()
     {
         if (! $this->selectedSeasonId) {
@@ -90,19 +180,19 @@ class ChildrenMonitoring extends Component
             $search = $this->search;
             $query->where(function ($q) use ($search) {
                 $q->where('code', 'like', "%{$search}%")
-                  ->orWhere('first_name', 'like', "%{$search}%")
-                  ->orWhere('gift', 'like', "%{$search}%")
-                  ->orWhereHas('giftRequest.family', function ($q) use ($search) {
-                      $q->where('last_name', 'like', "%{$search}%");
-                  });
+                    ->orWhere('first_name', 'like', "%{$search}%")
+                    ->orWhere('gift', 'like', "%{$search}%")
+                    ->orWhereHas('giftRequest.family', function ($q) use ($search) {
+                        $q->where('last_name', 'like', "%{$search}%");
+                    });
             });
         }
 
         if ($this->sortBy === 'family_name') {
             $query->join('gift_requests', 'children.gift_request_id', '=', 'gift_requests.id')
-                  ->join('families', 'gift_requests.family_id', '=', 'families.id')
-                  ->orderBy('families.last_name', $this->sortDirection)
-                  ->select('children.*');
+                ->join('families', 'gift_requests.family_id', '=', 'families.id')
+                ->orderBy('families.last_name', $this->sortDirection)
+                ->select('children.*');
         } else {
             $query->orderBy($this->sortBy, $this->sortDirection);
         }
@@ -162,19 +252,19 @@ class ChildrenMonitoring extends Component
                 $search = $this->search;
                 $query->where(function ($q) use ($search) {
                     $q->where('code', 'like', "%{$search}%")
-                      ->orWhere('first_name', 'like', "%{$search}%")
-                      ->orWhere('gift', 'like', "%{$search}%")
-                      ->orWhereHas('giftRequest.family', function ($q) use ($search) {
-                          $q->where('last_name', 'like', "%{$search}%");
-                      });
+                        ->orWhere('first_name', 'like', "%{$search}%")
+                        ->orWhere('gift', 'like', "%{$search}%")
+                        ->orWhereHas('giftRequest.family', function ($q) use ($search) {
+                            $q->where('last_name', 'like', "%{$search}%");
+                        });
                 });
             }
 
             if ($this->sortBy === 'family_name') {
                 $query->join('gift_requests', 'children.gift_request_id', '=', 'gift_requests.id')
-                      ->join('families', 'gift_requests.family_id', '=', 'families.id')
-                      ->orderBy('families.last_name', $this->sortDirection)
-                      ->select('children.*');
+                    ->join('families', 'gift_requests.family_id', '=', 'families.id')
+                    ->orderBy('families.last_name', $this->sortDirection)
+                    ->select('children.*');
             } else {
                 $query->orderBy($this->sortBy, $this->sortDirection);
             }
@@ -184,6 +274,7 @@ class ChildrenMonitoring extends Component
 
         return view('livewire.admin.children-monitoring', [
             'children' => $children,
+            'canEditGift' => (bool) auth()->user()?->isAdmin(),
             'statuses' => [
                 Child::STATUS_PENDING => 'À valider',
                 Child::STATUS_VALIDATED => 'Validé',

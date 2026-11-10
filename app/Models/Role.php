@@ -12,10 +12,15 @@ class Role extends Model
     use HasFactory, HasUuids;
 
     public const VISITOR = 'visitor';
+
     public const VALIDATOR = 'validator';
+
     public const FAMILY_VALIDATOR = 'validateFamily';
+
     public const ORGANIZER = 'organizer';
+
     public const RECEPTION = 'reception';
+
     public const ADMIN = 'admin';
 
     /**

@@ -1,7 +1,7 @@
 <?php
 /**
  * Server Diagnostic Page - Connection & Performance Analysis
- * 
+ *
  * Access: /server-diag.php?token=YOUR_SECRET_TOKEN
  * Set the token below or via DIAG_TOKEN environment variable.
  */
@@ -12,7 +12,7 @@
 $expectedToken = getenv('DIAG_TOKEN');
 
 if ($expectedToken === false || $expectedToken === '') {
-    $envFile = __DIR__ . '/../.env';
+    $envFile = __DIR__.'/../.env';
     if (is_readable($envFile)) {
         $envContent = file_get_contents($envFile);
         if ($envContent !== false && preg_match('/^DIAG_TOKEN=(.*)$/m', $envContent, $m)) {
@@ -28,7 +28,7 @@ if ($expectedToken === false || $expectedToken === '') {
     exit;
 }
 
-if (!isset($_GET['token']) || !hash_equals($expectedToken, $_GET['token'])) {
+if (! isset($_GET['token']) || ! hash_equals($expectedToken, $_GET['token'])) {
     http_response_code(403);
     echo 'Forbidden';
     exit;
@@ -39,17 +39,20 @@ $startTime = microtime(true);
 // ============================================================
 // Helper functions
 // ============================================================
-function formatBytes(int $bytes): string {
+function formatBytes(int $bytes): string
+{
     $units = ['B', 'KB', 'MB', 'GB'];
     $i = 0;
     while ($bytes >= 1024 && $i < count($units) - 1) {
         $bytes /= 1024;
         $i++;
     }
-    return round($bytes, 2) . ' ' . $units[$i];
+
+    return round($bytes, 2).' '.$units[$i];
 }
 
-function statusBadge(string $status, string $text): string {
+function statusBadge(string $status, string $text): string
+{
     $colors = [
         'ok' => '#27ae60',
         'warn' => '#f39c12',
@@ -57,6 +60,7 @@ function statusBadge(string $status, string $text): string {
         'info' => '#3498db',
     ];
     $color = $colors[$status] ?? $colors['info'];
+
     return "<span style='display:inline-block;padding:2px 10px;border-radius:12px;background:{$color};color:#fff;font-size:0.85em;font-weight:600;'>{$text}</span>";
 }
 
@@ -72,7 +76,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
 $postMaxSize = ini_get('post_max_size');
 $maxInputVars = ini_get('max_input_vars');
 $disabledFunctions = explode(',', str_replace(' ', '', ini_get('disable_functions')));
-$opcacheStatusCheckable = !in_array('opcache_get_status', $disabledFunctions);
+$opcacheStatusCheckable = ! in_array('opcache_get_status', $disabledFunctions);
 $opcacheEnabled = false;
 $opcacheDetectionMethod = 'function';
 if ($opcacheStatusCheckable && function_exists('opcache_get_status')) {
@@ -116,18 +120,23 @@ $dbError = null;
 $dbActiveConnections = null;
 
 // Try to use Laravel's .env for DB config
-$envFile = __DIR__ . '/../.env';
+$envFile = __DIR__.'/../.env';
 $dbConfig = [];
 if (file_exists($envFile)) {
     $envContent = file_get_contents($envFile);
-    preg_match('/^DB_HOST=(.+)$/m', $envContent, $m); $dbConfig['host'] = trim($m[1] ?? '');
-    preg_match('/^DB_PORT=(.+)$/m', $envContent, $m); $dbConfig['port'] = trim($m[1] ?? '3306');
-    preg_match('/^DB_DATABASE=(.+)$/m', $envContent, $m); $dbConfig['database'] = trim($m[1] ?? '');
-    preg_match('/^DB_USERNAME=(.+)$/m', $envContent, $m); $dbConfig['username'] = trim($m[1] ?? '');
-    preg_match('/^DB_PASSWORD=(.+)$/m', $envContent, $m); $dbConfig['password'] = trim($m[1] ?? '');
+    preg_match('/^DB_HOST=(.+)$/m', $envContent, $m);
+    $dbConfig['host'] = trim($m[1] ?? '');
+    preg_match('/^DB_PORT=(.+)$/m', $envContent, $m);
+    $dbConfig['port'] = trim($m[1] ?? '3306');
+    preg_match('/^DB_DATABASE=(.+)$/m', $envContent, $m);
+    $dbConfig['database'] = trim($m[1] ?? '');
+    preg_match('/^DB_USERNAME=(.+)$/m', $envContent, $m);
+    $dbConfig['username'] = trim($m[1] ?? '');
+    preg_match('/^DB_PASSWORD=(.+)$/m', $envContent, $m);
+    $dbConfig['password'] = trim($m[1] ?? '');
 }
 
-if (!empty($dbConfig['host'])) {
+if (! empty($dbConfig['host'])) {
     try {
         $dbStart = microtime(true);
         $pdo = new PDO(
@@ -177,7 +186,7 @@ $fpmStatus = null;
 $fpmStatusUrl = 'http://127.0.0.1/fpm-status';
 // Try to get FPM status via local request (often not available on shared hosting)
 $fpmContext = stream_context_create(['http' => ['timeout' => 2, 'ignore_errors' => true]]);
-$fpmResponse = @file_get_contents($fpmStatusUrl . '?json', false, $fpmContext);
+$fpmResponse = @file_get_contents($fpmStatusUrl.'?json', false, $fpmContext);
 if ($fpmResponse) {
     $fpmStatus = json_decode($fpmResponse, true);
 }
@@ -189,17 +198,17 @@ $netstatOutput = null;
 $connectionsByState = [];
 if (function_exists('exec')) {
     @exec('ss -s 2>/dev/null || netstat -s 2>/dev/null', $netOutput, $retCode);
-    if ($retCode === 0 && !empty($netOutput)) {
+    if ($retCode === 0 && ! empty($netOutput)) {
         $netstatOutput = implode("\n", $netOutput);
     }
 
     // Count connections to this server
     @exec("ss -tan 2>/dev/null | awk '{print \$1}' | sort | uniq -c | sort -rn 2>/dev/null", $connOutput);
-    if (!empty($connOutput)) {
+    if (! empty($connOutput)) {
         foreach ($connOutput as $line) {
             $parts = preg_split('/\s+/', trim($line));
             if (count($parts) >= 2) {
-                $connectionsByState[$parts[1]] = (int)$parts[0];
+                $connectionsByState[$parts[1]] = (int) $parts[0];
             }
         }
     }
@@ -210,7 +219,7 @@ if (function_exists('exec')) {
 // ============================================================
 $recentIPs = [];
 $botHits = [];
-$logFile = __DIR__ . '/../storage/logs/laravel.log';
+$logFile = __DIR__.'/../storage/logs/laravel.log';
 $accessLogPaths = [
     '/var/log/nginx/access.log',
     '/var/log/apache2/access.log',
@@ -228,7 +237,7 @@ foreach ($accessLogPaths as $logPath) {
             // Seek near end
             fseek($fp, -100000, SEEK_END);
             fgets($fp); // skip partial line
-            while (!feof($fp)) {
+            while (! feof($fp)) {
                 $lines[] = fgets($fp);
             }
             fclose($fp);
@@ -251,11 +260,11 @@ $botSignatures = [
 // ============================================================
 // 8. Session files count (indicator of active/stale sessions)
 // ============================================================
-$sessionPath = __DIR__ . '/../storage/framework/sessions';
+$sessionPath = __DIR__.'/../storage/framework/sessions';
 $sessionCount = 0;
 $staleSessionCount = 0;
 if (is_dir($sessionPath)) {
-    $files = glob($sessionPath . '/*');
+    $files = glob($sessionPath.'/*');
     $sessionCount = count($files);
     $oneHourAgo = time() - 3600;
     foreach ($files as $file) {
@@ -271,9 +280,9 @@ if (is_dir($sessionPath)) {
 $queueJobCount = null;
 $failedJobCount = null;
 $cacheEntryCount = null;
-if (isset($pdo) || (!empty($dbConfig['host']) && $dbStatus === 'Connected')) {
+if (isset($pdo) || (! empty($dbConfig['host']) && $dbStatus === 'Connected')) {
     try {
-        if (!isset($pdo)) {
+        if (! isset($pdo)) {
             $pdo = new PDO(
                 "mysql:host={$dbConfig['host']};port={$dbConfig['port']};dbname={$dbConfig['database']}",
                 $dbConfig['username'],
@@ -282,13 +291,13 @@ if (isset($pdo) || (!empty($dbConfig['host']) && $dbStatus === 'Connected')) {
             );
         }
 
-        $stmt = $pdo->query("SELECT COUNT(*) as cnt FROM jobs");
+        $stmt = $pdo->query('SELECT COUNT(*) as cnt FROM jobs');
         $queueJobCount = $stmt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? null;
 
-        $stmt = $pdo->query("SELECT COUNT(*) as cnt FROM failed_jobs");
+        $stmt = $pdo->query('SELECT COUNT(*) as cnt FROM failed_jobs');
         $failedJobCount = $stmt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? null;
 
-        $stmt = $pdo->query("SELECT COUNT(*) as cnt FROM cache");
+        $stmt = $pdo->query('SELECT COUNT(*) as cnt FROM cache');
         $cacheEntryCount = $stmt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? null;
 
         $pdo = null;
@@ -349,65 +358,65 @@ $totalTime = round((microtime(true) - $startTime) * 1000, 2);
     // ============================================================
     $issues = [];
 
-    if ($dbLatency !== null && $dbLatency > 200) {
-        $issues[] = ['error', "⚠️ Database latency is very high ({$dbLatency}ms). This causes PHP processes to wait, piling up nginx connections."];
-    } elseif ($dbLatency !== null && $dbLatency > 50) {
-        $issues[] = ['warn', "⚡ Database latency is elevated ({$dbLatency}ms). Consider using a local DB or connection pooling."];
-    }
+if ($dbLatency !== null && $dbLatency > 200) {
+    $issues[] = ['error', "⚠️ Database latency is very high ({$dbLatency}ms). This causes PHP processes to wait, piling up nginx connections."];
+} elseif ($dbLatency !== null && $dbLatency > 50) {
+    $issues[] = ['warn', "⚡ Database latency is elevated ({$dbLatency}ms). Consider using a local DB or connection pooling."];
+}
 
-    if ($dbActiveConnections !== null && $dbMaxConnections !== null) {
-        $ratio = $dbActiveConnections / $dbMaxConnections;
-        if ($ratio > 0.8) {
-            $issues[] = ['error', "🔴 Database connection usage is critical: {$dbActiveConnections}/{$dbMaxConnections}"];
-        } elseif ($ratio > 0.5) {
-            $issues[] = ['warn', "🟡 Database connections are elevated: {$dbActiveConnections}/{$dbMaxConnections}"];
-        }
+if ($dbActiveConnections !== null && $dbMaxConnections !== null) {
+    $ratio = $dbActiveConnections / $dbMaxConnections;
+    if ($ratio > 0.8) {
+        $issues[] = ['error', "🔴 Database connection usage is critical: {$dbActiveConnections}/{$dbMaxConnections}"];
+    } elseif ($ratio > 0.5) {
+        $issues[] = ['warn', "🟡 Database connections are elevated: {$dbActiveConnections}/{$dbMaxConnections}"];
     }
+}
 
-    if ($loadAvg !== null && $cpuCount !== null && $loadAvg[0] > $cpuCount * 2) {
-        $issues[] = ['error', "🔴 Server load is very high: " . round($loadAvg[0], 2) . " (with {$cpuCount} CPUs)"];
-    } elseif ($loadAvg !== null && $cpuCount !== null && $loadAvg[0] > $cpuCount) {
-        $issues[] = ['warn', "🟡 Server load is elevated: " . round($loadAvg[0], 2) . " (with {$cpuCount} CPUs)"];
-    }
+if ($loadAvg !== null && $cpuCount !== null && $loadAvg[0] > $cpuCount * 2) {
+    $issues[] = ['error', '🔴 Server load is very high: '.round($loadAvg[0], 2)." (with {$cpuCount} CPUs)"];
+} elseif ($loadAvg !== null && $cpuCount !== null && $loadAvg[0] > $cpuCount) {
+    $issues[] = ['warn', '🟡 Server load is elevated: '.round($loadAvg[0], 2)." (with {$cpuCount} CPUs)"];
+}
 
-    if ($sessionCount > 100) {
-        $issues[] = ['warn', "📁 High session file count: {$sessionCount} ({$staleSessionCount} stale). Bots may be generating sessions."];
-    }
+if ($sessionCount > 100) {
+    $issues[] = ['warn', "📁 High session file count: {$sessionCount} ({$staleSessionCount} stale). Bots may be generating sessions."];
+}
 
-    if ($queueJobCount !== null && $queueJobCount > 50) {
-        $issues[] = ['warn', "📬 Queue has {$queueJobCount} pending jobs. This may indicate the queue worker is stopped or too slow."];
-    }
+if ($queueJobCount !== null && $queueJobCount > 50) {
+    $issues[] = ['warn', "📬 Queue has {$queueJobCount} pending jobs. This may indicate the queue worker is stopped or too slow."];
+}
 
-    if ($failedJobCount !== null && $failedJobCount > 0) {
-        $issues[] = ['warn', "❌ There are {$failedJobCount} failed jobs in the queue."];
-    }
+if ($failedJobCount !== null && $failedJobCount > 0) {
+    $issues[] = ['warn', "❌ There are {$failedJobCount} failed jobs in the queue."];
+}
 
-    if (!$opcacheEnabled) {
-        $issues[] = ['warn', "⚡ OPcache is not enabled. This significantly slows PHP response time on every request."];
-    }
+if (! $opcacheEnabled) {
+    $issues[] = ['warn', '⚡ OPcache is not enabled. This significantly slows PHP response time on every request.'];
+}
 
-    if ($diskFree !== false && $diskTotal !== false) {
-        $diskUsagePercent = round((1 - $diskFree / $diskTotal) * 100, 1);
-        if ($diskUsagePercent > 90) {
-            $issues[] = ['error', "💾 Disk usage is critical: {$diskUsagePercent}%"];
-        }
+if ($diskFree !== false && $diskTotal !== false) {
+    $diskUsagePercent = round((1 - $diskFree / $diskTotal) * 100, 1);
+    if ($diskUsagePercent > 90) {
+        $issues[] = ['error', "💾 Disk usage is critical: {$diskUsagePercent}%"];
     }
+}
 
-    if (isset($connectionsByState['CLOSE-WAIT']) && $connectionsByState['CLOSE-WAIT'] > 50) {
-        $issues[] = ['error', "🔴 High CLOSE-WAIT connections ({$connectionsByState['CLOSE-WAIT']}): indicates connection leak!"];
-    }
-    if (isset($connectionsByState['TIME-WAIT']) && $connectionsByState['TIME-WAIT'] > 200) {
-        $issues[] = ['warn', "🟡 Many TIME-WAIT connections ({$connectionsByState['TIME-WAIT']}): connections not being reused."];
-    }
+if (isset($connectionsByState['CLOSE-WAIT']) && $connectionsByState['CLOSE-WAIT'] > 50) {
+    $issues[] = ['error', "🔴 High CLOSE-WAIT connections ({$connectionsByState['CLOSE-WAIT']}): indicates connection leak!"];
+}
+if (isset($connectionsByState['TIME-WAIT']) && $connectionsByState['TIME-WAIT'] > 200) {
+    $issues[] = ['warn', "🟡 Many TIME-WAIT connections ({$connectionsByState['TIME-WAIT']}): connections not being reused."];
+}
 
-    if (empty($issues)) {
-        echo '<div class="alert alert-ok">✅ No obvious issues detected from this diagnostic. The problem may be external (bots, shared hosting contention, or nginx config).</div>';
-    } else {
-        foreach ($issues as [$severity, $message]) {
-            echo "<div class='alert alert-{$severity}'>{$message}</div>";
-        }
+if (empty($issues)) {
+    echo '<div class="alert alert-ok">✅ No obvious issues detected from this diagnostic. The problem may be external (bots, shared hosting contention, or nginx config).</div>';
+} else {
+    foreach ($issues as [$severity, $message]) {
+        echo "<div class='alert alert-{$severity}'>{$message}</div>";
     }
-    ?>
+}
+?>
 
     <!-- PHP & Server -->
     <div class="card">
@@ -466,9 +475,9 @@ $totalTime = round((microtime(true) - $startTime) * 1000, 2);
     <!-- Database -->
     <div class="card">
         <h2>🗄️ Database</h2>
-        <?php if ($dbError): ?>
+        <?php if ($dbError) { ?>
             <div class="alert alert-error">Connection failed: <?= htmlspecialchars($dbError) ?></div>
-        <?php endif; ?>
+        <?php } ?>
         <div class="grid">
             <div class="metric">
                 <div class="label">Status</div>
@@ -477,24 +486,24 @@ $totalTime = round((microtime(true) - $startTime) * 1000, 2);
             <div class="metric">
                 <div class="label">Latency</div>
                 <div class="value <?= ($dbLatency ?? 0) > 200 ? 'error' : (($dbLatency ?? 0) > 50 ? 'warn' : 'ok') ?>">
-                    <?= $dbLatency !== null ? $dbLatency . 'ms' : 'N/A' ?>
+                    <?= $dbLatency !== null ? $dbLatency.'ms' : 'N/A' ?>
                 </div>
             </div>
             <div class="metric">
                 <div class="label">Host</div>
                 <div class="value" style="font-size:0.85em"><?= htmlspecialchars($dbConfig['host'] ?? 'N/A') ?></div>
             </div>
-            <?php if ($dbActiveConnections !== null): ?>
+            <?php if ($dbActiveConnections !== null) { ?>
             <div class="metric">
                 <div class="label">Active Connections</div>
                 <div class="value"><?= $dbActiveConnections ?><?= isset($dbMaxConnections) ? " / {$dbMaxConnections}" : '' ?></div>
             </div>
-            <?php endif; ?>
+            <?php } ?>
         </div>
     </div>
 
     <!-- Server Load -->
-    <?php if ($loadAvg !== null): ?>
+    <?php if ($loadAvg !== null) { ?>
     <div class="card">
         <h2>📊 Server Load</h2>
         <div class="grid">
@@ -510,32 +519,32 @@ $totalTime = round((microtime(true) - $startTime) * 1000, 2);
                 <div class="label">15 min avg</div>
                 <div class="value"><?= round($loadAvg[2], 2) ?></div>
             </div>
-            <?php if ($cpuCount): ?>
+            <?php if ($cpuCount) { ?>
             <div class="metric">
                 <div class="label">CPU Cores</div>
                 <div class="value"><?= $cpuCount ?></div>
             </div>
-            <?php endif; ?>
+            <?php } ?>
         </div>
     </div>
-    <?php endif; ?>
+    <?php } ?>
 
     <!-- Network Connections -->
-    <?php if (!empty($connectionsByState)): ?>
+    <?php if (! empty($connectionsByState)) { ?>
     <div class="card">
         <h2>🌐 Network Connections</h2>
         <div class="grid">
-            <?php foreach ($connectionsByState as $state => $count): ?>
+            <?php foreach ($connectionsByState as $state => $count) { ?>
             <div class="metric">
                 <div class="label"><?= htmlspecialchars($state) ?></div>
                 <div class="value <?= ($state === 'CLOSE-WAIT' && $count > 50) ? 'error' : (($state === 'TIME-WAIT' && $count > 200) ? 'warn' : '') ?>">
                     <?= $count ?>
                 </div>
             </div>
-            <?php endforeach; ?>
+            <?php } ?>
         </div>
     </div>
-    <?php endif; ?>
+    <?php } ?>
 
     <!-- Sessions -->
     <div class="card">
@@ -550,11 +559,11 @@ $totalTime = round((microtime(true) - $startTime) * 1000, 2);
                 <div class="value <?= $staleSessionCount > 50 ? 'warn' : '' ?>"><?= $staleSessionCount ?></div>
             </div>
         </div>
-        <?php if ($sessionCount > 100): ?>
+        <?php if ($sessionCount > 100) { ?>
             <div class="alert alert-warn" style="margin-top:12px;">
                 High session count may indicate bots creating sessions. Consider adding bot protection (e.g., robots.txt, rate limiting).
             </div>
-        <?php endif; ?>
+        <?php } ?>
     </div>
 
     <!-- Queue & Cache -->
@@ -581,7 +590,7 @@ $totalTime = round((microtime(true) - $startTime) * 1000, 2);
     </div>
 
     <!-- Disk -->
-    <?php if ($diskFree !== false && $diskTotal !== false): ?>
+    <?php if ($diskFree !== false && $diskTotal !== false) { ?>
     <div class="card">
         <h2>💾 Disk</h2>
         <div class="grid">
@@ -600,10 +609,10 @@ $totalTime = round((microtime(true) - $startTime) * 1000, 2);
             </div>
         </div>
     </div>
-    <?php endif; ?>
+    <?php } ?>
 
     <!-- PHP-FPM Status -->
-    <?php if ($fpmStatus): ?>
+    <?php if ($fpmStatus) { ?>
     <div class="card">
         <h2>⚙️ PHP-FPM</h2>
         <div class="grid">
@@ -635,7 +644,7 @@ $totalTime = round((microtime(true) - $startTime) * 1000, 2);
             </div>
         </div>
     </div>
-    <?php endif; ?>
+    <?php } ?>
 
     <!-- Recommendations -->
     <div class="card">
@@ -682,16 +691,16 @@ $totalTime = round((microtime(true) - $startTime) * 1000, 2);
         <h2 style="cursor:pointer;" onclick="const s=document.getElementById('phpinfo-section');s.style.display=s.style.display==='none'?'block':'none';">🛠️ PHPINFO <span style='font-size:0.8em;color:#888;'>(click to toggle)</span></h2>
         <div id="phpinfo-section" style="display:none;">
             <?php
-            ob_start();
-            phpinfo();
-            $phpinfo = ob_get_clean();
-            // Remove DOCTYPE, html, head, and body tags for embedding
-            $phpinfo = preg_replace('/<!DOCTYPE html.*?<body>/is', '', $phpinfo);
-            $phpinfo = preg_replace('/<\/body>.*?<\/html>/is', '', $phpinfo);
-            // Style override for dark background
-            $phpinfo = str_replace('body {', 'body { background: #16213e !important; color: #e0e0e0 !important;', $phpinfo);
-            echo '<div style="overflow-x:auto; max-height:600px; background:#0f3460; border-radius:8px; padding:10px;">' . $phpinfo . '</div>';
-            ?>
+        ob_start();
+phpinfo();
+$phpinfo = ob_get_clean();
+// Remove DOCTYPE, html, head, and body tags for embedding
+$phpinfo = preg_replace('/<!DOCTYPE html.*?<body>/is', '', $phpinfo);
+$phpinfo = preg_replace('/<\/body>.*?<\/html>/is', '', $phpinfo);
+// Style override for dark background
+$phpinfo = str_replace('body {', 'body { background: #16213e !important; color: #e0e0e0 !important;', $phpinfo);
+echo '<div style="overflow-x:auto; max-height:600px; background:#0f3460; border-radius:8px; padding:10px;">'.$phpinfo.'</div>';
+?>
         </div>
     </div>
 </div>

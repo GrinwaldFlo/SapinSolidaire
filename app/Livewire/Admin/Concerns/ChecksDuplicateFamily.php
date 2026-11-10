@@ -31,10 +31,10 @@ trait ChecksDuplicateFamily
             $result = $service->score($currentFamily, $other);
             if ($result['score'] >= $threshold) {
                 $this->potentialDuplicates[] = [
-                    'id'         => $other->id,
+                    'id' => $other->id,
                     'first_name' => $other->first_name,
-                    'last_name'  => $other->last_name,
-                    'score'      => $result['score'],
+                    'last_name' => $other->last_name,
+                    'score' => $result['score'],
                 ];
             }
         }

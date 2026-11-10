@@ -13,10 +13,15 @@ class SentMailLog extends Model
     use HasFactory, HasUuids;
 
     public const PURPOSE_ACCESS_LINK = 'Lien d\'accès au formulaire';
+
     public const PURPOSE_CORRECTION_REQUEST = 'Demande de correction';
+
     public const PURPOSE_FINAL_REJECTION = 'Refus définitif';
+
     public const PURPOSE_GIFT_CONFIRMATION = 'Confirmation de réception des cadeaux';
+
     public const PURPOSE_REQUEST_COMPLETE = 'Demande complète (cartes imprimées)';
+
     public const PURPOSE_ACCESS_LINK_FLOOD_ALERT = 'Alerte : demandes de liens bloquées';
 
     /**

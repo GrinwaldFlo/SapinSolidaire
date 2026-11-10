@@ -12,10 +12,59 @@ class AdminActionLog extends Model
     use HasFactory, HasUuids;
 
     public const ACTION_FAMILY_VALIDATED = 'family_validated';
+
     public const ACTION_CHILD_VALIDATED = 'child_validated';
+
     public const ACTION_FAMILY_STATUS_RESET = 'family_status_reset';
+
     public const ACTION_FAMILY_EXCLUDED = 'family_excluded';
+
     public const ACTION_EMAIL_SENT = 'email_sent';
+
+    public const ACTION_GIFT_UPDATED = 'gift_updated';
+
+    /**
+     * Human readable labels of the action types.
+     *
+     * @return array<string, string>
+     */
+    public static function actionLabels(): array
+    {
+        return [
+            self::ACTION_FAMILY_VALIDATED => 'Validation famille',
+            self::ACTION_CHILD_VALIDATED => 'Validation enfant',
+            self::ACTION_FAMILY_STATUS_RESET => 'Réinitialisation statut famille',
+            self::ACTION_FAMILY_EXCLUDED => 'Exclusion famille',
+            self::ACTION_EMAIL_SENT => 'Envoi e-mail',
+            self::ACTION_GIFT_UPDATED => 'Modification cadeau',
+        ];
+    }
+
+    /**
+     * Record an action made by the authenticated admin.
+     */
+    public static function record(
+        string $actionType,
+        string $description,
+        ?string $familyId = null,
+        ?string $giftRequestId = null,
+        ?string $childId = null,
+    ): self {
+        return self::create([
+            'user_id' => auth()->id(),
+            'user_label' => auth()->user()?->name,
+            'action_type' => $actionType,
+            'description' => $description,
+            'family_id' => $familyId,
+            'gift_request_id' => $giftRequestId,
+            'child_id' => $childId,
+        ]);
+    }
+
+    public function getActionLabelAttribute(): string
+    {
+        return self::actionLabels()[$this->action_type] ?? $this->action_type;
+    }
 
     /**
      * @var array<int, string>
