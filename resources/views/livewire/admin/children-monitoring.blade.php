@@ -1,5 +1,34 @@
 <div class="space-y-6">
     <x-admin.family-modal :showFamilyModal="$showFamilyModal" :selectedFamily="$selectedFamily" />
+
+    @if($canEditGift && $editingGiftChildId)
+        <div class="modal-backdrop" wire:click.self="cancelGiftEdit" x-data x-on:keydown.escape.window="$wire.cancelGiftEdit()">
+            <form wire:submit="saveGift" class="modal-panel modal-panel--small">
+                <div class="modal-header">
+                    <h2 class="section-title">Modifier le cadeau</h2>
+                </div>
+
+                <div class="modal-body">
+                    <label for="gift-draft" class="field-label">Cadeau</label>
+                    <input
+                        id="gift-draft"
+                        wire:model="giftDraft"
+                        type="text"
+                        maxlength="255"
+                        class="{{ $errors->has('giftDraft') ? 'field-input-error' : 'field-input' }}"
+                        autocomplete="off"
+                        autofocus
+                    />
+                    @error('giftDraft') <p class="field-error">{{ $message }}</p> @enderror
+                </div>
+
+                <div class="modal-footer modal-actions">
+                    <button type="button" wire:click="cancelGiftEdit" class="btn-secondary">Annuler</button>
+                    <button type="submit" wire:loading.attr="disabled" wire:target="saveGift" class="btn-confirm">OK</button>
+                </div>
+            </form>
+        </div>
+    @endif
     <h1 class="section-title">Suivi des enfants</h1>
 
     <div class="card-sm">
@@ -95,7 +124,14 @@
                                 @if($child->gender !== 'unspecified') {{ $child->gender_label }} @else - @endif
                             </td>
                             <td class="table-cell-muted">{{ $child->formatted_age }}</td>
-                            <td class="table-cell-muted">{{ $child->gift }}</td>
+                            <td class="table-cell-muted">
+                                <span class="inline-edit">
+                                    <span>{{ $child->gift }}</span>
+                                    @if($canEditGift)
+                                        <x-admin.gift-edit-button :childId="$child->id" />
+                                    @endif
+                                </span>
+                            </td>
                             <td class="table-cell">
                                 <button wire:click="showFamilyDetails('{{ $child->giftRequest->family->id }}')" class="link font-medium">
                                     {{ $child->giftRequest->family->last_name }}
@@ -155,7 +191,12 @@
                     <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-muted">
                         <div><span class="detail-value text-sm">Genre :</span> @if($child->gender !== 'unspecified') {{ $child->gender_label }} @else - @endif</div>
                         <div><span class="detail-value text-sm">Âge :</span> {{ $child->formatted_age }}</div>
-                        <div class="col-span-2"><span class="detail-value text-sm">Cadeau :</span> {{ $child->gift }}</div>
+                        <div class="col-span-2 inline-edit">
+                            <span><span class="detail-value text-sm">Cadeau :</span> {{ $child->gift }}</span>
+                            @if($canEditGift)
+                                <x-admin.gift-edit-button :childId="$child->id" />
+                            @endif
+                        </div>
                         <div class="col-span-2">
                             <span class="detail-value text-sm">Famille :</span>
                             <button wire:click="showFamilyDetails('{{ $child->giftRequest->family->id }}')" class="link font-medium">

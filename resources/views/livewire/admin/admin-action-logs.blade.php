@@ -54,21 +54,7 @@
                     <tr>
                         <td class="table-cell-muted" data-local-datetime="{{ $log->created_at->toIso8601String() }}">{{ $log->created_at->format('d/m/Y H:i') }}</td>
                         <td class="table-cell">{{ $log->user?->name ?? $log->user_label ?? 'Utilisateur supprimé' }}</td>
-                        <td class="table-cell">
-                            @if($log->action_type === \App\Models\AdminActionLog::ACTION_FAMILY_VALIDATED)
-                                Validation famille
-                            @elseif($log->action_type === \App\Models\AdminActionLog::ACTION_CHILD_VALIDATED)
-                                Validation enfant
-                            @elseif($log->action_type === \App\Models\AdminActionLog::ACTION_FAMILY_STATUS_RESET)
-                                Réinitialisation statut famille
-                            @elseif($log->action_type === \App\Models\AdminActionLog::ACTION_FAMILY_EXCLUDED)
-                                Exclusion famille
-                            @elseif($log->action_type === \App\Models\AdminActionLog::ACTION_EMAIL_SENT)
-                                Envoi e-mail
-                            @else
-                                {{ $log->action_type }}
-                            @endif
-                        </td>
+                        <td class="table-cell">{{ $log->action_label }}</td>
                         <td class="table-cell-muted">{{ $log->description }}</td>
                     </tr>
                 @empty
