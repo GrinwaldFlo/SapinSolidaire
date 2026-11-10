@@ -422,6 +422,11 @@ select:focus[data-flux-control] {
         @apply mt-4;
     }
 
+    /* Two statistics side by side inside one stat-card (e.g. families / children) */
+    .stat-pair {
+        @apply grid grid-cols-2 gap-4;
+    }
+
     /* Centered statistic inside a stat-grid */
     .stat-item {
         @apply text-center;

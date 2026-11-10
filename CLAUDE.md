@@ -337,7 +337,7 @@ Layout helpers: badge-row (wrapping badges), family-actions (stacked per-row act
 
 Table helpers: table-full (full width table with row dividers), table-head (thead background), table-divider (tbody row dividers), table-header-center + table-cell-center (centered matrix columns), access-granted / access-denied (✓ / — marks of the role access matrix).
 
-Statistic helpers: stat-bar (horizontal bar on a progress element, no inline width needed), stat-grid (responsive three-column grid, stat-grid--spaced adds top spacing), stat-item (centered statistic inside a stat-grid).
+Statistic helpers: stat-bar (horizontal bar on a progress element, no inline width needed), stat-grid (responsive three-column grid, stat-grid--spaced adds top spacing), stat-item (centered statistic inside a stat-grid), stat-pair (two statistics side by side inside one stat-card, e.g. families / children).
 
 Text helpers: text-multiline (free text keeping line breaks, e.g. custom texts outside notices), intro-text (introduction paragraph on public pages, combine with text-multiline for custom texts).
 
