@@ -188,13 +188,15 @@ FamilyValidation:
 - Queue of pending family requests ordered by updated_at.
 - Cache locks prevent two admins validating same request simultaneously.
 - Can validate, reject, or final-reject with comment templates.
+- Only page where the family is decided (with duplicate check); assigns the family number on validation.
 
-Validation:
+Validation (gift validation):
 
-- Handles both family and children decisions in one pass.
-- Uses DB transaction and row-level locks for consistency.
-- Assigns family numbers and child codes during validation.
-- Sends correction/final rejection emails from shared concern trait.
+- Only lists validated requests that still have pending children; no family decision.
+- Decides pending children only (validate, correction, final refusal); other children are left untouched.
+- Uses DB transaction and row-level locks for consistency; skips a request sent back to pending in the meantime.
+- Assigns child codes during validation.
+- Sends correction emails from the shared SendsRejectionEmail concern.
 
 ### Label and distribution flow
 
@@ -254,7 +256,7 @@ Admin components:
 
 - Dashboard: season-scoped KPI counters.
 - FamilyValidation: household-level queue validation.
-- Validation: family + child queue validation with lock and transaction semantics.
+- Validation: child (gift) queue validation of validated families, with lock and transaction semantics.
 - LabelGeneration: status transition to printed + PDF generation/history.
 - GiftReception: printed -> received transitions.
 - GiftDelivery: received -> given transitions.

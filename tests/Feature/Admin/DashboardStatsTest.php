@@ -29,7 +29,7 @@ beforeEach(function () {
         'next_family_number' => 1,
     ]);
 
-    $this->createRequest = function (Season $season, array $childStatuses): GiftRequest {
+    $this->createRequest = function (Season $season, array $childStatuses, string $requestStatus = GiftRequest::STATUS_PENDING): GiftRequest {
         $family = Family::create([
             'email' => fake()->unique()->safeEmail(),
             'first_name' => 'Paul',
@@ -44,7 +44,7 @@ beforeEach(function () {
         $request = GiftRequest::create([
             'family_id' => $family->id,
             'season_id' => $season->id,
-            'status' => GiftRequest::STATUS_PENDING,
+            'status' => $requestStatus,
         ]);
 
         foreach ($childStatuses as $status) {
@@ -73,4 +73,18 @@ test('dashboard counts rejected children of the active season', function () {
         ->assertSet('rejectedChildren', 2)
         ->assertSet('pendingChildren', 1)
         ->assertSee('Enfants refusés (cadeau à corriger)');
+});
+
+test('dashboard counts families of the active season that must correct their request', function () {
+    ($this->createRequest)($this->season, [Child::STATUS_PENDING], GiftRequest::STATUS_REJECTED);
+    ($this->createRequest)($this->season, [Child::STATUS_PENDING], GiftRequest::STATUS_REJECTED);
+    ($this->createRequest)($this->season, [Child::STATUS_PENDING], GiftRequest::STATUS_REJECTED_FINAL);
+    ($this->createRequest)($this->season, [Child::STATUS_REJECTED], GiftRequest::STATUS_VALIDATED);
+    ($this->createRequest)($this->previousSeason, [Child::STATUS_PENDING], GiftRequest::STATUS_REJECTED);
+
+    $this->actingAs($this->admin);
+
+    Livewire::test(Dashboard::class)
+        ->assertSet('rejectedFamilies', 2)
+        ->assertSee('Familles refusées (à corriger)');
 });

@@ -2,54 +2,48 @@
 
 namespace App\Livewire\Admin;
 
-use App\Livewire\Admin\Concerns\ChecksDuplicateFamily;
-use App\Livewire\Admin\Concerns\HandlesFamilyValidation;
 use App\Livewire\Admin\Concerns\InsertsCommentTemplates;
-use App\Livewire\Admin\Concerns\ShowsFamilyModal;
+use App\Livewire\Admin\Concerns\SendsRejectionEmail;
 use App\Models\AdminActionLog;
 use App\Models\Child;
 use App\Models\GiftRequest;
 use App\Models\Season;
 use App\Models\Setting;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
+/**
+ * Gift (children) validation. Only requests of families already validated on
+ * the FamilyValidation page are listed here; the family itself is not decided.
+ */
 class Validation extends Component
 {
-    use ChecksDuplicateFamily, HandlesFamilyValidation, InsertsCommentTemplates, ShowsFamilyModal;
+    use InsertsCommentTemplates, SendsRejectionEmail;
 
     private const LOCK_TTL_SECONDS = 300;
 
     public ?Season $activeSeason = null;
+
     public ?GiftRequest $currentRequest = null;
+
     public int $pendingFamiliesCount = 0;
+
     public int $pendingChildrenCount = 0;
 
-    public string $rejectionType = ''; // 'family', 'child'
-
     // Form state
-    public string $familyDecision = 'pending'; // 'pending', 'validated', 'correction', 'rejected'
-    public string $familyComment = '';
     public array $childDecisions = []; // child_id => 'pending', 'validated', 'correction', 'rejected'
+
     public array $childComments = []; // child_id => text
+
     public array $predefinedRejectionMessages = []; // index => message
-    public string $selectedFamilyMessageKey = '';
+
     public array $selectedChildMessageKeys = []; // child_id => message index
 
     public function getHasPendingDecisionsProperty(): bool
     {
-        if ($this->currentRequest && $this->currentRequest->status === GiftRequest::STATUS_PENDING && $this->familyDecision === 'pending') {
-            return true;
-        }
-
-        foreach ($this->childDecisions as $decision) {
-            if ($decision === 'pending') {
-                return true;
-            }
-        }
-
-        return false;
+        return in_array('pending', $this->childDecisions, true);
     }
 
     public function mount(): void
@@ -58,6 +52,18 @@ class Validation extends Component
         $this->predefinedRejectionMessages = Setting::getValidationCommentTemplates();
         $this->loadNextRequest();
         $this->loadCounts();
+    }
+
+    /**
+     * Validated requests of the active season that still have children to decide.
+     */
+    protected function queueQuery(): Builder
+    {
+        return GiftRequest::where('season_id', $this->activeSeason->id)
+            ->where('status', GiftRequest::STATUS_VALIDATED)
+            ->whereHas('children', function ($q) {
+                $q->where('status', Child::STATUS_PENDING);
+            });
     }
 
     protected function loadNextRequest(): void
@@ -71,14 +77,7 @@ class Validation extends Component
         $adminId = (string) auth()->id();
         $this->releaseReservation($adminId);
 
-        // Get IDs of pending requests in queue order
-        $candidateIds = GiftRequest::where('season_id', $this->activeSeason->id)
-            ->where(function ($query) {
-                $query->where('status', GiftRequest::STATUS_PENDING)
-                    ->orWhereHas('children', function ($q) {
-                        $q->where('status', Child::STATUS_PENDING);
-                    });
-            })
+        $candidateIds = $this->queueQuery()
             ->orderBy('updated_at')
             ->pluck('id');
 
@@ -93,7 +92,6 @@ class Validation extends Component
                 Cache::put("validation_admin:{$adminId}", $candidateId, self::LOCK_TTL_SECONDS);
                 $this->currentRequest = GiftRequest::with(['family', 'children'])->find($candidateId);
                 $this->initFormState();
-                $this->checkForDuplicates();
                 break;
             }
         }
@@ -101,30 +99,19 @@ class Validation extends Component
 
     protected function initFormState(): void
     {
-        $this->familyDecision = $this->currentRequest->status === GiftRequest::STATUS_PENDING ? 'pending' : 'validated';
-        $this->familyComment = '';
         $this->childDecisions = [];
         $this->childComments = [];
-        $this->selectedFamilyMessageKey = '';
         $this->selectedChildMessageKeys = [];
 
         foreach ($this->currentRequest->children as $child) {
-            $this->childDecisions[$child->id] = $child->status === Child::STATUS_PENDING ? 'pending' : 'validated';
+            if ($child->status !== Child::STATUS_PENDING) {
+                continue;
+            }
+
+            $this->childDecisions[$child->id] = 'pending';
             $this->childComments[$child->id] = '';
             $this->selectedChildMessageKeys[$child->id] = '';
         }
-    }
-
-    public function applyFamilyMessage(): void
-    {
-        $message = $this->resolveTemplateMessage($this->selectedFamilyMessageKey);
-
-        if ($message === '') {
-            return;
-        }
-
-        $this->familyComment = $this->appendTemplateMessage($this->familyComment, $message);
-        $this->resetErrorBag('familyComment');
     }
 
     public function applyChildMessage(string $childId): void
@@ -157,106 +144,90 @@ class Validation extends Component
             return;
         }
 
-        $this->pendingFamiliesCount = GiftRequest::where('season_id', $this->activeSeason->id)
-            ->where('status', GiftRequest::STATUS_PENDING)
-            ->count();
+        $this->pendingFamiliesCount = $this->queueQuery()->count();
 
         $this->pendingChildrenCount = Child::whereHas('giftRequest', function ($q) {
-            $q->where('season_id', $this->activeSeason->id);
+            $q->where('season_id', $this->activeSeason->id)
+                ->where('status', GiftRequest::STATUS_VALIDATED);
         })->where('status', Child::STATUS_PENDING)->count();
     }
 
     public function submitValidation(): void
     {
+        if (! $this->currentRequest) {
+            return;
+        }
+
         $this->validate([
-            'familyDecision' => 'required|in:pending,validated,correction,rejected',
-            'familyComment' => 'required_if:familyDecision,correction,rejected',
             'childDecisions.*' => 'required|in:pending,validated,correction,rejected',
             'childComments.*' => 'required_if:childDecisions.*,correction,rejected',
         ], [
-            'familyComment.required_if' => 'Le commentaire est obligatoire pour un refus ou une demande de correction.',
             'childComments.*.required_if' => 'Le commentaire est obligatoire pour un refus ou une demande de correction.',
         ]);
 
-        $hasCorrection = $this->familyDecision === 'correction';
-        $hasRejection = $this->familyDecision === 'rejected';
-
         $combinedComments = [];
-        $validatedFamilyRequest = null;
         $validatedChildren = [];
 
-        DB::transaction(function () use (&$hasCorrection, &$hasRejection, &$combinedComments, &$validatedFamilyRequest, &$validatedChildren) {
+        DB::transaction(function () use (&$combinedComments, &$validatedChildren) {
             $request = GiftRequest::lockForUpdate()->find($this->currentRequest->id);
 
-            if ($this->familyDecision === 'validated') {
-                $wasPending = $request->status === GiftRequest::STATUS_PENDING;
-
-                if ($request->family_number === null) {
-                    $request->family_number = $this->activeSeason->assignNextFamilyNumber();
-                    $request->save();
-                }
-                $request->setStatus(GiftRequest::STATUS_VALIDATED);
-
-                if ($wasPending) {
-                    $validatedFamilyRequest = $request->loadMissing('family');
-                }
-            } elseif ($this->familyDecision === 'correction') {
-                $request->setStatus(GiftRequest::STATUS_REJECTED, $this->familyComment);
-                $combinedComments[] = "Concernant la famille :\n".$this->familyComment;
-            } elseif ($this->familyDecision === 'rejected') {
-                $request->setStatus(GiftRequest::STATUS_REJECTED_FINAL, $this->familyComment);
-                $combinedComments[] = "Refus définitif de la famille :\n".$this->familyComment;
+            // The family may have changed its request (back to pending) in the meantime
+            if (! $request || $request->status !== GiftRequest::STATUS_VALIDATED) {
+                return;
             }
 
             foreach ($this->currentRequest->children as $childModel) {
                 $child = Child::lockForUpdate()->find($childModel->id);
-                $decision = $this->childDecisions[$child->id] ?? 'pending';
-                $comment = $this->childComments[$child->id] ?? '';
 
-                if ($this->familyDecision === 'rejected') {
-                    $child->setStatus(Child::STATUS_REJECTED_FINAL, $this->familyComment);
-
+                // Only children still waiting for a decision are handled here
+                if (! $child || $child->status !== Child::STATUS_PENDING) {
                     continue;
                 }
 
-                if ($decision === 'validated') {
-                    $wasPending = $child->status === Child::STATUS_PENDING;
+                $decision = $this->childDecisions[$child->id] ?? 'pending';
+                $comment = $this->childComments[$child->id] ?? '';
 
+                if ($decision === 'validated') {
                     if (! $child->code) {
                         $child->assignChildNumberAndCode();
                     }
                     $child->setStatus(Child::STATUS_VALIDATED);
-
-                    if ($wasPending) {
-                        $validatedChildren[] = $child->fresh();
-                    }
+                    $validatedChildren[] = $child->fresh();
                 } elseif ($decision === 'correction') {
-                    $hasCorrection = true;
                     $child->setStatus(Child::STATUS_REJECTED, $comment);
                     $combinedComments[] = "Pour l'enfant {$child->first_name} :\n - ".$comment;
                 } elseif ($decision === 'rejected') {
-                    $hasRejection = true;
                     $child->setStatus(Child::STATUS_REJECTED_FINAL, $comment);
                     $combinedComments[] = "Refus pour l'enfant {$child->first_name} :\n - ".$comment;
                 }
             }
         });
 
-        if ($validatedFamilyRequest instanceof GiftRequest) {
-            AdminActionLog::create([
-                'user_id' => auth()->id(),
-                'user_label' => auth()->user()?->name,
-                'action_type' => AdminActionLog::ACTION_FAMILY_VALIDATED,
-                'description' => 'Validation famille: '.$validatedFamilyRequest->family?->full_name,
-                'family_id' => $validatedFamilyRequest->family_id,
-                'gift_request_id' => $validatedFamilyRequest->id,
-            ]);
+        $this->logValidatedChildren($validatedChildren);
+
+        if (! empty($combinedComments)) {
+            $finalComment = implode("\n-------------------\n", $combinedComments);
+            // The family stays validated: it receives a correction email (with access link), never a final rejection
+            $this->sendRejectionEmail($this->currentRequest->family->email, false, $finalComment);
         }
 
-        foreach ($validatedChildren as $child) {
-            $familyName = $this->currentRequest?->family?->full_name;
-            $familyName = $familyName !== null && trim($familyName) !== '' ? $familyName : ($this->currentRequest?->family?->email ?? 'Famille inconnue');
+        $this->loadNextRequest();
+        $this->loadCounts();
 
+        $this->dispatch('scroll-to-top');
+    }
+
+    /**
+     * @param  array<int, Child>  $children
+     */
+    protected function logValidatedChildren(array $children): void
+    {
+        $family = $this->currentRequest?->family;
+        $familyName = trim((string) $family?->full_name) !== ''
+            ? $family->full_name
+            : ($family?->email ?? 'Famille inconnue');
+
+        foreach ($children as $child) {
             AdminActionLog::create([
                 'user_id' => auth()->id(),
                 'user_label' => auth()->user()?->name,
@@ -267,19 +238,6 @@ class Validation extends Component
                 'child_id' => $child->id,
             ]);
         }
-
-        if (! empty($combinedComments)) {
-            $finalComment = implode("\n-------------------\n", $combinedComments);
-            // If the family is completely rejected, we considered it a final rejection
-            $isFinal = $this->familyDecision === 'rejected';
-
-            $this->sendRejectionEmail($this->currentRequest->family->email, $isFinal, $finalComment);
-        }
-
-        $this->loadNextRequest();
-        $this->loadCounts();
-
-        $this->dispatch('scroll-to-top');
     }
 
     public function skip(): void

@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Admin\FamilyManagement;
+use App\Livewire\Admin\FamilyValidation;
 use App\Livewire\Admin\Validation;
 use App\Models\AdminActionLog;
 use App\Models\Child;
@@ -65,7 +66,7 @@ test('reset from family management writes an admin action log', function () {
     ]);
 });
 
-test('combined validation writes logs for validated family and child', function () {
+test('family then gift validation write logs for validated family and child', function () {
     $giftRequest = GiftRequest::create([
         'family_id' => $this->family->id,
         'season_id' => $this->season->id,
@@ -83,8 +84,9 @@ test('combined validation writes logs for validated family and child', function 
 
     $this->actingAs($this->admin);
 
+    Livewire::test(FamilyValidation::class)->call('validateFamily');
+
     Livewire::test(Validation::class)
-        ->set('familyDecision', 'validated')
         ->set("childDecisions.{$child->id}", 'validated')
         ->call('submitValidation');
 
@@ -108,14 +110,24 @@ test('validation correction email is also logged in admin actions', function () 
     $giftRequest = GiftRequest::create([
         'family_id' => $this->family->id,
         'season_id' => $this->season->id,
-        'status' => GiftRequest::STATUS_PENDING,
+        'family_number' => 1,
+        'status' => GiftRequest::STATUS_VALIDATED,
+    ]);
+
+    $child = Child::create([
+        'gift_request_id' => $giftRequest->id,
+        'first_name' => 'Noah',
+        'gender' => Child::GENDER_BOY,
+        'birth_year' => 2017,
+        'gift' => 'Lego',
+        'status' => Child::STATUS_PENDING,
     ]);
 
     $this->actingAs($this->admin);
 
     Livewire::test(Validation::class)
-        ->set('familyDecision', 'correction')
-        ->set('familyComment', 'Merci de corriger la demande.')
+        ->set("childDecisions.{$child->id}", 'correction')
+        ->set("childComments.{$child->id}", 'Merci de corriger la demande.')
         ->call('submitValidation');
 
     $this->assertDatabaseHas('admin_action_logs', [
