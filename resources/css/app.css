@@ -419,6 +419,10 @@ select:focus[data-flux-control] {
         @apply flex items-center gap-2;
     }
 
+    .gift-sizes {
+        @apply text-xs whitespace-nowrap text-gray-500 dark:text-gray-400;
+    }
+
     /* Two-column detail grid of a mobile card */
     .mobile-detail-grid {
         @apply grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-gray-400;

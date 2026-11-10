@@ -127,6 +127,9 @@
                             <td class="table-cell-muted">
                                 <span class="inline-edit">
                                     <span>{{ $child->gift }}</span>
+                                    @if($child->sizes_summary)
+                                        <span class="gift-sizes">{{ $child->sizes_summary }}</span>
+                                    @endif
                                     @if($canEditGift)
                                         <x-admin.gift-edit-button :childId="$child->id" />
                                     @endif
@@ -173,6 +176,9 @@
                         <div><span class="detail-value">Âge :</span> {{ $child->formatted_age }}</div>
                         <div class="mobile-detail-full inline-edit">
                             <span><span class="detail-value">Cadeau :</span> {{ $child->gift }}</span>
+                            @if($child->sizes_summary)
+                                <span class="gift-sizes">{{ $child->sizes_summary }}</span>
+                            @endif
                             @if($canEditGift)
                                 <x-admin.gift-edit-button :childId="$child->id" />
                             @endif

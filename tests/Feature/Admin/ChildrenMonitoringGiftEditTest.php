@@ -159,3 +159,25 @@ test('gift update appears in the admin action log page', function () {
         ->assertSee('Modification cadeau')
         ->assertSee('« Peluche » → « Vélo »');
 });
+
+test('gift column shows height and shoe size when set', function () {
+    $this->child->update(['height' => 120, 'shoe_size' => '32']);
+    $this->actingAs($this->admin);
+
+    Livewire::test(ChildrenMonitoring::class)
+        ->assertSeeHtml('<span class="gift-sizes">120 cm / P. 32</span>');
+});
+
+test('gift column shows no sizes when neither is set', function () {
+    $this->actingAs($this->admin);
+
+    Livewire::test(ChildrenMonitoring::class)
+        ->assertDontSeeHtml('gift-sizes');
+});
+
+test('sizes summary combines available sizes', function () {
+    expect(new Child(['height' => 120]))->sizes_summary->toBe('120 cm')
+        ->and(new Child(['shoe_size' => '32']))->sizes_summary->toBe('P. 32')
+        ->and(new Child(['height' => 120, 'shoe_size' => '32']))->sizes_summary->toBe('120 cm / P. 32')
+        ->and(new Child)->sizes_summary->toBeNull();
+});

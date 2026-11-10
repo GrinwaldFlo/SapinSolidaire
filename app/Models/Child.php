@@ -107,6 +107,19 @@ class Child extends Model
     }
 
     /**
+     * Height and shoe size summary (e.g. "120 cm / P. 32"), null when neither is set.
+     */
+    public function getSizesSummaryAttribute(): ?string
+    {
+        $parts = array_filter([
+            $this->height ? $this->height.' cm' : null,
+            $this->shoe_size ? 'P. '.$this->shoe_size : null,
+        ]);
+
+        return $parts === [] ? null : implode(' / ', $parts);
+    }
+
+    /**
      * Check if the child can be modified.
      */
     public function canModify(): bool
