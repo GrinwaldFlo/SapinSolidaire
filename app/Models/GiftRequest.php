@@ -94,6 +94,14 @@ class GiftRequest extends Model
     }
 
     /**
+     * Submissions (creation / updates) of this request by the family.
+     */
+    public function submissionLogs(): HasMany
+    {
+        return $this->hasMany(FamilySubmissionLog::class);
+    }
+
+    /**
      * Give the family its number for the season (at print time): the smallest free number of the
      * season, filling gaps. Once assigned, the number never changes.
      */

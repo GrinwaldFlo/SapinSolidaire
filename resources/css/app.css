@@ -494,6 +494,35 @@ select:focus[data-flux-control] {
         @apply bg-gray-50 dark:bg-zinc-700;
     }
 
+    /* Checkbox of a selectable list */
+    .checkbox-input {
+        @apply w-4 h-4 cursor-pointer accent-green-600 disabled:cursor-not-allowed;
+    }
+
+    /* Narrow header / cell holding the selection checkbox of a table row */
+    .table-header-checkbox {
+        @apply px-4 py-3 w-10 text-left;
+    }
+
+    .table-cell-checkbox {
+        @apply px-4 py-4 w-10;
+    }
+
+    /* Table cell holding a free text comment (keeps line breaks) */
+    .table-cell-comment {
+        @apply px-6 py-4 text-sm min-w-64 whitespace-pre-line text-gray-600 dark:text-gray-300;
+    }
+
+    /* Secondary line under the main value of a table cell */
+    .cell-subtext {
+        @apply text-xs text-gray-500 dark:text-gray-400;
+    }
+
+    /* Selection count followed by the action button of a selectable list */
+    .selection-bar {
+        @apply flex flex-wrap items-center justify-between gap-4;
+    }
+
     /* Stat value (big number, neutral) */
     .label-value {
         @apply text-3xl font-bold text-gray-900 dark:text-white;

@@ -112,6 +112,7 @@ Admin modules under /admin:
 - Dashboard
 - FamilyValidation
 - Validation
+- CorrectionReminders
 - LabelGeneration
 - GiftReception
 - GiftDelivery
@@ -196,7 +197,7 @@ Validation (gift validation):
 - Decides pending children only (validate, correction, final refusal); other children are left untouched.
 - Children may be left pending (e.g. a correction for one child only, at least one decision required): the request is touched and goes to the end of the queue, staying there while it has pending children.
 - Uses DB transaction and row-level locks for consistency; skips a request sent back to pending in the meantime.
-- Sends correction emails from the shared SendsRejectionEmail concern.
+- Sends correction emails from the shared SendsRejectionEmail concern (childRejectionComment() / combineRejectionComments() build the email comment, reused by CorrectionReminders).
 
 ### Label and distribution flow
 
@@ -257,6 +258,7 @@ Admin components:
 - Dashboard: season-scoped KPI counters.
 - FamilyValidation: household-level queue validation.
 - Validation: child (gift) queue validation of validated families, with lock and transaction semantics.
+- CorrectionReminders: lists families (requests) and children of the active season in status rejected ("Refusé", correction expected), with their comment, refusal date and last family edit (FamilySubmissionLog); the checked lines receive their correction request again (CorrectionRequestMail, same comment, new 48h link), one email per family, logged as SentMailLog::PURPOSE_CORRECTION_REMINDER. Disabled once the season modification deadline has passed. Admin only.
 - LabelGeneration: status transition to printed + PDF generation/history.
 - GiftReception: printed -> received transitions.
 - GiftDelivery: received -> given transitions.
@@ -344,6 +346,8 @@ Table helpers: table-full (full width table with row dividers), table-head (thea
 Statistic helpers: stat-bar (horizontal bar on a progress element, no inline width needed), stat-grid (responsive three-column grid, stat-grid--spaced adds top spacing), stat-item (centered statistic inside a stat-grid), stat-pair (two statistics side by side inside one stat-card, e.g. families / children).
 
 Text helpers: text-multiline (free text keeping line breaks, e.g. custom texts outside notices), intro-text (introduction paragraph on public pages, combine with text-multiline for custom texts).
+
+Selectable list helpers: checkbox-input (row / select-all checkbox), table-header-checkbox + table-cell-checkbox (narrow checkbox column), selection-bar (selection count + action button), table-cell-comment (free text comment cell keeping line breaks), cell-subtext (small muted second line in a table cell).
 
 Form helpers: field-help (help text under a field), placeholder-tag (inline token such as {site}).
 

@@ -39,6 +39,7 @@ class RoleAccessMap
         'admin.registration-funnel' => 'Suivi des inscriptions',
         'admin.seasons' => 'Saisons',
         'admin.family-duplicates' => 'Doublons familles',
+        'admin.correction-reminders' => 'Relances corrections',
         'admin.users' => 'Utilisateurs',
         'admin.settings' => 'Paramètres',
         'admin.gifts-management' => 'Cadeaux',

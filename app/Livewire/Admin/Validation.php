@@ -195,10 +195,10 @@ class Validation extends Component
                     $validatedChildren[] = $child->fresh();
                 } elseif ($decision === 'correction') {
                     $child->setStatus(Child::STATUS_REJECTED, $comment);
-                    $combinedComments[] = "Pour l'enfant {$child->first_name} :\n - ".$comment;
+                    $combinedComments[] = self::childRejectionComment($child->first_name, $comment);
                 } elseif ($decision === 'rejected') {
                     $child->setStatus(Child::STATUS_REJECTED_FINAL, $comment);
-                    $combinedComments[] = "Refus pour l'enfant {$child->first_name} :\n - ".$comment;
+                    $combinedComments[] = self::childRejectionComment($child->first_name, $comment, true);
                 }
             }
 
@@ -219,7 +219,7 @@ class Validation extends Component
         $this->logValidatedChildren($validatedChildren);
 
         if (! empty($combinedComments)) {
-            $finalComment = implode("\n-------------------\n", $combinedComments);
+            $finalComment = self::combineRejectionComments($combinedComments);
             // The family stays validated: it receives a correction email (with access link), never a final rejection
             $this->sendRejectionEmail($this->currentRequest, false, $finalComment);
         }
