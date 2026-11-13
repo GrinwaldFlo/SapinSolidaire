@@ -9,7 +9,7 @@
     </div>
     <div>
         <span class="detail-label">Email :</span>
-        <span class="detail-inline detail-value">{{ $request->family->email }}</span>
+        <x-admin.contact.email :email="$request->family->email" class="detail-inline" />
     </div>
     <div>
         <span class="detail-label">Téléphone :</span>
@@ -17,7 +17,11 @@
     </div>
     <div>
         <span class="detail-label">Adresse :</span>
-        <span class="detail-inline detail-value">{{ $request->family->full_address }}</span>
+        @if($request->family->full_address)
+            <x-admin.contact.address :address="$request->family->full_address" class="detail-inline" />
+        @else
+            <span class="detail-inline detail-value">-</span>
+        @endif
     </div>
 </div>
 
