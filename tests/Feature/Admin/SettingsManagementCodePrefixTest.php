@@ -129,7 +129,6 @@ test('changing padding regenerates all existing children codes', function () {
         'name' => 'Noël 2025',
         'start_date' => now()->subDays(10),
         'end_date' => now()->addDays(30),
-        'next_family_number' => 3,
     ]);
 
     $family = Family::create([
@@ -195,7 +194,6 @@ test('changing prefix regenerates all existing children codes', function () {
         'name' => 'Noël 2025',
         'start_date' => now()->subDays(10),
         'end_date' => now()->addDays(30),
-        'next_family_number' => 2,
     ]);
 
     $family = Family::create([
@@ -247,7 +245,6 @@ test('changing both prefix and padding regenerates all codes correctly', functio
         'name' => 'Noël 2025',
         'start_date' => now()->subDays(10),
         'end_date' => now()->addDays(30),
-        'next_family_number' => 3,
     ]);
 
     $family = Family::create([
@@ -300,7 +297,6 @@ test('saving without changing prefix or padding does not regenerate codes', func
         'name' => 'Noël 2025',
         'start_date' => now()->subDays(10),
         'end_date' => now()->addDays(30),
-        'next_family_number' => 2,
     ]);
 
     $family = Family::create([
@@ -359,7 +355,6 @@ test('children without code are not affected by regeneration', function () {
         'name' => 'Noël 2025',
         'start_date' => now()->subDays(10),
         'end_date' => now()->addDays(30),
-        'next_family_number' => 2,
     ]);
 
     $family = Family::create([

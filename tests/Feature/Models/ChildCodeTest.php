@@ -13,7 +13,6 @@ beforeEach(function () {
         'name' => 'Noël 2025',
         'start_date' => now()->subDays(10),
         'end_date' => now()->addDays(30),
-        'next_family_number' => 1,
     ]);
 
     $this->family = Family::create([

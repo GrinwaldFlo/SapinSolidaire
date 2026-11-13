@@ -31,11 +31,6 @@ trait HandlesFamilyValidation
                 return;
             }
 
-            if ($request->family_number === null) {
-                $request->family_number = $this->activeSeason->assignNextFamilyNumber();
-                $request->save();
-            }
-
             $request->setStatus(GiftRequest::STATUS_VALIDATED);
             $this->currentRequest = $request;
             $validatedRequest = $request->loadMissing('family');

@@ -20,7 +20,6 @@ beforeEach(function () {
         'name' => 'Noël 2026',
         'start_date' => now()->subDays(10),
         'end_date' => now()->addDays(30),
-        'next_family_number' => 1,
     ]);
 
     $this->family = Family::create([
@@ -44,7 +43,6 @@ beforeEach(function () {
         'name' => 'Noël 2020',
         'start_date' => now()->subYears(6),
         'end_date' => now()->subYears(6)->addMonth(),
-        'next_family_number' => 1,
     ]);
 
     $this->oldRequest = GiftRequest::create([

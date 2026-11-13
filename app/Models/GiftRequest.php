@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Services\NumberSequence;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 class GiftRequest extends Model
 {
@@ -89,6 +91,35 @@ class GiftRequest extends Model
     public function children(): HasMany
     {
         return $this->hasMany(Child::class);
+    }
+
+    /**
+     * Give the family its number for the season (at print time): the smallest free number of the
+     * season, filling gaps. Once assigned, the number never changes.
+     */
+    public function assignFamilyNumber(): int
+    {
+        if ($this->family_number !== null) {
+            return $this->family_number;
+        }
+
+        return DB::transaction(function () {
+            // Season lock: two prints cannot take the same number
+            Season::whereKey($this->season_id)->lockForUpdate()->first();
+            $current = self::whereKey($this->id)->lockForUpdate()->value('family_number');
+
+            if ($current === null) {
+                $current = NumberSequence::firstFree(
+                    self::where('season_id', $this->season_id)->whereNotNull('family_number')->pluck('family_number')
+                );
+                self::whereKey($this->id)->update(['family_number' => $current]);
+            }
+
+            $this->family_number = (int) $current;
+            $this->syncOriginalAttribute('family_number');
+
+            return $this->family_number;
+        });
     }
 
     /**

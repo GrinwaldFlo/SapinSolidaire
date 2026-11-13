@@ -35,7 +35,6 @@ test('dev tools page shows season related tools when a season is active', functi
         'name' => 'Noël 2026',
         'start_date' => now()->subDays(10),
         'end_date' => now()->addDays(20),
-        'next_family_number' => 1,
     ]);
 
     Livewire::actingAs($this->admin)

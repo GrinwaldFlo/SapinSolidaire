@@ -17,7 +17,7 @@ Core lifecycle:
 
 1. Family receives email token and submits/updates request.
 2. Admin-side validation queues process family and child statuses.
-3. Validated children get generated codes and printable labels.
+3. Validated children get printable labels; the family number and child codes are given at print time.
 4. Reception marks gifts as received.
 5. Delivery marks gifts as given.
 6. Confirmation emails are sent using assigned pickup slots.
@@ -148,14 +148,13 @@ Child:
 - Gender: boy, girl, unspecified
 - Code format: prefix + padded family_number + / + child_number
 - Printed card (printed, received, given = GiftRequest::PRINTED_CHILD_STATUSES): frozen for the family (canModify) and for every decision (family rejection, reset, exclusion skip it via hasPrintedCard() / withoutPrintedCard()); only reception (printed -> received), delivery (received -> given) and the label reset in LabelGeneration change it
-- assignChildNumberAndCode() is transactional and season counter-safe through GiftRequest/Season locks
+- assignChildNumberAndCode() (called only by LabelGeneration) gives the child the smallest free child number of its request and the family its number (GiftRequest::assignFamilyNumber(): smallest free number of the season, Season lock). Gaps are filled (NumberSequence::firstFree) and an assigned number never changes (reprint keeps the code); only a code prefix/padding change rewrites the code string
 
 Season:
 
 - Defines request window and optional modification deadline
 - Optional max_gifts limit: countedGiftsCount() counts children of the season in every status except rejected/rejected_final; hasReachedMaxGifts()
 - Scheduling settings: family_limit_per_slot, slot_duration_minutes, responsible contact
-- Atomic assignNextFamilyNumber() with lockForUpdate
 
 Setting:
 
@@ -189,7 +188,7 @@ FamilyValidation:
 - Queue of pending family requests ordered by updated_at.
 - Cache locks prevent two admins validating same request simultaneously.
 - Can validate, reject, or final-reject with comment templates.
-- Only page where the family is decided (with duplicate check); assigns the family number on validation.
+- Only page where the family is decided (with duplicate check); no number is assigned here.
 
 Validation (gift validation):
 
@@ -197,12 +196,11 @@ Validation (gift validation):
 - Decides pending children only (validate, correction, final refusal); other children are left untouched.
 - Children may be left pending (e.g. a correction for one child only, at least one decision required): the request is touched and goes to the end of the queue, staying there while it has pending children.
 - Uses DB transaction and row-level locks for consistency; skips a request sent back to pending in the meantime.
-- Assigns child codes during validation.
 - Sends correction emails from the shared SendsRejectionEmail concern.
 
 ### Label and distribution flow
 
-- LabelGeneration selects validated children of validated requests (Child::readyToPrint), marks them printed, generates PDF (label or grid style), stores file and DB trace.
+- LabelGeneration selects validated children of validated requests (Child::readyToPrint), in a transaction under a Season lock gives them their code (and the family its number) and marks them printed, generates PDF (label or grid style), stores file and DB trace.
 - GiftReception marks printed children as received by family number keypad flow.
 - GiftDelivery marks received children as given by family search.
 
@@ -240,7 +238,7 @@ Schema principles:
 Important evolution points:
 
 - children.code moved from unique 4-char to nullable indexed varchar for family/child format.
-- seasons gained next_family_number counter.
+- seasons.next_family_number counter dropped: family numbers are computed at print time (smallest free number).
 - pickup scheduling added with pickup_slots and slot_start/end on gift_requests.
 - families.address split into street_name + house_no.
 - gift_requests gained proof_of_habitation_path.
@@ -296,7 +294,7 @@ Tests are Pest feature-heavy and cover:
 - Auth/registration/password/verification/two-factor pages and guards.
 - Family form behavior including proof-of-habitation toggles.
 - Settings behavior for city lists, proof flag, code prefix/padding.
-- Model behavior for child code generation and season family numbering.
+- Model behavior for child code generation and gap-free family/child numbering at print time.
 - Validation component behavior around code/number assignment.
 
 When changing workflow logic, extend the corresponding Feature tests first.

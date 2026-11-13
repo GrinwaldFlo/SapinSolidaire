@@ -13,6 +13,7 @@ use App\Services\FamilyMailer;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 
@@ -65,16 +66,7 @@ class LabelGeneration extends Component
             return;
         }
 
-        // Get validated children ordered by validation date
-        $children = Child::with('giftRequest.family')
-            ->readyToPrint($this->activeSeason)
-            ->orderBy('validated_at')
-            ->get();
-
-        // Update status to printed
-        foreach ($children as $child) {
-            $child->setStatus(Child::STATUS_PRINTED);
-        }
+        $children = $this->printReadyChildren();
 
         // Generate PDF
         $pdfStyle = Setting::getPdfStyle();
@@ -115,6 +107,32 @@ class LabelGeneration extends Component
             fn () => print (Storage::disk('local')->get($path)),
             $filename
         );
+    }
+
+    /**
+     * Mark the validated children as printed, in validation order, giving them their code (and the family
+     * its number) at that moment. The season lock keeps two simultaneous prints apart.
+     *
+     * @return Collection<int, Child>
+     */
+    protected function printReadyChildren(): Collection
+    {
+        return DB::transaction(function () {
+            Season::whereKey($this->activeSeason->id)->lockForUpdate()->first();
+
+            $children = Child::with('giftRequest.family')
+                ->readyToPrint($this->activeSeason)
+                ->orderBy('validated_at')
+                ->lockForUpdate()
+                ->get();
+
+            foreach ($children as $child) {
+                $child->assignChildNumberAndCode();
+                $child->setStatus(Child::STATUS_PRINTED);
+            }
+
+            return $children;
+        });
     }
 
     /**

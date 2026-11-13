@@ -19,7 +19,6 @@ beforeEach(function () {
         'name' => 'Noël 2026',
         'start_date' => now()->subDay(),
         'end_date' => now()->addMonth(),
-        'next_family_number' => 1,
     ]);
 
     config([

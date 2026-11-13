@@ -191,9 +191,6 @@ class Validation extends Component
                 $comment = $this->childComments[$child->id] ?? '';
 
                 if ($decision === 'validated') {
-                    if (! $child->code) {
-                        $child->assignChildNumberAndCode();
-                    }
                     $child->setStatus(Child::STATUS_VALIDATED);
                     $validatedChildren[] = $child->fresh();
                 } elseif ($decision === 'correction') {

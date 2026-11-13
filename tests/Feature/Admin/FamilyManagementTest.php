@@ -21,7 +21,6 @@ beforeEach(function () {
         'name' => 'Noël 2026',
         'start_date' => now()->subDays(10),
         'end_date' => now()->addDays(20),
-        'next_family_number' => 1,
     ]);
 
     $this->family = Family::create([
@@ -152,7 +151,6 @@ test('excluding a family does not modify requests from past seasons', function (
         'name' => 'Noël 2025',
         'start_date' => now()->subYear()->subDays(10),
         'end_date' => now()->subYear()->addDays(20),
-        'next_family_number' => 1,
     ]);
     $pastRequest = GiftRequest::create([
         'family_id' => $this->family->id,

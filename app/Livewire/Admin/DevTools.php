@@ -208,9 +208,6 @@ class DevTools extends Component
             $familiesValidated = $pendingRequests->count();
 
             foreach ($pendingRequests as $request) {
-                if ($request->family_number === null) {
-                    $request->family_number = $this->activeSeason->assignNextFamilyNumber();
-                }
                 $request->status = GiftRequest::STATUS_VALIDATED;
                 $request->status_changed_at = now();
                 $request->save();
@@ -223,7 +220,6 @@ class DevTools extends Component
             $childrenValidated = $pendingChildren->count();
 
             foreach ($pendingChildren as $child) {
-                $child->assignChildNumberAndCode();
                 $child->status = Child::STATUS_VALIDATED;
                 $child->status_changed_at = now();
                 $child->validated_at = now();

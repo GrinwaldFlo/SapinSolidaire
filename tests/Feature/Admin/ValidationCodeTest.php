@@ -24,7 +24,6 @@ beforeEach(function () {
         'name' => 'Noël 2025',
         'start_date' => now()->subDays(10),
         'end_date' => now()->addDays(30),
-        'next_family_number' => 1,
     ]);
 
     $this->family = Family::create([
@@ -56,61 +55,24 @@ beforeEach(function () {
     ]);
 });
 
-test('validateFamily assigns family number from season counter', function () {
+test('validateFamily does not assign a family number', function () {
     $this->actingAs($this->admin);
 
     Livewire::test(FamilyValidation::class)->call('validateFamily');
 
     $this->giftRequest->refresh();
-    expect($this->giftRequest->family_number)->toBe(1);
+    expect($this->giftRequest->family_number)->toBeNull();
     expect($this->giftRequest->status)->toBe(GiftRequest::STATUS_VALIDATED);
 });
 
-test('validateFamily assigns sequential family numbers to different families', function () {
-    $family2 = Family::create([
-        'email' => 'family2@example.com',
-        'first_name' => 'Marie',
-        'last_name' => 'Martin',
-        'street_name' => 'Rue du Lac',
-        'house_no' => '5',
-        'postal_code' => '1000',
-        'city' => 'Lausanne',
-        'phone' => '0799999999',
-    ]);
-
-    $giftRequest2 = GiftRequest::create([
-        'family_id' => $family2->id,
-        'season_id' => $this->season->id,
-        'status' => GiftRequest::STATUS_PENDING,
-    ]);
-
-    $this->actingAs($this->admin);
-
-    // validateFamily moves to the next pending family
-    Livewire::test(FamilyValidation::class)
-        ->call('validateFamily')
-        ->call('validateFamily');
-
-    $this->giftRequest->refresh();
-    $giftRequest2->refresh();
-
-    expect($this->giftRequest->family_number)->toBe(1);
-    expect($giftRequest2->family_number)->toBe(2);
-});
-
-test('validateFamily does not reassign family number if already set', function () {
+test('validateFamily keeps a family number already assigned', function () {
     $this->giftRequest->update(['family_number' => 42]);
 
     $this->actingAs($this->admin);
 
     Livewire::test(FamilyValidation::class)->call('validateFamily');
 
-    $this->giftRequest->refresh();
-    expect($this->giftRequest->family_number)->toBe(42);
-
-    // Season counter should NOT have been consumed
-    $this->season->refresh();
-    expect($this->season->next_family_number)->toBe(1);
+    expect($this->giftRequest->fresh()->family_number)->toBe(42);
 });
 
 test('gift validation does not list requests of families still pending', function () {
@@ -150,8 +112,8 @@ test('gift validation has no family decision', function () {
         ->assertDontSee('Refuser définitivement');
 });
 
-test('validateChild assigns child number and code', function () {
-    $this->giftRequest->update(['family_number' => 3, 'status' => GiftRequest::STATUS_VALIDATED]);
+test('validating a child does not assign its number nor its code', function () {
+    $this->giftRequest->update(['status' => GiftRequest::STATUS_VALIDATED]);
     $child = ($this->makeChild)($this->giftRequest, 'Alice');
 
     $this->actingAs($this->admin);
@@ -161,84 +123,11 @@ test('validateChild assigns child number and code', function () {
         ->call('submitValidation');
 
     $child->refresh();
-    $this->giftRequest->refresh();
-    expect($child->child_number)->toBe(1);
-    expect($child->code)->toBe('Y0003/1');
     expect($child->status)->toBe(Child::STATUS_VALIDATED);
     expect($child->validated_at)->not->toBeNull();
-    expect($this->giftRequest->status)->toBe(GiftRequest::STATUS_VALIDATED);
-});
-
-test('validateChild assigns sequential child numbers within same family', function () {
-    $this->giftRequest->update(['family_number' => 1, 'status' => GiftRequest::STATUS_VALIDATED]);
-    $child1 = ($this->makeChild)($this->giftRequest, 'Alice');
-    $child2 = ($this->makeChild)($this->giftRequest, 'Bob');
-
-    $this->actingAs($this->admin);
-
-    Livewire::test(Validation::class)
-        ->set("childDecisions.{$child1->id}", 'validated')
-        ->set("childDecisions.{$child2->id}", 'validated')
-        ->call('submitValidation');
-
-    $child1->refresh();
-    $child2->refresh();
-
-    expect($child1->child_number)->toBe(1);
-    expect($child1->code)->toBe('Y0001/1');
-
-    expect($child2->child_number)->toBe(2);
-    expect($child2->code)->toBe('Y0001/2');
-});
-
-test('full validation flow produces correct codes', function () {
-    $child1 = ($this->makeChild)($this->giftRequest, 'Alice');
-    $child2 = ($this->makeChild)($this->giftRequest, 'Bob');
-
-    $family2 = Family::create([
-        'email' => 'family2@example.com',
-        'first_name' => 'Marie',
-        'last_name' => 'Martin',
-        'street_name' => 'Rue du Lac',
-        'house_no' => '5',
-        'postal_code' => '1000',
-        'city' => 'Lausanne',
-        'phone' => '0799999999',
-    ]);
-
-    $giftRequest2 = GiftRequest::create([
-        'family_id' => $family2->id,
-        'season_id' => $this->season->id,
-        'status' => GiftRequest::STATUS_PENDING,
-    ]);
-
-    $child3 = ($this->makeChild)($giftRequest2, 'Charlie');
-
-    $this->actingAs($this->admin);
-
-    // Families are validated on the family validation page
-    Livewire::test(FamilyValidation::class)
-        ->call('validateFamily')
-        ->call('validateFamily');
-
-    // Then their children on the gift validation page
-    Livewire::test(Validation::class)
-        ->set("childDecisions.{$child1->id}", 'validated')
-        ->set("childDecisions.{$child2->id}", 'validated')
-        ->call('submitValidation')
-        ->set("childDecisions.{$child3->id}", 'validated')
-        ->call('submitValidation');
-
-    $child1->refresh();
-    $child2->refresh();
-    $child3->refresh();
-
-    expect($child1->code)->toBe('Y0001/1');
-    expect($child2->code)->toBe('Y0001/2');
-    expect($child3->code)->toBe('Y0002/1');
-
-    $this->season->refresh();
-    expect($this->season->next_family_number)->toBe(3);
+    expect($child->child_number)->toBeNull();
+    expect($child->code)->toBeNull();
+    expect($this->giftRequest->fresh()->family_number)->toBeNull();
 });
 
 test('gift validation only changes pending children', function () {

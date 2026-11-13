@@ -16,7 +16,6 @@ beforeEach(function () {
         'start_date' => now()->subDay(),
         'end_date' => now()->addMonth(),
         'modification_deadline' => now()->addMonth(),
-        'next_family_number' => 2,
     ]);
 
     $this->family = Family::create([

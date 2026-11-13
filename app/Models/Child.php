@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\NumberSequence;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -252,26 +253,31 @@ class Child extends Model
     }
 
     /**
-     * Assign the next child number within the family and generate the code.
+     * Give the child its number and code at print time, with the family number when the family has none yet.
+     * The child number is the smallest free number of the family (gaps filled).
+     * Once assigned, the numbers never change (a reprinted child keeps its code).
      */
     public function assignChildNumberAndCode(): void
     {
-        DB::transaction(function () {
-            $giftRequest = $this->giftRequest()->lockForUpdate()->first();
+        if ($this->child_number !== null && $this->code !== null) {
+            return;
+        }
 
-            if ($giftRequest->family_number === null) {
-                $giftRequest->family_number = $giftRequest->season->assignNextFamilyNumber();
-                $giftRequest->save();
+        DB::transaction(function () {
+            $giftRequest = $this->giftRequest;
+            $familyNumber = $giftRequest->assignFamilyNumber();
+
+            if ($this->child_number === null) {
+                GiftRequest::whereKey($giftRequest->id)->lockForUpdate()->first();
+
+                $this->child_number = NumberSequence::firstFree(
+                    self::where('gift_request_id', $giftRequest->id)->whereNotNull('child_number')->pluck('child_number')
+                );
             }
 
-            $maxChildNumber = Child::where('gift_request_id', $giftRequest->id)
-                ->whereNotNull('child_number')
-                ->max('child_number');
-
-            $this->child_number = ($maxChildNumber ?? 0) + 1;
             $this->code = self::generateCode(
                 Setting::getCodePrefix(),
-                $giftRequest->family_number,
+                $familyNumber,
                 $this->child_number,
                 Setting::getCodeFamilyPadding()
             );

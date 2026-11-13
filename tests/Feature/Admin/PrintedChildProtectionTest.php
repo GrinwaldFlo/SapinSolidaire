@@ -30,7 +30,6 @@ beforeEach(function () {
         'start_date' => now()->subDays(10),
         'end_date' => now()->addDays(20),
         'modification_deadline' => now()->addDays(20),
-        'next_family_number' => 2,
     ]);
 
     $this->createFamilyRequest = function (string $email, string $status): GiftRequest {
