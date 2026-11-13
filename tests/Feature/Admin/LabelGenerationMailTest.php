@@ -170,3 +170,18 @@ test('finally rejected children do not block the request complete mail', functio
 
     Mail::assertQueued(RequestCompleteMail::class, fn ($mail) => $mail->children->count() === 1);
 });
+
+test('validated children of a family sent back to validation are not printed', function () {
+    $waiting = ($this->createRequestWithChildren)('waiting@example.com', [Child::STATUS_VALIDATED]);
+    $waiting->setStatus(GiftRequest::STATUS_PENDING);
+    $ready = ($this->createRequestWithChildren)('ready@example.com', [Child::STATUS_VALIDATED]);
+
+    $this->actingAs($this->admin);
+
+    Livewire::test(LabelGeneration::class)
+        ->assertSet('validatedCount', 1)
+        ->call('generatePdf');
+
+    expect($waiting->children()->first()->status)->toBe(Child::STATUS_VALIDATED);
+    expect($ready->children()->first()->status)->toBe(Child::STATUS_PRINTED);
+});

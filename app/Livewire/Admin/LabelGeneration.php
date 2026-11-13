@@ -36,9 +36,7 @@ class LabelGeneration extends Component
             return;
         }
 
-        $this->validatedCount = Child::whereHas('giftRequest', function ($q) {
-            $q->where('season_id', $this->activeSeason->id);
-        })->where('status', Child::STATUS_VALIDATED)->count();
+        $this->validatedCount = Child::readyToPrint($this->activeSeason)->count();
 
         // Families that will receive the "request complete" mail once the validated children are printed
         $this->requestCompleteMailCount = $this->requestsWithChildrenInStatus(Child::STATUS_VALIDATED)
@@ -69,10 +67,7 @@ class LabelGeneration extends Component
 
         // Get validated children ordered by validation date
         $children = Child::with('giftRequest.family')
-            ->whereHas('giftRequest', function ($q) {
-                $q->where('season_id', $this->activeSeason->id);
-            })
-            ->where('status', Child::STATUS_VALIDATED)
+            ->readyToPrint($this->activeSeason)
             ->orderBy('validated_at')
             ->get();
 

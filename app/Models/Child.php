@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -117,6 +118,18 @@ class Child extends Model
         ]);
 
         return $parts === [] ? null : implode(' / ', $parts);
+    }
+
+    /**
+     * Validated children of validated requests of the season: their gift card can be printed.
+     * A family sent back to validation keeps its validated children, but they wait for it.
+     */
+    public function scopeReadyToPrint(Builder $query, Season $season): Builder
+    {
+        return $query->where('status', self::STATUS_VALIDATED)
+            ->whereHas('giftRequest', fn (Builder $q) => $q
+                ->where('season_id', $season->id)
+                ->where('status', GiftRequest::STATUS_VALIDATED));
     }
 
     /**

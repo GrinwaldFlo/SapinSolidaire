@@ -41,9 +41,12 @@ class Validation extends Component
 
     public array $selectedChildMessageKeys = []; // child_id => message index
 
-    public function getHasPendingDecisionsProperty(): bool
+    /**
+     * Children may be left pending (e.g. a correction asked for one child only), but at least one must be decided.
+     */
+    public function getHasNoDecisionProperty(): bool
     {
-        return in_array('pending', $this->childDecisions, true);
+        return array_diff($this->childDecisions, ['pending']) === [];
     }
 
     public function mount(): void
@@ -154,7 +157,7 @@ class Validation extends Component
 
     public function submitValidation(): void
     {
-        if (! $this->currentRequest) {
+        if (! $this->currentRequest || $this->has_no_decision) {
             return;
         }
 
@@ -201,6 +204,9 @@ class Validation extends Component
                     $combinedComments[] = "Refus pour l'enfant {$child->first_name} :\n - ".$comment;
                 }
             }
+
+            // Children left pending: the family goes to the end of the queue
+            $request->touch();
 
             return true;
         });

@@ -178,7 +178,7 @@ Other models:
 3. GiftRequestForm validates token and active season.
 4. Existing family/request data is loaded if present.
 5. Address and phone are validated (Swiss services/libs).
-6. Request/children are created or updated.
+6. Request/children are created or updated. A validated request goes back to pending (FamilyValidation) only when family data or the proof changed; an unchanged validated child keeps its status, other modifiable children go back to pending (Validation queue).
 7. Optional proof of habitation upload is stored on local disk.
 
 ### Validation flow
@@ -194,13 +194,14 @@ Validation (gift validation):
 
 - Only lists validated requests that still have pending children; no family decision.
 - Decides pending children only (validate, correction, final refusal); other children are left untouched.
+- Children may be left pending (e.g. a correction for one child only, at least one decision required): the request is touched and goes to the end of the queue, staying there while it has pending children.
 - Uses DB transaction and row-level locks for consistency; skips a request sent back to pending in the meantime.
 - Assigns child codes during validation.
 - Sends correction emails from the shared SendsRejectionEmail concern.
 
 ### Label and distribution flow
 
-- LabelGeneration selects validated children, marks them printed, generates PDF (label or grid style), stores file and DB trace.
+- LabelGeneration selects validated children of validated requests (Child::readyToPrint), marks them printed, generates PDF (label or grid style), stores file and DB trace.
 - GiftReception marks printed children as received by family number keypad flow.
 - GiftDelivery marks received children as given by family search.
 

@@ -309,6 +309,78 @@ test('child correction keeps the family validated and sends a correction email',
     Mail::assertQueued(CorrectionRequestMail::class);
 });
 
+test('a correction can be asked for one child while the other children stay pending', function () {
+    Mail::fake();
+
+    $this->giftRequest->update(['family_number' => 1, 'status' => GiftRequest::STATUS_VALIDATED]);
+    $corrected = ($this->makeChild)($this->giftRequest, 'Alice');
+    $waiting = ($this->makeChild)($this->giftRequest, 'Bob');
+
+    $this->actingAs($this->admin);
+
+    Livewire::test(Validation::class)
+        ->set("childDecisions.{$corrected->id}", 'correction')
+        ->set("childComments.{$corrected->id}", 'Merci de préciser le cadeau.')
+        ->call('submitValidation');
+
+    expect($corrected->fresh()->status)->toBe(Child::STATUS_REJECTED);
+    expect($waiting->fresh()->status)->toBe(Child::STATUS_PENDING);
+    expect($this->giftRequest->fresh()->status)->toBe(GiftRequest::STATUS_VALIDATED);
+    Mail::assertQueued(CorrectionRequestMail::class);
+
+    // The family stays in the gift validation queue for the child still pending
+    Livewire::test(Validation::class)
+        ->assertSet('currentRequest.id', $this->giftRequest->id)
+        ->assertSet('childDecisions', [$waiting->id => 'pending']);
+});
+
+test('gift validation cannot be submitted without any decision', function () {
+    $this->giftRequest->update(['family_number' => 1, 'status' => GiftRequest::STATUS_VALIDATED]);
+    $child = ($this->makeChild)($this->giftRequest, 'Alice');
+
+    $this->actingAs($this->admin);
+
+    Livewire::test(Validation::class)
+        ->call('submitValidation');
+
+    expect($child->fresh()->status)->toBe(Child::STATUS_PENDING);
+});
+
+test('a family partially decided goes to the end of the gift validation queue', function () {
+    $this->giftRequest->update(['family_number' => 1, 'status' => GiftRequest::STATUS_VALIDATED]);
+    $decided = ($this->makeChild)($this->giftRequest, 'Alice');
+    ($this->makeChild)($this->giftRequest, 'Bob');
+
+    $otherFamily = Family::create([
+        'email' => 'other@example.com',
+        'first_name' => 'Marie',
+        'last_name' => 'Martin',
+        'street_name' => 'Rue du Lac',
+        'house_no' => '5',
+        'postal_code' => '1000',
+        'city' => 'Lausanne',
+        'phone' => '0799999999',
+    ]);
+    $otherRequest = GiftRequest::create([
+        'family_id' => $otherFamily->id,
+        'season_id' => $this->season->id,
+        'status' => GiftRequest::STATUS_VALIDATED,
+        'family_number' => 2,
+    ]);
+    ($this->makeChild)($otherRequest, 'Chloé');
+
+    GiftRequest::whereKey($this->giftRequest->id)->toBase()->update(['updated_at' => now()->subHour()]);
+    GiftRequest::whereKey($otherRequest->id)->toBase()->update(['updated_at' => now()->subMinutes(30)]);
+
+    $this->actingAs($this->admin);
+
+    Livewire::test(Validation::class)
+        ->assertSet('currentRequest.id', $this->giftRequest->id)
+        ->set("childDecisions.{$decided->id}", 'validated')
+        ->call('submitValidation')
+        ->assertSet('currentRequest.id', $otherRequest->id);
+});
+
 test('final family rejection in family validation final-rejects all children', function () {
     Mail::fake();
 
