@@ -9,7 +9,7 @@
 <div x-data="{ action: '' }" class="family-actions">
     <div class="badge-row">
         @if($isExcluded)
-            <span class="badge--rejected" title="{{ $family->exclusion_reason }}">{{ \App\Models\GiftRequest::STATUS_LABELS[\App\Models\GiftRequest::STATUS_REJECTED_FINAL] }}</span>
+            <span class="badge--rejected" title="{{ $family->exclusion_reason }}">{{ \App\Models\GiftRequest::statusLabels()[\App\Models\GiftRequest::STATUS_REJECTED_FINAL] }}</span>
         @elseif($actionRequest)
             <span class="{{ $actionRequest->status_badge_class }}">{{ $actionRequest->status_label }}</span>
         @else

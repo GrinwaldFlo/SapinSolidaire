@@ -162,13 +162,19 @@ class CorrectionReminders extends Component
             ->map(fn ($id) => (string) $id)
             ->unique();
 
+        if ($requestIds->isEmpty()) {
+            session()->flash('error', 'Aucune ligne sélectionnée.');
+
+            return;
+        }
+
         $sent = $requestIds->filter(fn (string $requestId) => $this->sendReminder($requestId))->count();
 
         $this->selectedRequestIds = [];
         $this->selectedChildIds = [];
 
         if ($sent === 0) {
-            session()->flash('error', 'Aucune ligne sélectionnée.');
+            session()->flash('error', 'Aucun rappel envoyé : les lignes sélectionnées ont été corrigées entre-temps par les familles.');
 
             return;
         }
@@ -177,19 +183,20 @@ class CorrectionReminders extends Component
     }
 
     /**
-     * Send the reminder of one family, under a lock of its request: a request or child corrected
-     * by the family in the meantime is no longer refused and is not reminded.
+     * Send the reminder of one family. The comment is built under a lock of its request (a request
+     * or child corrected by the family in the meantime is no longer refused and is not reminded);
+     * the new token and the email are created once the transaction is committed.
      */
     protected function sendReminder(string $requestId): bool
     {
-        return DB::transaction(function () use ($requestId): bool {
+        $reminder = DB::transaction(function () use ($requestId): ?array {
             $request = GiftRequest::where('season_id', $this->activeSeason->id)
                 ->with('family')
                 ->lockForUpdate()
                 ->find($requestId);
 
             if ($request === null) {
-                return false;
+                return null;
             }
 
             $comments = [];
@@ -211,14 +218,29 @@ class CorrectionReminders extends Component
                 $comments[] = self::childRejectionComment($child->first_name, $child->rejection_comment);
             }
 
-            if ($comments === []) {
-                return false;
-            }
-
-            $this->sendCorrectionEmail($request, self::combineRejectionComments($comments), SentMailLog::PURPOSE_CORRECTION_REMINDER);
-
-            return true;
+            return $comments === [] ? null : [$request, self::combineRejectionComments($comments)];
         });
+
+        if ($reminder === null) {
+            return false;
+        }
+
+        [$request, $comment] = $reminder;
+        $this->sendCorrectionEmail($request, $comment, SentMailLog::PURPOSE_CORRECTION_REMINDER);
+
+        return true;
+    }
+
+    /**
+     * Whether every selectable line (with a comment to send) of a list is selected.
+     *
+     * @param  array<int, string>  $selectedIds
+     */
+    protected static function allSelected(Collection $lines, array $selectedIds): bool
+    {
+        $selectableIds = $lines->filter(fn ($line) => filled($line->rejection_comment))->pluck('id');
+
+        return $selectableIds->isNotEmpty() && $selectableIds->diff($selectedIds)->isEmpty();
     }
 
     public function render()
@@ -230,8 +252,8 @@ class CorrectionReminders extends Component
             'activeSeason' => $this->activeSeason,
             'requests' => $requests,
             'children' => $children,
-            'allRequestsSelected' => $requests->isNotEmpty() && $requests->pluck('id')->diff($this->selectedRequestIds)->isEmpty(),
-            'allChildrenSelected' => $children->isNotEmpty() && $children->pluck('id')->diff($this->selectedChildIds)->isEmpty(),
+            'allRequestsSelected' => self::allSelected($requests, $this->selectedRequestIds),
+            'allChildrenSelected' => self::allSelected($children, $this->selectedChildIds),
             // Only the selected lines still listed (a line corrected in the meantime is no longer sent)
             'selectedCount' => $requests->pluck('id')->intersect($this->selectedRequestIds)->count()
                 + $children->pluck('id')->intersect($this->selectedChildIds)->count(),

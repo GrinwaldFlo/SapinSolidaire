@@ -40,8 +40,10 @@ class LabelGeneration extends Component
         $this->validatedCount = Child::readyToPrint($this->activeSeason)->count();
 
         // Families that will receive the "request complete" mail once the validated children are printed
+        // (only validated requests are printed, see Child::readyToPrint)
         $this->requestCompleteMailCount = $this->requestsWithChildrenInStatus(Child::STATUS_VALIDATED)
-            ->filter(fn (GiftRequest $request) => $request->isRequestCompleteMailDue([Child::STATUS_VALIDATED]))
+            ->filter(fn (GiftRequest $request) => $request->status === GiftRequest::STATUS_VALIDATED
+                && $request->isRequestCompleteMailDue([Child::STATUS_VALIDATED]))
             ->count();
     }
 

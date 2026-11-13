@@ -43,7 +43,6 @@
                         <td class="table-cell">{{ $family->last_name }}</td>
                         <td class="table-cell-muted text-sm">
                             <x-admin.family-contact :family="$family" />
-                            </div>
                         </td>
                         <td class="table-cell">
                             @foreach($family->giftRequests as $request)
@@ -92,7 +91,7 @@
                 <div class="font-semibold detail-value text-base">
                     {{ $family->first_name }} {{ $family->last_name }}
                 </div>
-                <x-admin.family-contact :family="$family" class="text-sm text-muted" />
+                <x-admin.family-contact :family="$family" class="contact-list--card" />
                 @if($family->giftRequests->isNotEmpty())
                     <div class="space-y-2">
                         @foreach($family->giftRequests as $request)

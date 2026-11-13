@@ -184,3 +184,17 @@ test('validated children of a family sent back to validation are not printed', f
     expect($waiting->children()->first()->status)->toBe(Child::STATUS_VALIDATED);
     expect($ready->children()->first()->status)->toBe(Child::STATUS_PRINTED);
 });
+
+test('a request sent back to family validation is not counted in the request complete mails', function () {
+    ($this->createRequestWithChildren)('a@example.com', [Child::STATUS_VALIDATED]);
+    $pending = ($this->createRequestWithChildren)('b@example.com', [Child::STATUS_VALIDATED]);
+    $pending->update(['status' => GiftRequest::STATUS_PENDING]);
+
+    $this->actingAs($this->admin);
+
+    Livewire::test(LabelGeneration::class)
+        ->assertSet('requestCompleteMailCount', 1)
+        ->call('generatePdf');
+
+    Mail::assertQueued(RequestCompleteMail::class, 1);
+});

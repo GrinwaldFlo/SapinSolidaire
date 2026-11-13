@@ -244,16 +244,7 @@ class ChildrenMonitoring extends Component
 
         $children = $query->get();
 
-        $statusLabels = [
-            '' => 'Tous les statuts',
-            Child::STATUS_PENDING => 'À valider',
-            Child::STATUS_VALIDATED => 'Validé',
-            Child::STATUS_REJECTED => 'Refusé',
-            Child::STATUS_REJECTED_FINAL => 'Refusé définitivement',
-            Child::STATUS_PRINTED => 'Imprimé',
-            Child::STATUS_RECEIVED => 'Reçu',
-            Child::STATUS_GIVEN => 'Donné',
-        ];
+        $statusLabels = ['' => 'Tous les statuts', ...Child::statusLabels()];
 
         $pdf = Pdf::loadView('pdf.monitoring-grid', [
             'children' => $children,
@@ -325,15 +316,7 @@ class ChildrenMonitoring extends Component
             'canResetRejected' => $isAdmin
                 && $this->selectedSeasonId !== null
                 && $this->selectedSeasonId === Season::getActive()?->id,
-            'statuses' => [
-                Child::STATUS_PENDING => 'À valider',
-                Child::STATUS_VALIDATED => 'Validé',
-                Child::STATUS_REJECTED => 'Refusé',
-                Child::STATUS_REJECTED_FINAL => 'Refusé définitivement',
-                Child::STATUS_PRINTED => 'Imprimé',
-                Child::STATUS_RECEIVED => 'Reçu',
-                Child::STATUS_GIVEN => 'Donné',
-            ],
+            'statuses' => Child::statusLabels(),
         ]);
     }
 }

@@ -5,19 +5,19 @@
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
     <div>
         <span class="detail-label">Nom :</span>
-        <span class="ml-2 detail-value">{{ $request->family->first_name }} {{ $request->family->last_name }}</span>
+        <span class="detail-inline detail-value">{{ $request->family->first_name }} {{ $request->family->last_name }}</span>
     </div>
     <div>
         <span class="detail-label">Email :</span>
-        <span class="ml-2 detail-value">{{ $request->family->email }}</span>
+        <span class="detail-inline detail-value">{{ $request->family->email }}</span>
     </div>
     <div>
         <span class="detail-label">Téléphone :</span>
-        <x-admin.contact.phone :tel="$request->family->tel_phone" :formatted="$request->family->formatted_phone" class="ml-2" />
+        <x-admin.contact.phone :tel="$request->family->tel_phone" :formatted="$request->family->formatted_phone" class="detail-inline" />
     </div>
     <div>
         <span class="detail-label">Adresse :</span>
-        <span class="ml-2 detail-value">{{ $request->family->full_address }}</span>
+        <span class="detail-inline detail-value">{{ $request->family->full_address }}</span>
     </div>
 </div>
 

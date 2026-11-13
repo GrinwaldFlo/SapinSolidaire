@@ -245,7 +245,7 @@ class FamilyManagement extends Component
 
         return view('livewire.admin.family-management', [
             'families' => $query->orderBy($this->sortBy, $this->sortDirection)->paginate(200),
-            'statuses' => GiftRequest::STATUS_LABELS,
+            'statuses' => GiftRequest::statusLabels(),
         ]);
     }
 }

@@ -503,6 +503,21 @@ select:focus[data-flux-control] {
         @apply w-4 h-4 shrink-0;
     }
 
+    /* Email contact link: long addresses wrap anywhere */
+    .contact-email {
+        @apply break-all;
+    }
+
+    /* Smaller muted contact lines of a mobile card */
+    .contact-list--card {
+        @apply text-sm text-gray-500 dark:text-gray-400;
+    }
+
+    /* Value displayed after its label on the same line (label : value) */
+    .detail-inline {
+        @apply ml-2;
+    }
+
     /* Checkbox of a selectable list */
     .checkbox-input {
         @apply w-4 h-4 cursor-pointer accent-green-600 dark:accent-green-500 disabled:cursor-not-allowed;

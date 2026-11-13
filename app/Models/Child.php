@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasStatusBadge;
 use App\Services\NumberSequence;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 
 class Child extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasStatusBadge, HasUuids;
 
     public const STATUS_PENDING = 'pending';
 
@@ -206,37 +207,29 @@ class Child extends Model
     }
 
     /**
-     * Get status label in French.
+     * @return array<string, string>
      */
-    public function getStatusLabelAttribute(): string
+    public static function statusLabels(): array
     {
-        return match ($this->status) {
-            self::STATUS_PENDING => 'À valider',
-            self::STATUS_VALIDATED => 'Validé',
-            self::STATUS_REJECTED => 'Refusé',
-            self::STATUS_REJECTED_FINAL => 'Refusé définitivement',
+        return [
+            ...self::decisionStatusLabels(),
             self::STATUS_PRINTED => 'Imprimé',
             self::STATUS_RECEIVED => 'Reçu',
             self::STATUS_GIVEN => 'Donné',
-            default => $this->status,
-        };
+        ];
     }
 
     /**
-     * Get the badge CSS class matching the status.
+     * @return array<string, string>
      */
-    public function getStatusBadgeClassAttribute(): string
+    public static function statusBadgeClasses(): array
     {
-        return match ($this->status) {
-            self::STATUS_PENDING => 'badge--pending',
-            self::STATUS_VALIDATED => 'badge--validated',
-            self::STATUS_REJECTED => 'badge--warning',
-            self::STATUS_REJECTED_FINAL => 'badge--rejected',
+        return [
+            ...self::decisionStatusBadgeClasses(),
             self::STATUS_PRINTED => 'badge--printed',
             self::STATUS_RECEIVED => 'badge--received',
             self::STATUS_GIVEN => 'badge--given',
-            default => 'badge--neutral',
-        };
+        ];
     }
 
     /**

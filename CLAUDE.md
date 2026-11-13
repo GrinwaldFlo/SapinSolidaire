@@ -142,7 +142,7 @@ GiftRequest:
 - Linked to Family + Season, optional PickupSlot
 - Holds family_number, proof path, slot_start/end datetime
 - Mutation helper: setStatus(status, optional comment)
-- STATUS_LABELS (French labels), status_label / status_badge_class accessors (same badge colors as Child)
+- statusLabels() (French labels), status_label / status_badge_class accessors: App\Models\Concerns\HasStatusBadge, shared with Child (Child adds its print statuses)
 
 Child:
 
@@ -338,7 +338,7 @@ Disabled confirm buttons: btn-confirm is greyed out automatically with the disab
 
 Notice banners: notice-info / notice-warning / notice-success / notice-error, with notice-title, notice-list and notice-text (free text keeping line breaks) for structured content inside them. Add notice-spaced for bottom spacing above following content.
 
-Layout helpers: mobile-detail-grid + mobile-detail-full (two-column details of a mobile card, full-width item), badge-row (wrapping badges), family-actions (stacked per-row action controls), contact-list (stacked contact lines), inline-form + inline-form-field (single-line field + submit button), button-row (wrapping row of buttons under content), page-stack (vertical spacing between page sections). Button size modifier: btn-sm (combine with any btn-* class). Icon button: btn-icon + btn-icon-svg (small icon-only button, e.g. pen to edit a value), inline-edit (value followed by its inline edit button), gift-sizes (muted height / shoe size next to a gift, from Child::sizes_summary). contact-link + contact-icon (family contact link with icon, combine with link): use the Blade components x-admin.contact.email / phone / address, or x-admin.family-contact for the stacked email / phone / address of a family.
+Layout helpers: mobile-detail-grid + mobile-detail-full (two-column details of a mobile card, full-width item), badge-row (wrapping badges), family-actions (stacked per-row action controls), contact-list (stacked contact lines), inline-form + inline-form-field (single-line field + submit button), button-row (wrapping row of buttons under content), page-stack (vertical spacing between page sections). Button size modifier: btn-sm (combine with any btn-* class). Icon button: btn-icon + btn-icon-svg (small icon-only button, e.g. pen to edit a value), inline-edit (value followed by its inline edit button), gift-sizes (muted height / shoe size next to a gift, from Child::sizes_summary). contact-link + contact-icon (family contact link with icon, combine with link; contact-email lets a long email wrap), contact-list--card (smaller muted contact lines of a mobile card), detail-inline (value after its label on the same line): use the Blade components x-admin.contact.email / phone / address, or x-admin.family-contact for the stacked email / phone / address of a family.
 
 Modal helpers: modal-backdrop, modal-panel (modal-panel--small for a simple dialog box), modal-header, modal-body, modal-footer (+ modal-actions for right-aligned OK / Annuler buttons).
 

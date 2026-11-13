@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasStatusBadge;
 use App\Services\NumberSequence;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 
 class GiftRequest extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasStatusBadge, HasUuids;
 
     public const STATUS_PENDING = 'pending';
 
@@ -21,18 +22,6 @@ class GiftRequest extends Model
     public const STATUS_REJECTED = 'rejected';
 
     public const STATUS_REJECTED_FINAL = 'rejected_final';
-
-    /**
-     * French labels of the request statuses.
-     *
-     * @var array<string, string>
-     */
-    public const STATUS_LABELS = [
-        self::STATUS_PENDING => 'À valider',
-        self::STATUS_VALIDATED => 'Validé',
-        self::STATUS_REJECTED => 'Refusé',
-        self::STATUS_REJECTED_FINAL => 'Refusé définitivement',
-    ];
 
     /**
      * Child statuses meaning the gift card has been printed.
@@ -132,7 +121,8 @@ class GiftRequest extends Model
                 $current = NumberSequence::firstFree(
                     self::where('season_id', $this->season_id)->whereNotNull('family_number')->pluck('family_number')
                 );
-                self::whereKey($this->id)->update(['family_number' => $current]);
+                // toBase(): no updated_at bump, the Validation queue is ordered by updated_at
+                self::whereKey($this->id)->toBase()->update(['family_number' => $current]);
             }
 
             $this->family_number = (int) $current;
@@ -230,27 +220,5 @@ class GiftRequest extends Model
         }
 
         return $updated === 1;
-    }
-
-    /**
-     * Get status label in French.
-     */
-    public function getStatusLabelAttribute(): string
-    {
-        return self::STATUS_LABELS[$this->status] ?? (string) $this->status;
-    }
-
-    /**
-     * Get the badge CSS class matching the status (same colors as the child statuses).
-     */
-    public function getStatusBadgeClassAttribute(): string
-    {
-        return match ($this->status) {
-            self::STATUS_PENDING => 'badge--pending',
-            self::STATUS_VALIDATED => 'badge--validated',
-            self::STATUS_REJECTED => 'badge--warning',
-            self::STATUS_REJECTED_FINAL => 'badge--rejected',
-            default => 'badge--neutral',
-        };
     }
 }

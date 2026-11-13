@@ -389,16 +389,7 @@
                                 </div>
                                 @if(!($child['can_modify'] ?? true))
                                     @php
-                                        $statusLabel = match($child['status'] ?? '') {
-                                            'pending' => 'À valider',
-                                            'validated' => 'Validé',
-                                            'rejected' => 'Refusé',
-                                            'rejected_final' => 'Refusé définitivement',
-                                            'printed' => 'Imprimé',
-                                            'received' => 'Reçu',
-                                            'given' => 'Donné',
-                                            default => $child['status'] ?? ''
-                                        };
+                                        $statusLabel = \App\Models\Child::statusLabels()[$child['status'] ?? ''] ?? ($child['status'] ?? '');
                                     @endphp
                                     <span class="text-sm text-orange-600 dark:text-orange-400">Non modifiable ({{ $statusLabel }})</span>
                                 @elseif(isset($child['status']))

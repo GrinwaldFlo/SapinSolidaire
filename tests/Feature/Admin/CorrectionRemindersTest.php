@@ -240,7 +240,7 @@ test('a family with only children without comment receives nothing', function ()
     Livewire::actingAs($this->admin)->test(CorrectionReminders::class)
         ->set('selectedChildIds', [$hugo->id])
         ->call('sendReminders')
-        ->assertSee('Aucune ligne sélectionnée');
+        ->assertSee('Aucun rappel envoyé');
 
     Mail::assertNothingQueued();
 });
@@ -257,6 +257,28 @@ test('the selection count only includes lines still listed', function () {
     $request->update(['status' => GiftRequest::STATUS_PENDING]);
 
     $component->call('$refresh')->assertViewHas('selectedCount', 1);
+});
+
+test('select all is shown checked when every line with a comment is selected', function () {
+    ($this->createRequest)('a@example.com', GiftRequest::STATUS_REJECTED, comment: 'Commentaire A');
+    ($this->createRequest)('b@example.com', GiftRequest::STATUS_REJECTED);
+
+    Livewire::actingAs($this->admin)->test(CorrectionReminders::class)
+        ->call('toggleAll', CorrectionReminders::LIST_REQUESTS)
+        ->assertViewHas('allRequestsSelected', true);
+});
+
+test('lines corrected in the meantime are reported as such', function () {
+    $request = ($this->createRequest)('famille@example.com', GiftRequest::STATUS_REJECTED, comment: 'Justificatif illisible');
+
+    $component = Livewire::actingAs($this->admin)->test(CorrectionReminders::class)
+        ->set('selectedRequestIds', [$request->id]);
+
+    $request->update(['status' => GiftRequest::STATUS_PENDING]);
+
+    $component->call('sendReminders')->assertSee('corrigées entre-temps');
+
+    Mail::assertNothingQueued();
 });
 
 test('the page is reserved to admins', function (string $roleName) {

@@ -128,3 +128,15 @@ test('a child code never changes once assigned', function () {
     expect($child->fresh()->child_number)->toBe(3);
     expect($child->fresh()->code)->toBe('Y0004/3');
 });
+
+test('assigning the family number does not move the request in the validation queue', function () {
+    $request = ($this->makeRequest)($this->season);
+    $request->forceFill(['updated_at' => now()->subDay()])->saveQuietly();
+    $updatedAt = $request->fresh()->updated_at;
+
+    $this->travel(1)->hours();
+    $request->fresh()->assignFamilyNumber();
+
+    expect($request->fresh()->family_number)->toBe(1);
+    expect($request->fresh()->updated_at->equalTo($updatedAt))->toBeTrue();
+});
