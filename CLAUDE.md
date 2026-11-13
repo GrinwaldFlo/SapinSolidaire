@@ -147,6 +147,7 @@ Child:
 - Status: pending, validated, rejected, rejected_final, printed, received, given
 - Gender: boy, girl, unspecified
 - Code format: prefix + padded family_number + / + child_number
+- Printed card (printed, received, given = GiftRequest::PRINTED_CHILD_STATUSES): frozen for the family (canModify) and for every decision (family rejection, reset, exclusion skip it via hasPrintedCard() / withoutPrintedCard()); only reception (printed -> received), delivery (received -> given) and the label reset in LabelGeneration change it
 - assignChildNumberAndCode() is transactional and season counter-safe through GiftRequest/Season locks
 
 Season:

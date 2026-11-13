@@ -61,8 +61,10 @@ class GiftDelivery extends Component
 
     public function markAsGiven(string $childId): void
     {
-        $child = Child::findOrFail($childId);
-        $child->setStatus(Child::STATUS_GIVEN);
+        $child = $this->activeSeason
+            ? Child::findInSeasonWithStatus($childId, $this->activeSeason, Child::STATUS_RECEIVED)
+            : null;
+        $child?->setStatus(Child::STATUS_GIVEN);
     }
 
     public function markAllAsGiven(string $familyId): void

@@ -136,7 +136,8 @@ class FamilyValidation extends Component
             $request->setStatus($status, $this->rejectionComment);
 
             if ($this->isFinalRejection) {
-                $request->children()->update([
+                // Printed gift cards keep their status
+                $request->children()->withoutPrintedCard()->update([
                     'status' => Child::STATUS_REJECTED_FINAL,
                     'status_changed_at' => now(),
                     'rejection_comment' => $this->rejectionComment,

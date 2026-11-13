@@ -568,7 +568,8 @@ trait HandlesGiftRequestShared
                 $childRecord = null;
 
                 if (! empty($childData['id'])) {
-                    $childRecord = Child::find($childData['id']);
+                    // Only a child of this request: ids sent by the browser are not trusted
+                    $childRecord = $this->giftRequest->children()->find($childData['id']);
                 }
 
                 if ($childRecord && $childRecord->canModify()) {

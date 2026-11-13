@@ -133,6 +133,33 @@ class Child extends Model
     }
 
     /**
+     * Whether the gift card is printed: the child's data and decision are then frozen.
+     */
+    public function hasPrintedCard(): bool
+    {
+        return in_array($this->status, GiftRequest::PRINTED_CHILD_STATUSES, true);
+    }
+
+    /**
+     * Children whose gift card is not printed yet, i.e. whose status can still be decided.
+     */
+    public function scopeWithoutPrintedCard(Builder $query): Builder
+    {
+        return $query->whereNotIn('status', GiftRequest::PRINTED_CHILD_STATUSES);
+    }
+
+    /**
+     * Child of the active season in the given status, or null (ids sent by the browser are not trusted).
+     */
+    public static function findInSeasonWithStatus(string $childId, Season $season, string $status): ?self
+    {
+        return self::whereKey($childId)
+            ->where('status', $status)
+            ->whereHas('giftRequest', fn (Builder $q) => $q->where('season_id', $season->id))
+            ->first();
+    }
+
+    /**
      * Check if the child can be modified.
      */
     public function canModify(): bool

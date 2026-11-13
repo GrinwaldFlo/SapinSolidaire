@@ -135,9 +135,8 @@ class FamilyManagement extends Component
             if ($request) {
                 $request->resetToPending();
 
-                foreach ($request->children as $child) {
-                    $child->resetToPending();
-                }
+                // Printed gift cards keep their status
+                $request->children->reject->hasPrintedCard()->each->resetToPending();
             }
 
             $family->clearExclusion();
@@ -180,9 +179,9 @@ class FamilyManagement extends Component
                 $request->setRelation('family', $family);
                 $request->setStatus(GiftRequest::STATUS_REJECTED_FINAL, $reason);
 
-                foreach ($request->children as $child) {
-                    $child->setStatus(Child::STATUS_REJECTED_FINAL, $reason);
-                }
+                // Printed gift cards keep their status
+                $request->children->reject->hasPrintedCard()
+                    ->each->setStatus(Child::STATUS_REJECTED_FINAL, $reason);
             } else {
                 $family->exclude($reason);
             }
