@@ -7,6 +7,7 @@ use App\Models\AdminActionLog;
 use App\Models\Child;
 use App\Models\Season;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Locked;
@@ -204,6 +205,47 @@ class ChildrenMonitoring extends Component
         abort_unless(auth()->user()?->isAdmin(), 403);
     }
 
+    /**
+     * Children of the selected season matching the current filters and sort.
+     * Columns are qualified with their table: sorting by family name joins
+     * gift_requests and families, which share column names (status, ...).
+     */
+    private function childrenQuery(): Builder
+    {
+        $query = Child::with(['giftRequest.family', 'giftRequest.season'])
+            ->whereHas('giftRequest', function ($q) {
+                $q->where('gift_requests.season_id', $this->selectedSeasonId);
+            });
+
+        if ($this->statusFilter) {
+            $query->where('children.status', $this->statusFilter);
+        }
+
+        if ($this->search) {
+            $search = $this->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('children.code', 'like', "%{$search}%")
+                    ->orWhere('children.first_name', 'like', "%{$search}%")
+                    ->orWhere('children.gift', 'like', "%{$search}%")
+                    ->orWhereHas('giftRequest.family', function ($q) use ($search) {
+                        $q->where('families.last_name', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        if ($this->sortBy === 'family_name') {
+            $query->join('gift_requests', 'children.gift_request_id', '=', 'gift_requests.id')
+                ->join('families', 'gift_requests.family_id', '=', 'families.id')
+                ->orderBy('families.last_name', $this->sortDirection === 'desc' ? 'desc' : 'asc')
+                ->select('children.*');
+        } else {
+            $column = in_array($this->sortBy, self::SORTABLE_COLUMNS, true) ? $this->sortBy : 'first_name';
+            $query->orderBy('children.'.$column, $this->sortDirection === 'desc' ? 'desc' : 'asc');
+        }
+
+        return $query;
+    }
+
     public function exportPdf()
     {
         if (! $this->selectedSeasonId) {
@@ -212,37 +254,7 @@ class ChildrenMonitoring extends Component
 
         $season = $this->seasons->firstWhere('id', $this->selectedSeasonId);
 
-        $query = Child::with(['giftRequest.family', 'giftRequest.season'])
-            ->whereHas('giftRequest', function ($q) {
-                $q->where('season_id', $this->selectedSeasonId);
-            });
-
-        if ($this->statusFilter) {
-            $query->where('status', $this->statusFilter);
-        }
-
-        if ($this->search) {
-            $search = $this->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('code', 'like', "%{$search}%")
-                    ->orWhere('first_name', 'like', "%{$search}%")
-                    ->orWhere('gift', 'like', "%{$search}%")
-                    ->orWhereHas('giftRequest.family', function ($q) use ($search) {
-                        $q->where('last_name', 'like', "%{$search}%");
-                    });
-            });
-        }
-
-        if ($this->sortBy === 'family_name') {
-            $query->join('gift_requests', 'children.gift_request_id', '=', 'gift_requests.id')
-                ->join('families', 'gift_requests.family_id', '=', 'families.id')
-                ->orderBy('families.last_name', $this->sortDirection)
-                ->select('children.*');
-        } else {
-            $query->orderBy($this->sortBy, $this->sortDirection);
-        }
-
-        $children = $query->get();
+        $children = $this->childrenQuery()->get();
 
         $statusLabels = ['' => 'Tous les statuts', ...Child::statusLabels()];
 
@@ -275,37 +287,7 @@ class ChildrenMonitoring extends Component
         $children = collect();
 
         if ($this->selectedSeasonId) {
-            $query = Child::with(['giftRequest.family', 'giftRequest.season'])
-                ->whereHas('giftRequest', function ($q) {
-                    $q->where('season_id', $this->selectedSeasonId);
-                });
-
-            if ($this->statusFilter) {
-                $query->where('status', $this->statusFilter);
-            }
-
-            if ($this->search) {
-                $search = $this->search;
-                $query->where(function ($q) use ($search) {
-                    $q->where('code', 'like', "%{$search}%")
-                        ->orWhere('first_name', 'like', "%{$search}%")
-                        ->orWhere('gift', 'like', "%{$search}%")
-                        ->orWhereHas('giftRequest.family', function ($q) use ($search) {
-                            $q->where('last_name', 'like', "%{$search}%");
-                        });
-                });
-            }
-
-            if ($this->sortBy === 'family_name') {
-                $query->join('gift_requests', 'children.gift_request_id', '=', 'gift_requests.id')
-                    ->join('families', 'gift_requests.family_id', '=', 'families.id')
-                    ->orderBy('families.last_name', $this->sortDirection)
-                    ->select('children.*');
-            } else {
-                $query->orderBy($this->sortBy, $this->sortDirection);
-            }
-
-            $children = $query->paginate(200);
+            $children = $this->childrenQuery()->paginate(200);
         }
 
         $isAdmin = (bool) auth()->user()?->isAdmin();
