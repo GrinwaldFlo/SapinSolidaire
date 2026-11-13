@@ -7,10 +7,12 @@ use App\Models\Child;
 use App\Models\GiftRequest;
 use App\Models\Season;
 use App\Models\SentMailLog;
+use App\Services\SeasonService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Livewire\Attributes\Locked;
+use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 /**
@@ -25,9 +27,6 @@ class CorrectionReminders extends Component
 
     public const LIST_CHILDREN = 'children';
 
-    #[Locked]
-    public ?Season $activeSeason = null;
-
     /**
      * Selected ids per list (sent by the browser: only used to filter the server-side queries).
      *
@@ -40,9 +39,13 @@ class CorrectionReminders extends Component
      */
     public array $selectedChildIds = [];
 
-    public function mount(): void
+    /**
+     * Active season, read again on every request (deadline or active season may change while the page is open).
+     */
+    #[Computed]
+    public function activeSeason(): ?Season
     {
-        $this->activeSeason = Season::getActive();
+        return Season::getActive();
     }
 
     /**
@@ -63,6 +66,14 @@ class CorrectionReminders extends Component
             ->whereHas('giftRequest', fn (Builder $q) => $q
                 ->where('season_id', $this->activeSeason?->id)
                 ->where('status', '!=', GiftRequest::STATUS_REJECTED_FINAL));
+    }
+
+    /**
+     * Only lines with a comment to send again (a reminder without comment would not tell the family what to correct).
+     */
+    protected static function withComment(Builder $query): Builder
+    {
+        return $query->whereNotNull('rejection_comment')->where('rejection_comment', '!=', '');
     }
 
     /**
@@ -102,7 +113,7 @@ class CorrectionReminders extends Component
             return;
         }
 
-        $query = $list === self::LIST_REQUESTS ? $this->rejectedRequestsQuery() : $this->rejectedChildrenQuery();
+        $query = self::withComment($list === self::LIST_REQUESTS ? $this->rejectedRequestsQuery() : $this->rejectedChildrenQuery());
         $allIds = $query->pluck('id')->map(fn ($id) => (string) $id)->all();
 
         $this->{$property} = array_diff($allIds, $this->{$property}) === [] ? [] : $allIds;
@@ -118,11 +129,22 @@ class CorrectionReminders extends Component
     }
 
     /**
-     * Whether a list can receive reminders: the family must still be able to modify its request.
+     * Reason why no reminder can be sent (no active season, registrations blocked by an admin
+     * or modification deadline passed: the family could not correct its request), or null.
      */
+    #[Computed]
+    public function sendBlockedMessage(): ?string
+    {
+        if ($this->activeSeason === null) {
+            return null;
+        }
+
+        return app(SeasonService::class)->getRegistrationClosedMessage($this->activeSeason, hasRequest: true);
+    }
+
     public function getCanSendProperty(): bool
     {
-        return $this->activeSeason !== null && $this->activeSeason->canModify();
+        return $this->activeSeason !== null && $this->sendBlockedMessage === null;
     }
 
     /**
@@ -135,40 +157,68 @@ class CorrectionReminders extends Component
             return;
         }
 
-        $requests = $this->rejectedRequestsQuery()->whereKey($this->selectedRequestIds)->with('family')->get()->keyBy('id');
-        $childrenByRequest = $this->rejectedChildrenQuery()->whereKey($this->selectedChildIds)
-            ->with('giftRequest.family')
-            ->orderBy('first_name')
-            ->get()
-            ->groupBy('gift_request_id');
+        $requestIds = collect($this->selectedRequestIds)
+            ->merge(Child::whereKey($this->selectedChildIds)->pluck('gift_request_id'))
+            ->map(fn ($id) => (string) $id)
+            ->unique();
 
-        $requestIds = $requests->keys()->merge($childrenByRequest->keys())->unique();
-
-        foreach ($requestIds as $requestId) {
-            $request = $requests->get($requestId) ?? $childrenByRequest->get($requestId)->first()->giftRequest;
-            $comments = [];
-
-            if ($requests->has($requestId) && filled($request->rejection_comment)) {
-                $comments[] = $request->rejection_comment;
-            }
-
-            foreach ($childrenByRequest->get($requestId, []) as $child) {
-                $comments[] = self::childRejectionComment($child->first_name, (string) $child->rejection_comment);
-            }
-
-            $this->sendCorrectionEmail($request, self::combineRejectionComments($comments), SentMailLog::PURPOSE_CORRECTION_REMINDER);
-        }
+        $sent = $requestIds->filter(fn (string $requestId) => $this->sendReminder($requestId))->count();
 
         $this->selectedRequestIds = [];
         $this->selectedChildIds = [];
 
-        if ($requestIds->isEmpty()) {
+        if ($sent === 0) {
             session()->flash('error', 'Aucune ligne sélectionnée.');
 
             return;
         }
 
-        session()->flash('message', "Rappel envoyé à {$requestIds->count()} famille(s), avec un nouveau lien valable 48h.");
+        session()->flash('message', "Rappel envoyé à {$sent} famille(s), avec un nouveau lien valable 48h.");
+    }
+
+    /**
+     * Send the reminder of one family, under a lock of its request: a request or child corrected
+     * by the family in the meantime is no longer refused and is not reminded.
+     */
+    protected function sendReminder(string $requestId): bool
+    {
+        return DB::transaction(function () use ($requestId): bool {
+            $request = GiftRequest::where('season_id', $this->activeSeason->id)
+                ->with('family')
+                ->lockForUpdate()
+                ->find($requestId);
+
+            if ($request === null) {
+                return false;
+            }
+
+            $comments = [];
+
+            if (in_array($requestId, $this->selectedRequestIds, true)
+                && $request->status === GiftRequest::STATUS_REJECTED
+                && filled($request->rejection_comment)) {
+                $comments[] = $request->rejection_comment;
+            }
+
+            $children = self::withComment($this->rejectedChildrenQuery())
+                ->where('gift_request_id', $requestId)
+                ->whereKey($this->selectedChildIds)
+                ->orderBy('first_name')
+                ->lockForUpdate()
+                ->get();
+
+            foreach ($children as $child) {
+                $comments[] = self::childRejectionComment($child->first_name, $child->rejection_comment);
+            }
+
+            if ($comments === []) {
+                return false;
+            }
+
+            $this->sendCorrectionEmail($request, self::combineRejectionComments($comments), SentMailLog::PURPOSE_CORRECTION_REMINDER);
+
+            return true;
+        });
     }
 
     public function render()
@@ -177,11 +227,14 @@ class CorrectionReminders extends Component
         $children = $this->activeSeason ? $this->rejectedChildren() : new Collection;
 
         return view('livewire.admin.correction-reminders', [
+            'activeSeason' => $this->activeSeason,
             'requests' => $requests,
             'children' => $children,
             'allRequestsSelected' => $requests->isNotEmpty() && $requests->pluck('id')->diff($this->selectedRequestIds)->isEmpty(),
             'allChildrenSelected' => $children->isNotEmpty() && $children->pluck('id')->diff($this->selectedChildIds)->isEmpty(),
-            'selectedCount' => count($this->selectedRequestIds) + count($this->selectedChildIds),
+            // Only the selected lines still listed (a line corrected in the meantime is no longer sent)
+            'selectedCount' => $requests->pluck('id')->intersect($this->selectedRequestIds)->count()
+                + $children->pluck('id')->intersect($this->selectedChildIds)->count(),
         ]);
     }
 }

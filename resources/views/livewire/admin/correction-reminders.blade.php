@@ -16,9 +16,12 @@
 Le rappel renvoie le même message de demande de correction avec un nouveau lien valable 48h (un seul e-mail par famille, regroupant les lignes cochées).</p>
         </div>
 
-        @unless($this->can_send)
-            <div class="notice-warning">La date limite de modification de la saison est dépassée : les familles ne peuvent plus corriger leur demande, aucun rappel ne peut être envoyé.</div>
-        @endunless
+        @if($this->sendBlockedMessage)
+            <div class="notice-warning">
+                <p class="notice-title">Les familles ne peuvent plus corriger leur demande, aucun rappel ne peut être envoyé.</p>
+                <p class="notice-text">@linkify($this->sendBlockedMessage)</p>
+            </div>
+        @endif
 
         <div class="selection-bar">
             <span class="text-muted">{{ $selectedCount }} ligne(s) sélectionnée(s)</span>
@@ -59,7 +62,8 @@ Le rappel renvoie le même message de demande de correction avec un nouveau lien
                         @forelse($requests as $request)
                             <tr wire:key="reminder-request-{{ $request->id }}">
                                 <td class="table-cell-checkbox">
-                                    <input type="checkbox" class="checkbox-input" value="{{ $request->id }}" wire:model.live="selectedRequestIds">
+                                    <input type="checkbox" class="checkbox-input" value="{{ $request->id }}" wire:model.live="selectedRequestIds"
+                                        @disabled(blank($request->rejection_comment)) @if(blank($request->rejection_comment)) title="Aucun commentaire à renvoyer" @endif>
                                 </td>
                                 @include('livewire.admin.partials.correction-reminder-family-cells', ['giftRequest' => $request, 'showStatus' => false])
                                 <td class="table-cell-muted">
@@ -112,7 +116,8 @@ Le rappel renvoie le même message de demande de correction avec un nouveau lien
                         @forelse($children as $child)
                             <tr wire:key="reminder-child-{{ $child->id }}">
                                 <td class="table-cell-checkbox">
-                                    <input type="checkbox" class="checkbox-input" value="{{ $child->id }}" wire:model.live="selectedChildIds">
+                                    <input type="checkbox" class="checkbox-input" value="{{ $child->id }}" wire:model.live="selectedChildIds"
+                                        @disabled(blank($child->rejection_comment)) @if(blank($child->rejection_comment)) title="Aucun commentaire à renvoyer" @endif>
                                 </td>
                                 <td class="table-cell">
                                     <div class="detail-value">{{ $child->first_name }}</div>

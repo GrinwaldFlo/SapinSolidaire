@@ -494,9 +494,18 @@ select:focus[data-flux-control] {
         @apply bg-gray-50 dark:bg-zinc-700;
     }
 
+    /* Family contact link (email, phone, address) with its icon, combine with link */
+    .contact-link {
+        @apply inline-flex items-center gap-1;
+    }
+
+    .contact-icon {
+        @apply w-4 h-4 shrink-0;
+    }
+
     /* Checkbox of a selectable list */
     .checkbox-input {
-        @apply w-4 h-4 cursor-pointer accent-green-600 disabled:cursor-not-allowed;
+        @apply w-4 h-4 cursor-pointer accent-green-600 dark:accent-green-500 disabled:cursor-not-allowed;
     }
 
     /* Narrow header / cell holding the selection checkbox of a table row */

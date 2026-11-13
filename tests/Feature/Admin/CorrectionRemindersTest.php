@@ -10,6 +10,7 @@ use App\Models\GiftRequest;
 use App\Models\Role;
 use App\Models\Season;
 use App\Models\SentMailLog;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
@@ -183,11 +184,79 @@ test('no reminder is sent once the modification deadline has passed', function (
     $request = ($this->createRequest)('famille@example.com', GiftRequest::STATUS_REJECTED, comment: 'Justificatif illisible');
 
     Livewire::actingAs($this->admin)->test(CorrectionReminders::class)
-        ->assertSee('date limite de modification')
+        ->assertSee('ne peuvent plus corriger')
         ->set('selectedRequestIds', [$request->id])
         ->call('sendReminders');
 
     Mail::assertNothingQueued();
+});
+
+test('no reminder is sent while registrations are blocked by an admin', function () {
+    Setting::setValue(Setting::REGISTRATION_BLOCKED, '1');
+    $request = ($this->createRequest)('famille@example.com', GiftRequest::STATUS_REJECTED, comment: 'Justificatif illisible');
+
+    Livewire::actingAs($this->admin)->test(CorrectionReminders::class)
+        ->assertSee('ne peuvent plus corriger')
+        ->set('selectedRequestIds', [$request->id])
+        ->call('sendReminders');
+
+    Mail::assertNothingQueued();
+});
+
+test('the deadline is read again when sending, not kept from the page opening', function () {
+    $request = ($this->createRequest)('famille@example.com', GiftRequest::STATUS_REJECTED, comment: 'Justificatif illisible');
+
+    $component = Livewire::actingAs($this->admin)->test(CorrectionReminders::class)
+        ->set('selectedRequestIds', [$request->id]);
+
+    // Another admin moves the deadline into the past while the page is open
+    $this->season->update(['modification_deadline' => now()->subDay()]);
+
+    $component->call('sendReminders');
+
+    Mail::assertNothingQueued();
+});
+
+test('a child without comment is not reminded and cannot be selected', function () {
+    $request = ($this->createRequest)('famille@example.com', GiftRequest::STATUS_VALIDATED);
+    $emma = ($this->makeChild)($request, 'Emma', Child::STATUS_REJECTED, 'Préciser la taille');
+    $hugo = ($this->makeChild)($request, 'Hugo', Child::STATUS_REJECTED);
+
+    $component = Livewire::actingAs($this->admin)->test(CorrectionReminders::class)
+        ->call('toggleAll', CorrectionReminders::LIST_CHILDREN);
+
+    expect($component->get('selectedChildIds'))->toBe([$emma->id]);
+
+    $component->set('selectedChildIds', [$emma->id, $hugo->id])->call('sendReminders');
+
+    Mail::assertQueuedCount(1);
+    Mail::assertQueued(CorrectionRequestMail::class, fn (CorrectionRequestMail $mail) => $mail->comment === "Pour l'enfant Emma :\n - Préciser la taille");
+});
+
+test('a family with only children without comment receives nothing', function () {
+    $request = ($this->createRequest)('famille@example.com', GiftRequest::STATUS_VALIDATED);
+    $hugo = ($this->makeChild)($request, 'Hugo', Child::STATUS_REJECTED);
+
+    Livewire::actingAs($this->admin)->test(CorrectionReminders::class)
+        ->set('selectedChildIds', [$hugo->id])
+        ->call('sendReminders')
+        ->assertSee('Aucune ligne sélectionnée');
+
+    Mail::assertNothingQueued();
+});
+
+test('the selection count only includes lines still listed', function () {
+    $request = ($this->createRequest)('famille@example.com', GiftRequest::STATUS_REJECTED, comment: 'Justificatif illisible');
+    $other = ($this->createRequest)('autre@example.com', GiftRequest::STATUS_REJECTED, comment: 'Adresse incomplète');
+
+    $component = Livewire::actingAs($this->admin)->test(CorrectionReminders::class)
+        ->set('selectedRequestIds', [$request->id, $other->id])
+        ->assertViewHas('selectedCount', 2);
+
+    // The family corrected its request in the meantime
+    $request->update(['status' => GiftRequest::STATUS_PENDING]);
+
+    $component->call('$refresh')->assertViewHas('selectedCount', 1);
 });
 
 test('the page is reserved to admins', function (string $roleName) {
@@ -200,3 +269,15 @@ test('the page is reserved to admins', function (string $roleName) {
 test('admins can open the page', function () {
     $this->actingAs($this->admin)->get(route('admin.correction-reminders'))->assertOk();
 });
+
+test('gift requests expose their status label and badge class', function (string $status, string $label, string $badge) {
+    $request = new GiftRequest(['status' => $status]);
+
+    expect($request->status_label)->toBe($label);
+    expect($request->status_badge_class)->toBe($badge);
+})->with([
+    [GiftRequest::STATUS_PENDING, 'À valider', 'badge--pending'],
+    [GiftRequest::STATUS_VALIDATED, 'Validé', 'badge--validated'],
+    [GiftRequest::STATUS_REJECTED, 'Refusé', 'badge--warning'],
+    [GiftRequest::STATUS_REJECTED_FINAL, 'Refusé définitivement', 'badge--rejected'],
+]);

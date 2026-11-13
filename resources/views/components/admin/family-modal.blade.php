@@ -22,7 +22,7 @@
                         @if($selectedFamily['email'])
                             <div>
                                 <h3 class="sub-label">Email</h3>
-                                <a href="mailto:{{ $selectedFamily['email'] }}" class="link break-all">{{ $selectedFamily['email'] }}</a>
+                                <x-admin.contact.email :email="$selectedFamily['email']" />
                             </div>
                         @endif
 
@@ -30,7 +30,7 @@
                         @if($selectedFamily['phone'])
                             <div>
                                 <h3 class="sub-label">Téléphone</h3>
-                                <a href="tel:{{ $selectedFamily['tel_phone'] }}" class="link">{{ $selectedFamily['formatted_phone'] }}</a>
+                                <x-admin.contact.phone :tel="$selectedFamily['tel_phone']" :formatted="$selectedFamily['formatted_phone']" />
                             </div>
                         @endif
 
@@ -38,7 +38,7 @@
                         @if($selectedFamily['full_address'])
                             <div>
                                 <h3 class="sub-label">Adresse</h3>
-                                <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($selectedFamily['full_address']) }}" target="_blank" rel="noopener" class="link">{{ $selectedFamily['full_address'] }}</a>
+                                <x-admin.contact.address :address="$selectedFamily['full_address']" />
                             </div>
                         @endif
                     </div>

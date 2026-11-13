@@ -245,12 +245,7 @@ class FamilyManagement extends Component
 
         return view('livewire.admin.family-management', [
             'families' => $query->orderBy($this->sortBy, $this->sortDirection)->paginate(200),
-            'statuses' => [
-                GiftRequest::STATUS_PENDING => 'À valider',
-                GiftRequest::STATUS_VALIDATED => 'Validé',
-                GiftRequest::STATUS_REJECTED => 'Refusé',
-                GiftRequest::STATUS_REJECTED_FINAL => 'Refusé définitivement',
-            ],
+            'statuses' => GiftRequest::STATUS_LABELS,
         ]);
     }
 }

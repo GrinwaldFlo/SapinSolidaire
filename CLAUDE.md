@@ -142,6 +142,7 @@ GiftRequest:
 - Linked to Family + Season, optional PickupSlot
 - Holds family_number, proof path, slot_start/end datetime
 - Mutation helper: setStatus(status, optional comment)
+- STATUS_LABELS (French labels), status_label / status_badge_class accessors (same badge colors as Child)
 
 Child:
 
@@ -258,7 +259,7 @@ Admin components:
 - Dashboard: season-scoped KPI counters.
 - FamilyValidation: household-level queue validation.
 - Validation: child (gift) queue validation of validated families, with lock and transaction semantics.
-- CorrectionReminders: lists families (requests) and children of the active season in status rejected ("Refusé", correction expected), with their comment, refusal date and last family edit (FamilySubmissionLog); the checked lines receive their correction request again (CorrectionRequestMail, same comment, new 48h link), one email per family, logged as SentMailLog::PURPOSE_CORRECTION_REMINDER. Disabled once the season modification deadline has passed. Admin only.
+- CorrectionReminders: lists families (requests) and children of the active season in status rejected ("Refusé", correction expected), with their comment, refusal date and last family edit (FamilySubmissionLog); the checked lines receive their correction request again (CorrectionRequestMail, same comment, new 48h link), one email per family, logged as SentMailLog::PURPOSE_CORRECTION_REMINDER. Each family is sent under a row lock of its request (lines corrected in the meantime are skipped); lines without comment cannot be selected. Disabled whenever families cannot modify their request (SeasonService::getRegistrationClosedMessage: admin block or modification deadline passed, season read again on every request). Admin only.
 - LabelGeneration: status transition to printed + PDF generation/history.
 - GiftReception: printed -> received transitions.
 - GiftDelivery: received -> given transitions.
@@ -337,7 +338,7 @@ Disabled confirm buttons: btn-confirm is greyed out automatically with the disab
 
 Notice banners: notice-info / notice-warning / notice-success / notice-error, with notice-title, notice-list and notice-text (free text keeping line breaks) for structured content inside them. Add notice-spaced for bottom spacing above following content.
 
-Layout helpers: mobile-detail-grid + mobile-detail-full (two-column details of a mobile card, full-width item), badge-row (wrapping badges), family-actions (stacked per-row action controls), contact-list (stacked contact lines), inline-form + inline-form-field (single-line field + submit button), button-row (wrapping row of buttons under content), page-stack (vertical spacing between page sections). Button size modifier: btn-sm (combine with any btn-* class). Icon button: btn-icon + btn-icon-svg (small icon-only button, e.g. pen to edit a value), inline-edit (value followed by its inline edit button), gift-sizes (muted height / shoe size next to a gift, from Child::sizes_summary).
+Layout helpers: mobile-detail-grid + mobile-detail-full (two-column details of a mobile card, full-width item), badge-row (wrapping badges), family-actions (stacked per-row action controls), contact-list (stacked contact lines), inline-form + inline-form-field (single-line field + submit button), button-row (wrapping row of buttons under content), page-stack (vertical spacing between page sections). Button size modifier: btn-sm (combine with any btn-* class). Icon button: btn-icon + btn-icon-svg (small icon-only button, e.g. pen to edit a value), inline-edit (value followed by its inline edit button), gift-sizes (muted height / shoe size next to a gift, from Child::sizes_summary). contact-link + contact-icon (family contact link with icon, combine with link): use the Blade components x-admin.contact.email / phone / address, or x-admin.family-contact for the stacked email / phone / address of a family.
 
 Modal helpers: modal-backdrop, modal-panel (modal-panel--small for a simple dialog box), modal-header, modal-body, modal-footer (+ modal-actions for right-aligned OK / Annuler buttons).
 
