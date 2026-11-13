@@ -23,6 +23,8 @@ class AdminActionLog extends Model
 
     public const ACTION_GIFT_UPDATED = 'gift_updated';
 
+    public const ACTION_CHILD_STATUS_RESET = 'child_status_reset';
+
     /**
      * Human readable labels of the action types.
      *
@@ -37,6 +39,7 @@ class AdminActionLog extends Model
             self::ACTION_FAMILY_EXCLUDED => 'Exclusion famille',
             self::ACTION_EMAIL_SENT => 'Envoi e-mail',
             self::ACTION_GIFT_UPDATED => 'Modification cadeau',
+            self::ACTION_CHILD_STATUS_RESET => 'Réinitialisation statut enfant',
         ];
     }
 

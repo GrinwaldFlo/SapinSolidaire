@@ -7,6 +7,7 @@ use App\Models\AdminActionLog;
 use App\Models\Child;
 use App\Models\Season;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -154,6 +155,50 @@ class ChildrenMonitoring extends Component
         $this->cancelGiftEdit();
     }
 
+    /**
+     * Send a refused child of the current season back to the validation queue.
+     */
+    public function resetRejectedChild(string $childId): void
+    {
+        $this->ensureAdmin();
+
+        $activeSeasonId = Season::getActive()?->id;
+
+        if (! $activeSeasonId) {
+            return;
+        }
+
+        $child = DB::transaction(function () use ($childId, $activeSeasonId) {
+            $child = Child::whereKey($childId)
+                ->where('status', Child::STATUS_REJECTED)
+                ->whereHas('giftRequest', fn ($q) => $q->where('season_id', $activeSeasonId))
+                ->lockForUpdate()
+                ->first();
+
+            $child?->resetToPending();
+
+            return $child;
+        });
+
+        if (! $child) {
+            return;
+        }
+
+        $family = $child->giftRequest?->family;
+
+        AdminActionLog::record(
+            AdminActionLog::ACTION_CHILD_STATUS_RESET,
+            sprintf(
+                'Statut enfant remis à valider : %s%s',
+                $child->first_name,
+                $family ? ', famille '.$family->last_name : ''
+            ),
+            $family?->id,
+            $child->gift_request_id,
+            $child->id,
+        );
+    }
+
     private function ensureAdmin(): void
     {
         abort_unless(auth()->user()?->isAdmin(), 403);
@@ -272,9 +317,14 @@ class ChildrenMonitoring extends Component
             $children = $query->paginate(200);
         }
 
+        $isAdmin = (bool) auth()->user()?->isAdmin();
+
         return view('livewire.admin.children-monitoring', [
             'children' => $children,
-            'canEditGift' => (bool) auth()->user()?->isAdmin(),
+            'canEditGift' => $isAdmin,
+            'canResetRejected' => $isAdmin
+                && $this->selectedSeasonId !== null
+                && $this->selectedSeasonId === Season::getActive()?->id,
             'statuses' => [
                 Child::STATUS_PENDING => 'À valider',
                 Child::STATUS_VALIDATED => 'Validé',
