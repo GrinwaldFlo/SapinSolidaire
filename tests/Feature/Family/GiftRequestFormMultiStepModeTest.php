@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Family\GiftRequestForm;
+use App\Models\Child;
 use App\Models\EmailToken;
 use App\Models\Season;
 use App\Models\Setting;
@@ -84,4 +85,28 @@ test('multi step mode can reach summary after anonymous and child pages', functi
         ->call('nextFamilyFormStep')
         ->assertSet('familyFormCurrentStep', 4)
         ->assertSee('Résumé');
+});
+
+test('multi step mode shows a notice and disabled fields for a child that cannot be modified', function () {
+    Setting::setValue(Setting::FAMILY_FORM_MULTI_STEP_ENABLED, '1');
+
+    Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
+        ->call('acceptConsecutiveYears')
+        ->call('acceptPickupCommitment')
+        ->call('acceptCity')
+        ->set('firstName', 'Jean')
+        ->set('lastName', 'Dupont')
+        ->set('streetName', 'Rue de Test')
+        ->set('houseNo', '1')
+        ->set('postalCode', '1000')
+        ->set('city', 'Lausanne')
+        ->set('phone', '+41791234567')
+        ->call('nextFamilyFormStep')
+        ->call('setAnonymousChoice', true)
+        ->set('children.0.first_name', 'Lina')
+        ->set('children.0.status', Child::STATUS_PRINTED)
+        ->set('children.0.can_modify', false)
+        ->assertSet('familyFormCurrentStep', 3)
+        ->assertSee('Cet enfant ne peut plus être modifié ('.Child::statusLabels()[Child::STATUS_PRINTED].')')
+        ->assertSeeHtml('disabled');
 });

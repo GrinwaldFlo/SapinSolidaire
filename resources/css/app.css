@@ -91,6 +91,12 @@ select:focus[data-flux-control] {
         @apply w-full px-4 py-2 border border-red-500 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white;
     }
 
+    /* Disabled field (e.g. child that can no longer be modified) */
+    .field-input:disabled,
+    .field-input-error:disabled {
+        @apply cursor-not-allowed bg-gray-100 text-gray-500 border-gray-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700;
+    }
+
     /* Inline error message */
     .field-error {
         @apply mt-1 text-sm text-red-600 dark:text-red-400;

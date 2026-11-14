@@ -334,7 +334,7 @@ If a class is missing:
 2. Include dark variants if color is involved.
 3. Document it in this guide.
 
-Disabled confirm buttons: btn-confirm is greyed out automatically with the disabled attribute (use @disabled()).
+Disabled confirm buttons: btn-confirm is greyed out automatically with the disabled attribute (use @disabled()). Disabled fields: field-input / field-input-error are greyed out automatically with the disabled attribute.
 
 Notice banners: notice-info / notice-warning / notice-success / notice-error, with notice-title, notice-list and notice-text (free text keeping line breaks) for structured content inside them. Add notice-spaced for bottom spacing above following content.
 
