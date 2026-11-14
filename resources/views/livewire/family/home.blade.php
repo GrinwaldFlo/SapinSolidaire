@@ -158,7 +158,7 @@
                                 <div class="slot-pill">
                                     <span>📦</span>
                                     <span>
-                                        {{ $slot->start_datetime->translatedFormat('l d/m/Y') }}
+                                        {{ \App\Support\FrenchDate::format($slot->start_datetime, 'l d/m/Y') }}
                                         de {{ $slot->start_datetime->format('H\hi') }}
                                         à {{ $slot->end_datetime->format('H\hi') }}
                                     </span>

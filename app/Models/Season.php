@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\FrenchDate;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -151,13 +152,13 @@ class Season extends Model
         }
 
         if ($firstStart->toDateString() === $lastEnd->toDateString()) {
-            return 'le '.$firstStart->translatedFormat('l d F Y');
+            return 'le '.FrenchDate::format($firstStart);
         }
 
         return sprintf(
             'entre le %s et le %s',
-            $firstStart->translatedFormat('l d F Y'),
-            $lastEnd->translatedFormat('l d F Y')
+            FrenchDate::format($firstStart),
+            FrenchDate::format($lastEnd)
         );
     }
 
