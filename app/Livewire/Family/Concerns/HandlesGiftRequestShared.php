@@ -531,30 +531,32 @@ trait HandlesGiftRequestShared
         $submissionAction = FamilySubmissionLog::ACTION_CREATED;
 
         DB::transaction(function () use ($formattedPhone, $proofPath, &$submissionAction): void {
-            $this->family = Family::updateOrCreate(
-                ['email' => $this->email],
-                [
-                    'first_name' => $this->firstName,
-                    'last_name' => $this->lastName,
-                    'street_name' => $this->streetName,
-                    'house_no' => $this->houseNo,
-                    'postal_code' => $this->postalCode,
-                    'city' => $this->city,
-                    'phone' => $formattedPhone,
-                ]
-            );
+            $this->family = Family::firstOrNew(['email' => $this->email])->fill([
+                'first_name' => $this->firstName,
+                'last_name' => $this->lastName,
+                'street_name' => $this->streetName,
+                'house_no' => $this->houseNo,
+                'postal_code' => $this->postalCode,
+                'city' => $this->city,
+                'phone' => $formattedPhone,
+            ]);
+            $familyChanged = ! $this->family->exists || $this->family->isDirty();
+            $this->family->save();
 
-            $this->giftRequest = GiftRequest::updateOrCreate(
-                [
-                    'family_id' => $this->family->id,
-                    'season_id' => $this->season->id,
-                ],
-                [
-                    'status' => GiftRequest::STATUS_PENDING,
-                    'status_changed_at' => now(),
-                    'proof_of_habitation_path' => $proofPath,
-                ]
-            );
+            $this->giftRequest = GiftRequest::firstOrNew([
+                'family_id' => $this->family->id,
+                'season_id' => $this->season->id,
+            ]);
+            $familyChanged = $familyChanged || $this->giftRequest->proof_of_habitation_path !== $proofPath;
+            $this->giftRequest->proof_of_habitation_path = $proofPath;
+
+            // A validated family goes back to the family validation queue only when its own data changed
+            if ($familyChanged || $this->giftRequest->status !== GiftRequest::STATUS_VALIDATED) {
+                $this->giftRequest->status = GiftRequest::STATUS_PENDING;
+                $this->giftRequest->status_changed_at = now();
+            }
+
+            $this->giftRequest->save();
             $submissionAction = $this->giftRequest->wasRecentlyCreated
                 ? FamilySubmissionLog::ACTION_CREATED
                 : FamilySubmissionLog::ACTION_UPDATED;
@@ -566,32 +568,24 @@ trait HandlesGiftRequestShared
                 $childRecord = null;
 
                 if (! empty($childData['id'])) {
-                    $childRecord = Child::find($childData['id']);
+                    // Only a child of this request: ids sent by the browser are not trusted
+                    $childRecord = $this->giftRequest->children()->find($childData['id']);
                 }
 
                 if ($childRecord && $childRecord->canModify()) {
-                    $childRecord->update([
-                        'first_name' => $childData['first_name'],
-                        'gender' => $childData['gender'] ?? '',
-                        'anonymous' => $this->isAnonymous,
-                        'birth_year' => $childData['birth_year'],
-                        'height' => $childData['height'] ?: null,
-                        'gift' => $childData['gift'],
-                        'shoe_size' => $childData['shoe_size'] ?: null,
-                        'status' => Child::STATUS_PENDING,
-                        'status_changed_at' => now(),
-                    ]);
+                    $childRecord->fill($this->childAttributes($childData));
+
+                    // An unchanged validated child keeps its validation
+                    if ($childRecord->isDirty() || $childRecord->status !== Child::STATUS_VALIDATED) {
+                        $childRecord->status = Child::STATUS_PENDING;
+                        $childRecord->status_changed_at = now();
+                        $childRecord->save();
+                    }
                     $updatedChildIds[] = $childRecord->id;
                 } elseif (empty($childData['id'])) {
                     $newChild = Child::create([
                         'gift_request_id' => $this->giftRequest->id,
-                        'first_name' => $childData['first_name'],
-                        'gender' => $childData['gender'] ?? '',
-                        'anonymous' => $this->isAnonymous,
-                        'birth_year' => $childData['birth_year'],
-                        'height' => $childData['height'] ?: null,
-                        'gift' => $childData['gift'],
-                        'shoe_size' => $childData['shoe_size'] ?: null,
+                        ...$this->childAttributes($childData),
                     ]);
                     $updatedChildIds[] = $newChild->id;
                 } else {
@@ -619,6 +613,25 @@ trait HandlesGiftRequestShared
         $this->recordFunnelStep(RegistrationFunnelCounter::STEP_SUBMITTED);
 
         $this->submitted = true;
+    }
+
+    /**
+     * Child data entered by the family, as stored on the Child model.
+     *
+     * @param  array<string, mixed>  $childData
+     * @return array<string, mixed>
+     */
+    protected function childAttributes(array $childData): array
+    {
+        return [
+            'first_name' => $childData['first_name'],
+            'gender' => $childData['gender'] ?? '',
+            'anonymous' => $this->isAnonymous,
+            'birth_year' => $childData['birth_year'],
+            'height' => $childData['height'] ?: null,
+            'gift' => $childData['gift'],
+            'shoe_size' => $childData['shoe_size'] ?: null,
+        ];
     }
 
     protected function isForbiddenGift(string $gift): bool

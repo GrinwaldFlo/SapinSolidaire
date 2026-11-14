@@ -67,8 +67,10 @@ class GiftReception extends Component
 
     public function markAsReceived(string $childId): void
     {
-        $child = Child::findOrFail($childId);
-        $child->setStatus(Child::STATUS_RECEIVED);
+        $child = $this->activeSeason
+            ? Child::findInSeasonWithStatus($childId, $this->activeSeason, Child::STATUS_PRINTED)
+            : null;
+        $child?->setStatus(Child::STATUS_RECEIVED);
         $this->selectedChild = null;
         $this->showMobileDetail = false;
     }

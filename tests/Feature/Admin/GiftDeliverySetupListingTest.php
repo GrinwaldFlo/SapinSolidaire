@@ -23,7 +23,6 @@ beforeEach(function () {
         'name' => 'Noël 2026',
         'start_date' => now()->subDay(),
         'end_date' => now()->addDays(20),
-        'next_family_number' => 1,
     ]);
 });
 
@@ -176,6 +175,22 @@ test('setup listing ignores children not eligible for delivery', function () {
     expect($row['large_objects']->pluck('display')->all())->toBe(['Vélo bleu 7/1']);
 });
 
+test('setup listing ignores validated children without a code yet', function () {
+    Setting::setValue(Setting::LARGE_GIFTS, 'velo');
+
+    $giftRequest = createSetupListingRequest($this->season, 7);
+    createSetupListingChild($giftRequest, 1, 'Vélo bleu', Child::STATUS_PRINTED);
+    $notPrinted = createSetupListingChild($giftRequest, 2, 'Vélo vert', Child::STATUS_VALIDATED);
+    $notPrinted->update(['child_number' => null, 'code' => null]);
+
+    $this->actingAs($this->receptionUser);
+
+    $row = exportSetupListingPages()->first()['rows']->first();
+
+    expect($row['children_count'])->toBe(1);
+    expect($row['large_objects']->pluck('display')->all())->toBe(['Vélo bleu 7/1']);
+});
+
 test('setup listing shows no large gifts when the setting is empty', function () {
     $giftRequest = createSetupListingRequest($this->season, 7);
     createSetupListingChild($giftRequest, 1, 'Vélo bleu', Child::STATUS_RECEIVED);
@@ -201,7 +216,6 @@ test('setup listing is limited to the active season and paginated by ten familie
         'name' => 'Noël 2025',
         'start_date' => now()->subYear(),
         'end_date' => now()->subYear()->addDays(20),
-        'next_family_number' => 1,
     ]);
     createSetupListingChild(createSetupListingRequest($otherSeason, 99), 1, 'Livre', Child::STATUS_RECEIVED);
 

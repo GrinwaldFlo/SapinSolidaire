@@ -118,7 +118,7 @@
                 </button>
                 <button wire:click="submitValidation"
                         class="btn-confirm"
-                        @disabled($this->has_pending_decisions)>
+                        @disabled($this->has_no_decision)>
                     Soumettre la validation
                 </button>
             </div>

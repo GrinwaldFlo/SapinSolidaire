@@ -2,6 +2,7 @@
 
 use App\Livewire\Admin\AdminActionLogs;
 use App\Livewire\Admin\ChildrenMonitoring;
+use App\Livewire\Admin\CorrectionReminders;
 use App\Livewire\Admin\CssShowcase;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\DevTools;
@@ -116,6 +117,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     // Admin only routes
     Route::middleware('role:'.Role::ADMIN)->group(function () {
         Route::get('/saisons', SeasonManagement::class)->name('admin.seasons');
+        Route::get('/relances-corrections', CorrectionReminders::class)->name('admin.correction-reminders');
         Route::get('/utilisateurs', UserManagement::class)->name('admin.users');
         Route::get('/parametres', SettingsManagement::class)->name('admin.settings');
         Route::get('/parametres-cadeaux', GiftsManagement::class)->name('admin.gifts-management');

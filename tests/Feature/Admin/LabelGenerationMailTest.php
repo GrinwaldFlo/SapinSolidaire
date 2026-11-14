@@ -29,7 +29,6 @@ beforeEach(function () {
         'name' => 'Noël 2026',
         'start_date' => now()->subDays(10),
         'end_date' => now()->addDays(30),
-        'next_family_number' => 1,
     ]);
 
     PickupSlot::create([
@@ -169,4 +168,33 @@ test('finally rejected children do not block the request complete mail', functio
         ->call('generatePdf');
 
     Mail::assertQueued(RequestCompleteMail::class, fn ($mail) => $mail->children->count() === 1);
+});
+
+test('validated children of a family sent back to validation are not printed', function () {
+    $waiting = ($this->createRequestWithChildren)('waiting@example.com', [Child::STATUS_VALIDATED]);
+    $waiting->setStatus(GiftRequest::STATUS_PENDING);
+    $ready = ($this->createRequestWithChildren)('ready@example.com', [Child::STATUS_VALIDATED]);
+
+    $this->actingAs($this->admin);
+
+    Livewire::test(LabelGeneration::class)
+        ->assertSet('validatedCount', 1)
+        ->call('generatePdf');
+
+    expect($waiting->children()->first()->status)->toBe(Child::STATUS_VALIDATED);
+    expect($ready->children()->first()->status)->toBe(Child::STATUS_PRINTED);
+});
+
+test('a request sent back to family validation is not counted in the request complete mails', function () {
+    ($this->createRequestWithChildren)('a@example.com', [Child::STATUS_VALIDATED]);
+    $pending = ($this->createRequestWithChildren)('b@example.com', [Child::STATUS_VALIDATED]);
+    $pending->update(['status' => GiftRequest::STATUS_PENDING]);
+
+    $this->actingAs($this->admin);
+
+    Livewire::test(LabelGeneration::class)
+        ->assertSet('requestCompleteMailCount', 1)
+        ->call('generatePdf');
+
+    Mail::assertQueued(RequestCompleteMail::class, 1);
 });

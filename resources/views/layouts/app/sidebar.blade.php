@@ -75,6 +75,10 @@
 
                 @can('admin')
                 <flux:sidebar.group heading="Administration" class="grid">
+                    <flux:sidebar.item icon="bell-alert" :href="route('admin.correction-reminders')" :current="request()->routeIs('admin.correction-reminders')" wire:navigate>
+                        Relances corrections
+                    </flux:sidebar.item>
+
                     <flux:sidebar.item icon="calendar" :href="route('admin.seasons')" :current="request()->routeIs('admin.seasons')" wire:navigate>
                         Saisons
                     </flux:sidebar.item>

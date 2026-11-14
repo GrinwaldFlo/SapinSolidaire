@@ -61,8 +61,10 @@ class GiftDelivery extends Component
 
     public function markAsGiven(string $childId): void
     {
-        $child = Child::findOrFail($childId);
-        $child->setStatus(Child::STATUS_GIVEN);
+        $child = $this->activeSeason
+            ? Child::findInSeasonWithStatus($childId, $this->activeSeason, Child::STATUS_RECEIVED)
+            : null;
+        $child?->setStatus(Child::STATUS_GIVEN);
     }
 
     public function markAllAsGiven(string $familyId): void
@@ -96,6 +98,8 @@ class GiftDelivery extends Component
                     ->whereNotNull('family_number');
             })
             ->whereIn('status', self::DELIVERY_ELIGIBLE_STATUSES)
+            // The code is given at print time: a child without one has no card yet
+            ->whereNotNull('child_number')
             ->orderBy('code')
             ->get();
 

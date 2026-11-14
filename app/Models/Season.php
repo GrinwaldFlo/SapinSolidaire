@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
+use App\Support\FrenchDate;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-use Illuminate\Support\Facades\DB;
 
 class Season extends Model
 {
@@ -28,7 +28,6 @@ class Season extends Model
         'responsible_name',
         'responsible_phone',
         'responsible_email',
-        'next_family_number',
     ];
 
     /**
@@ -41,7 +40,6 @@ class Season extends Model
         'max_gifts' => 'integer',
         'family_limit_per_slot' => 'integer',
         'slot_duration_minutes' => 'integer',
-        'next_family_number' => 'integer',
     ];
 
     /**
@@ -154,13 +152,13 @@ class Season extends Model
         }
 
         if ($firstStart->toDateString() === $lastEnd->toDateString()) {
-            return 'le '.$firstStart->translatedFormat('l d F Y');
+            return 'le '.FrenchDate::format($firstStart);
         }
 
         return sprintf(
             'entre le %s et le %s',
-            $firstStart->translatedFormat('l d F Y'),
-            $lastEnd->translatedFormat('l d F Y')
+            FrenchDate::format($firstStart),
+            FrenchDate::format($lastEnd)
         );
     }
 
@@ -172,23 +170,5 @@ class Season extends Model
         return self::where('start_date', '>', now()->toDateString())
             ->orderBy('start_date')
             ->first();
-    }
-
-    /**
-     * Atomically assign and return the next family number for this season.
-     */
-    public function assignNextFamilyNumber(): int
-    {
-        return DB::transaction(function () {
-            $updated = self::where('id', $this->id)
-                ->lockForUpdate()
-                ->first();
-
-            $number = $updated->next_family_number;
-
-            $updated->increment('next_family_number');
-
-            return $number;
-        });
     }
 }

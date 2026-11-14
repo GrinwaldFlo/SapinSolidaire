@@ -2,11 +2,6 @@
     $actionRequest = $activeSeason ? $family->giftRequests->firstWhere('season_id', $activeSeason->id) : null;
     $isFinalRequest = $actionRequest?->status === \App\Models\GiftRequest::STATUS_REJECTED_FINAL;
     $isExcluded = $family->isExcluded();
-    $statusBadgeClass = match ($actionRequest?->status) {
-        \App\Models\GiftRequest::STATUS_VALIDATED => 'badge--validated',
-        \App\Models\GiftRequest::STATUS_REJECTED, \App\Models\GiftRequest::STATUS_REJECTED_FINAL => 'badge--rejected',
-        default => 'badge--pending',
-    };
 @endphp
 @php
     $reasonKey = \App\Livewire\Admin\FamilyManagement::exclusionReasonKey($family->id);
@@ -14,9 +9,9 @@
 <div x-data="{ action: '' }" class="family-actions">
     <div class="badge-row">
         @if($isExcluded)
-            <span class="badge--rejected" title="{{ $family->exclusion_reason }}">{{ $statuses[\App\Models\GiftRequest::STATUS_REJECTED_FINAL] }}</span>
+            <span class="badge--rejected" title="{{ $family->exclusion_reason }}">{{ \App\Models\GiftRequest::statusLabels()[\App\Models\GiftRequest::STATUS_REJECTED_FINAL] }}</span>
         @elseif($actionRequest)
-            <span class="{{ $statusBadgeClass }}">{{ $statuses[$actionRequest->status] ?? $actionRequest->status }}</span>
+            <span class="{{ $actionRequest->status_badge_class }}">{{ $actionRequest->status_label }}</span>
         @else
             <span class="badge--neutral">Aucune demande cette saison</span>
         @endif

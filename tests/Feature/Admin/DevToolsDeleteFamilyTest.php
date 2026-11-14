@@ -23,14 +23,12 @@ beforeEach(function () {
         'name' => 'Noël 2026',
         'start_date' => now()->subDays(10),
         'end_date' => now()->addDays(20),
-        'next_family_number' => 1,
     ]);
 
     $this->previousSeason = Season::create([
         'name' => 'Noël 2025',
         'start_date' => now()->subYear()->subDays(10),
         'end_date' => now()->subYear()->addDays(20),
-        'next_family_number' => 1,
     ]);
 
     $this->createFamily = function (string $email): Family {

@@ -17,7 +17,7 @@ Core lifecycle:
 
 1. Family receives email token and submits/updates request.
 2. Admin-side validation queues process family and child statuses.
-3. Validated children get generated codes and printable labels.
+3. Validated children get printable labels; the family number and child codes are given at print time.
 4. Reception marks gifts as received.
 5. Delivery marks gifts as given.
 6. Confirmation emails are sent using assigned pickup slots.
@@ -112,6 +112,7 @@ Admin modules under /admin:
 - Dashboard
 - FamilyValidation
 - Validation
+- CorrectionReminders
 - LabelGeneration
 - GiftReception
 - GiftDelivery
@@ -141,20 +142,21 @@ GiftRequest:
 - Linked to Family + Season, optional PickupSlot
 - Holds family_number, proof path, slot_start/end datetime
 - Mutation helper: setStatus(status, optional comment)
+- statusLabels() (French labels), status_label / status_badge_class accessors: App\Models\Concerns\HasStatusBadge, shared with Child (Child adds its print statuses)
 
 Child:
 
 - Status: pending, validated, rejected, rejected_final, printed, received, given
 - Gender: boy, girl, unspecified
 - Code format: prefix + padded family_number + / + child_number
-- assignChildNumberAndCode() is transactional and season counter-safe through GiftRequest/Season locks
+- Printed card (printed, received, given = GiftRequest::PRINTED_CHILD_STATUSES): frozen for the family (canModify) and for every decision (family rejection, reset, exclusion skip it via hasPrintedCard() / withoutPrintedCard()); only reception (printed -> received), delivery (received -> given) and the label reset in LabelGeneration change it
+- assignChildNumberAndCode() (called only by LabelGeneration) gives the child the smallest free child number of its request and the family its number (GiftRequest::assignFamilyNumber(): smallest free number of the season, Season lock). Gaps are filled (NumberSequence::firstFree) and an assigned number never changes (reprint keeps the code); only a code prefix/padding change rewrites the code string
 
 Season:
 
 - Defines request window and optional modification deadline
 - Optional max_gifts limit: countedGiftsCount() counts children of the season in every status except rejected/rejected_final; hasReachedMaxGifts()
 - Scheduling settings: family_limit_per_slot, slot_duration_minutes, responsible contact
-- Atomic assignNextFamilyNumber() with lockForUpdate
 
 Setting:
 
@@ -178,7 +180,7 @@ Other models:
 3. GiftRequestForm validates token and active season.
 4. Existing family/request data is loaded if present.
 5. Address and phone are validated (Swiss services/libs).
-6. Request/children are created or updated.
+6. Request/children are created or updated. A validated request goes back to pending (FamilyValidation) only when family data or the proof changed; an unchanged validated child keeps its status, other modifiable children go back to pending (Validation queue).
 7. Optional proof of habitation upload is stored on local disk.
 
 ### Validation flow
@@ -188,19 +190,19 @@ FamilyValidation:
 - Queue of pending family requests ordered by updated_at.
 - Cache locks prevent two admins validating same request simultaneously.
 - Can validate, reject, or final-reject with comment templates.
-- Only page where the family is decided (with duplicate check); assigns the family number on validation.
+- Only page where the family is decided (with duplicate check); no number is assigned here.
 
 Validation (gift validation):
 
 - Only lists validated requests that still have pending children; no family decision.
 - Decides pending children only (validate, correction, final refusal); other children are left untouched.
+- Children may be left pending (e.g. a correction for one child only, at least one decision required): the request is touched and goes to the end of the queue, staying there while it has pending children.
 - Uses DB transaction and row-level locks for consistency; skips a request sent back to pending in the meantime.
-- Assigns child codes during validation.
-- Sends correction emails from the shared SendsRejectionEmail concern.
+- Sends correction emails from the shared SendsRejectionEmail concern (childRejectionComment() / combineRejectionComments() build the email comment, reused by CorrectionReminders).
 
 ### Label and distribution flow
 
-- LabelGeneration selects validated children, marks them printed, generates PDF (label or grid style), stores file and DB trace.
+- LabelGeneration selects validated children of validated requests (Child::readyToPrint), in a transaction under a Season lock gives them their code (and the family its number) and marks them printed, generates PDF (label or grid style), stores file and DB trace.
 - GiftReception marks printed children as received by family number keypad flow.
 - GiftDelivery marks received children as given by family search.
 
@@ -238,7 +240,7 @@ Schema principles:
 Important evolution points:
 
 - children.code moved from unique 4-char to nullable indexed varchar for family/child format.
-- seasons gained next_family_number counter.
+- seasons.next_family_number counter dropped: family numbers are computed at print time (smallest free number).
 - pickup scheduling added with pickup_slots and slot_start/end on gift_requests.
 - families.address split into street_name + house_no.
 - gift_requests gained proof_of_habitation_path.
@@ -257,6 +259,7 @@ Admin components:
 - Dashboard: season-scoped KPI counters.
 - FamilyValidation: household-level queue validation.
 - Validation: child (gift) queue validation of validated families, with lock and transaction semantics.
+- CorrectionReminders: lists families (requests) and children of the active season in status rejected ("Refusé", correction expected), with their comment, refusal date and last family edit (FamilySubmissionLog); the checked lines receive their correction request again (CorrectionRequestMail, same comment, new 48h link), one email per family, logged as SentMailLog::PURPOSE_CORRECTION_REMINDER. Each family is sent under a row lock of its request (lines corrected in the meantime are skipped); lines without comment cannot be selected. Disabled whenever families cannot modify their request (SeasonService::getRegistrationClosedMessage: admin block or modification deadline passed, season read again on every request). Admin only.
 - LabelGeneration: status transition to printed + PDF generation/history.
 - GiftReception: printed -> received transitions.
 - GiftDelivery: received -> given transitions.
@@ -294,7 +297,7 @@ Tests are Pest feature-heavy and cover:
 - Auth/registration/password/verification/two-factor pages and guards.
 - Family form behavior including proof-of-habitation toggles.
 - Settings behavior for city lists, proof flag, code prefix/padding.
-- Model behavior for child code generation and season family numbering.
+- Model behavior for child code generation and gap-free family/child numbering at print time.
 - Validation component behavior around code/number assignment.
 
 When changing workflow logic, extend the corresponding Feature tests first.
@@ -331,11 +334,11 @@ If a class is missing:
 2. Include dark variants if color is involved.
 3. Document it in this guide.
 
-Disabled confirm buttons: btn-confirm is greyed out automatically with the disabled attribute (use @disabled()).
+Disabled confirm buttons: btn-confirm is greyed out automatically with the disabled attribute (use @disabled()). Disabled fields: field-input / field-input-error are greyed out automatically with the disabled attribute.
 
 Notice banners: notice-info / notice-warning / notice-success / notice-error, with notice-title, notice-list and notice-text (free text keeping line breaks) for structured content inside them. Add notice-spaced for bottom spacing above following content.
 
-Layout helpers: mobile-detail-grid + mobile-detail-full (two-column details of a mobile card, full-width item), badge-row (wrapping badges), family-actions (stacked per-row action controls), contact-list (stacked contact lines), inline-form + inline-form-field (single-line field + submit button), button-row (wrapping row of buttons under content), page-stack (vertical spacing between page sections). Button size modifier: btn-sm (combine with any btn-* class). Icon button: btn-icon + btn-icon-svg (small icon-only button, e.g. pen to edit a value), inline-edit (value followed by its inline edit button), gift-sizes (muted height / shoe size next to a gift, from Child::sizes_summary).
+Layout helpers: mobile-detail-grid + mobile-detail-full (two-column details of a mobile card, full-width item), badge-row (wrapping badges), family-actions (stacked per-row action controls), contact-list (stacked contact lines), inline-form + inline-form-field (single-line field + submit button), button-row (wrapping row of buttons under content), page-stack (vertical spacing between page sections). Button size modifier: btn-sm (combine with any btn-* class). Icon button: btn-icon + btn-icon-svg (small icon-only button, e.g. pen to edit a value), inline-edit (value followed by its inline edit button), gift-sizes (muted height / shoe size next to a gift, from Child::sizes_summary). contact-link + contact-icon (family contact link with icon, combine with link; contact-email lets a long email wrap), contact-list--card (smaller muted contact lines of a mobile card), detail-inline (value after its label on the same line): use the Blade components x-admin.contact.email / phone / address, or x-admin.family-contact for the stacked email / phone / address of a family.
 
 Modal helpers: modal-backdrop, modal-panel (modal-panel--small for a simple dialog box), modal-header, modal-body, modal-footer (+ modal-actions for right-aligned OK / Annuler buttons).
 
@@ -344,6 +347,8 @@ Table helpers: table-full (full width table with row dividers), table-head (thea
 Statistic helpers: stat-bar (horizontal bar on a progress element, no inline width needed), stat-grid (responsive three-column grid, stat-grid--spaced adds top spacing), stat-item (centered statistic inside a stat-grid), stat-pair (two statistics side by side inside one stat-card, e.g. families / children).
 
 Text helpers: text-multiline (free text keeping line breaks, e.g. custom texts outside notices), intro-text (introduction paragraph on public pages, combine with text-multiline for custom texts).
+
+Selectable list helpers: checkbox-input (row / select-all checkbox), table-header-checkbox + table-cell-checkbox (narrow checkbox column), selection-bar (selection count + action button), table-cell-comment (free text comment cell keeping line breaks), cell-subtext (small muted second line in a table cell).
 
 Form helpers: field-help (help text under a field), placeholder-tag (inline token such as {site}).
 

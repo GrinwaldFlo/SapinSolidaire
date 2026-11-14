@@ -7,6 +7,8 @@ use App\Models\AdminActionLog;
 use App\Models\Child;
 use App\Models\Season;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -154,9 +156,94 @@ class ChildrenMonitoring extends Component
         $this->cancelGiftEdit();
     }
 
+    /**
+     * Send a refused child of the current season back to the validation queue.
+     */
+    public function resetRejectedChild(string $childId): void
+    {
+        $this->ensureAdmin();
+
+        $activeSeasonId = Season::getActive()?->id;
+
+        if (! $activeSeasonId) {
+            return;
+        }
+
+        $child = DB::transaction(function () use ($childId, $activeSeasonId) {
+            $child = Child::whereKey($childId)
+                ->where('status', Child::STATUS_REJECTED)
+                ->whereHas('giftRequest', fn ($q) => $q->where('season_id', $activeSeasonId))
+                ->lockForUpdate()
+                ->first();
+
+            $child?->resetToPending();
+
+            return $child;
+        });
+
+        if (! $child) {
+            return;
+        }
+
+        $family = $child->giftRequest?->family;
+
+        AdminActionLog::record(
+            AdminActionLog::ACTION_CHILD_STATUS_RESET,
+            sprintf(
+                'Statut enfant remis à valider : %s%s',
+                $child->first_name,
+                $family ? ', famille '.$family->last_name : ''
+            ),
+            $family?->id,
+            $child->gift_request_id,
+            $child->id,
+        );
+    }
+
     private function ensureAdmin(): void
     {
         abort_unless(auth()->user()?->isAdmin(), 403);
+    }
+
+    /**
+     * Children of the selected season matching the current filters and sort.
+     * Columns are qualified with their table: sorting by family name joins
+     * gift_requests and families, which share column names (status, ...).
+     */
+    private function childrenQuery(): Builder
+    {
+        $query = Child::with(['giftRequest.family', 'giftRequest.season'])
+            ->whereHas('giftRequest', function ($q) {
+                $q->where('gift_requests.season_id', $this->selectedSeasonId);
+            });
+
+        if ($this->statusFilter) {
+            $query->where('children.status', $this->statusFilter);
+        }
+
+        if ($this->search) {
+            $search = $this->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('children.code', 'like', "%{$search}%")
+                    ->orWhere('children.first_name', 'like', "%{$search}%")
+                    ->orWhere('children.gift', 'like', "%{$search}%")
+                    ->orWhereHas('giftRequest.family', function ($q) use ($search) {
+                        $q->where('families.last_name', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        if ($this->sortBy === 'family_name') {
+            $query->join('gift_requests', 'children.gift_request_id', '=', 'gift_requests.id')
+                ->join('families', 'gift_requests.family_id', '=', 'families.id')
+                ->orderBy('families.last_name', $this->sortDirection === 'desc' ? 'desc' : 'asc')
+                ->select('children.*');
+        } else {
+            $column = in_array($this->sortBy, self::SORTABLE_COLUMNS, true) ? $this->sortBy : 'first_name';
+            $query->orderBy('children.'.$column, $this->sortDirection === 'desc' ? 'desc' : 'asc');
+        }
+
+        return $query;
     }
 
     public function exportPdf()
@@ -167,48 +254,9 @@ class ChildrenMonitoring extends Component
 
         $season = $this->seasons->firstWhere('id', $this->selectedSeasonId);
 
-        $query = Child::with(['giftRequest.family', 'giftRequest.season'])
-            ->whereHas('giftRequest', function ($q) {
-                $q->where('season_id', $this->selectedSeasonId);
-            });
+        $children = $this->childrenQuery()->get();
 
-        if ($this->statusFilter) {
-            $query->where('status', $this->statusFilter);
-        }
-
-        if ($this->search) {
-            $search = $this->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('code', 'like', "%{$search}%")
-                    ->orWhere('first_name', 'like', "%{$search}%")
-                    ->orWhere('gift', 'like', "%{$search}%")
-                    ->orWhereHas('giftRequest.family', function ($q) use ($search) {
-                        $q->where('last_name', 'like', "%{$search}%");
-                    });
-            });
-        }
-
-        if ($this->sortBy === 'family_name') {
-            $query->join('gift_requests', 'children.gift_request_id', '=', 'gift_requests.id')
-                ->join('families', 'gift_requests.family_id', '=', 'families.id')
-                ->orderBy('families.last_name', $this->sortDirection)
-                ->select('children.*');
-        } else {
-            $query->orderBy($this->sortBy, $this->sortDirection);
-        }
-
-        $children = $query->get();
-
-        $statusLabels = [
-            '' => 'Tous les statuts',
-            Child::STATUS_PENDING => 'À valider',
-            Child::STATUS_VALIDATED => 'Validé',
-            Child::STATUS_REJECTED => 'Refusé',
-            Child::STATUS_REJECTED_FINAL => 'Refusé définitivement',
-            Child::STATUS_PRINTED => 'Imprimé',
-            Child::STATUS_RECEIVED => 'Reçu',
-            Child::STATUS_GIVEN => 'Donné',
-        ];
+        $statusLabels = ['' => 'Tous les statuts', ...Child::statusLabels()];
 
         $pdf = Pdf::loadView('pdf.monitoring-grid', [
             'children' => $children,
@@ -239,51 +287,18 @@ class ChildrenMonitoring extends Component
         $children = collect();
 
         if ($this->selectedSeasonId) {
-            $query = Child::with(['giftRequest.family', 'giftRequest.season'])
-                ->whereHas('giftRequest', function ($q) {
-                    $q->where('season_id', $this->selectedSeasonId);
-                });
-
-            if ($this->statusFilter) {
-                $query->where('status', $this->statusFilter);
-            }
-
-            if ($this->search) {
-                $search = $this->search;
-                $query->where(function ($q) use ($search) {
-                    $q->where('code', 'like', "%{$search}%")
-                        ->orWhere('first_name', 'like', "%{$search}%")
-                        ->orWhere('gift', 'like', "%{$search}%")
-                        ->orWhereHas('giftRequest.family', function ($q) use ($search) {
-                            $q->where('last_name', 'like', "%{$search}%");
-                        });
-                });
-            }
-
-            if ($this->sortBy === 'family_name') {
-                $query->join('gift_requests', 'children.gift_request_id', '=', 'gift_requests.id')
-                    ->join('families', 'gift_requests.family_id', '=', 'families.id')
-                    ->orderBy('families.last_name', $this->sortDirection)
-                    ->select('children.*');
-            } else {
-                $query->orderBy($this->sortBy, $this->sortDirection);
-            }
-
-            $children = $query->paginate(200);
+            $children = $this->childrenQuery()->paginate(200);
         }
+
+        $isAdmin = (bool) auth()->user()?->isAdmin();
 
         return view('livewire.admin.children-monitoring', [
             'children' => $children,
-            'canEditGift' => (bool) auth()->user()?->isAdmin(),
-            'statuses' => [
-                Child::STATUS_PENDING => 'À valider',
-                Child::STATUS_VALIDATED => 'Validé',
-                Child::STATUS_REJECTED => 'Refusé',
-                Child::STATUS_REJECTED_FINAL => 'Refusé définitivement',
-                Child::STATUS_PRINTED => 'Imprimé',
-                Child::STATUS_RECEIVED => 'Reçu',
-                Child::STATUS_GIVEN => 'Donné',
-            ],
+            'canEditGift' => $isAdmin,
+            'canResetRejected' => $isAdmin
+                && $this->selectedSeasonId !== null
+                && $this->selectedSeasonId === Season::getActive()?->id,
+            'statuses' => Child::statusLabels(),
         ]);
     }
 }

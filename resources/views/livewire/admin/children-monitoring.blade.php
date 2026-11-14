@@ -141,8 +141,13 @@
                                 </button>
                             </td>
                             <td class="table-cell">
-                                <span class="{{ $child->status_badge_class }}">
-                                    {{ $child->status_label }}
+                                <span class="inline-edit">
+                                    <span class="{{ $child->status_badge_class }}">
+                                        {{ $child->status_label }}
+                                    </span>
+                                    @if($canResetRejected && $child->status === \App\Models\Child::STATUS_REJECTED)
+                                        <x-admin.child-status-reset-button :childId="$child->id" />
+                                    @endif
                                 </span>
                             </td>
                         </tr>
@@ -161,8 +166,13 @@
                 <div class="card-sm space-y-3">
                     <div class="flex items-center justify-between gap-2">
                         <span class="font-mono font-bold detail-value">{{ $child->code ?? '—' }}</span>
-                        <span class="{{ $child->status_badge_class }}">
-                            {{ $child->status_label }}
+                        <span class="inline-edit">
+                            <span class="{{ $child->status_badge_class }}">
+                                {{ $child->status_label }}
+                            </span>
+                            @if($canResetRejected && $child->status === \App\Models\Child::STATUS_REJECTED)
+                                <x-admin.child-status-reset-button :childId="$child->id" />
+                            @endif
                         </span>
                     </div>
                     <div class="detail-value">

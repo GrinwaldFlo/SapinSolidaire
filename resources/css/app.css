@@ -91,6 +91,12 @@ select:focus[data-flux-control] {
         @apply w-full px-4 py-2 border border-red-500 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-zinc-700 dark:text-white;
     }
 
+    /* Disabled field (e.g. child that can no longer be modified) */
+    .field-input:disabled,
+    .field-input-error:disabled {
+        @apply cursor-not-allowed bg-gray-100 text-gray-500 border-gray-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700;
+    }
+
     /* Inline error message */
     .field-error {
         @apply mt-1 text-sm text-red-600 dark:text-red-400;
@@ -492,6 +498,59 @@ select:focus[data-flux-control] {
     /* Table head background */
     .table-head {
         @apply bg-gray-50 dark:bg-zinc-700;
+    }
+
+    /* Family contact link (email, phone, address) with its icon, combine with link */
+    .contact-link {
+        @apply inline-flex items-center gap-1;
+    }
+
+    .contact-icon {
+        @apply w-4 h-4 shrink-0;
+    }
+
+    /* Email contact link: long addresses wrap anywhere */
+    .contact-email {
+        @apply break-all;
+    }
+
+    /* Smaller muted contact lines of a mobile card */
+    .contact-list--card {
+        @apply text-sm text-gray-500 dark:text-gray-400;
+    }
+
+    /* Value displayed after its label on the same line (label : value) */
+    .detail-inline {
+        @apply ml-2;
+    }
+
+    /* Checkbox of a selectable list */
+    .checkbox-input {
+        @apply w-4 h-4 cursor-pointer accent-green-600 dark:accent-green-500 disabled:cursor-not-allowed;
+    }
+
+    /* Narrow header / cell holding the selection checkbox of a table row */
+    .table-header-checkbox {
+        @apply px-4 py-3 w-10 text-left;
+    }
+
+    .table-cell-checkbox {
+        @apply px-4 py-4 w-10;
+    }
+
+    /* Table cell holding a free text comment (keeps line breaks) */
+    .table-cell-comment {
+        @apply px-6 py-4 text-sm min-w-64 whitespace-pre-line text-gray-600 dark:text-gray-300;
+    }
+
+    /* Secondary line under the main value of a table cell */
+    .cell-subtext {
+        @apply text-xs text-gray-500 dark:text-gray-400;
+    }
+
+    /* Selection count followed by the action button of a selectable list */
+    .selection-bar {
+        @apply flex flex-wrap items-center justify-between gap-4;
     }
 
     /* Stat value (big number, neutral) */

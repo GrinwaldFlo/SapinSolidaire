@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasStatusBadge;
+use App\Services\NumberSequence;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 
 class Child extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasStatusBadge, HasUuids;
 
     public const STATUS_PENDING = 'pending';
 
@@ -120,6 +123,45 @@ class Child extends Model
     }
 
     /**
+     * Validated children of validated requests of the season: their gift card can be printed.
+     * A family sent back to validation keeps its validated children, but they wait for it.
+     */
+    public function scopeReadyToPrint(Builder $query, Season $season): Builder
+    {
+        return $query->where('status', self::STATUS_VALIDATED)
+            ->whereHas('giftRequest', fn (Builder $q) => $q
+                ->where('season_id', $season->id)
+                ->where('status', GiftRequest::STATUS_VALIDATED));
+    }
+
+    /**
+     * Whether the gift card is printed: the child's data and decision are then frozen.
+     */
+    public function hasPrintedCard(): bool
+    {
+        return in_array($this->status, GiftRequest::PRINTED_CHILD_STATUSES, true);
+    }
+
+    /**
+     * Children whose gift card is not printed yet, i.e. whose status can still be decided.
+     */
+    public function scopeWithoutPrintedCard(Builder $query): Builder
+    {
+        return $query->whereNotIn('status', GiftRequest::PRINTED_CHILD_STATUSES);
+    }
+
+    /**
+     * Child of the active season in the given status, or null (ids sent by the browser are not trusted).
+     */
+    public static function findInSeasonWithStatus(string $childId, Season $season, string $status): ?self
+    {
+        return self::whereKey($childId)
+            ->where('status', $status)
+            ->whereHas('giftRequest', fn (Builder $q) => $q->where('season_id', $season->id))
+            ->first();
+    }
+
+    /**
      * Check if the child can be modified.
      */
     public function canModify(): bool
@@ -165,37 +207,29 @@ class Child extends Model
     }
 
     /**
-     * Get status label in French.
+     * @return array<string, string>
      */
-    public function getStatusLabelAttribute(): string
+    public static function statusLabels(): array
     {
-        return match ($this->status) {
-            self::STATUS_PENDING => 'À valider',
-            self::STATUS_VALIDATED => 'Validé',
-            self::STATUS_REJECTED => 'Refusé',
-            self::STATUS_REJECTED_FINAL => 'Refusé définitivement',
+        return [
+            ...self::decisionStatusLabels(),
             self::STATUS_PRINTED => 'Imprimé',
             self::STATUS_RECEIVED => 'Reçu',
             self::STATUS_GIVEN => 'Donné',
-            default => $this->status,
-        };
+        ];
     }
 
     /**
-     * Get the badge CSS class matching the status.
+     * @return array<string, string>
      */
-    public function getStatusBadgeClassAttribute(): string
+    public static function statusBadgeClasses(): array
     {
-        return match ($this->status) {
-            self::STATUS_PENDING => 'badge--pending',
-            self::STATUS_VALIDATED => 'badge--validated',
-            self::STATUS_REJECTED => 'badge--warning',
-            self::STATUS_REJECTED_FINAL => 'badge--rejected',
+        return [
+            ...self::decisionStatusBadgeClasses(),
             self::STATUS_PRINTED => 'badge--printed',
             self::STATUS_RECEIVED => 'badge--received',
             self::STATUS_GIVEN => 'badge--given',
-            default => 'badge--neutral',
-        };
+        ];
     }
 
     /**
@@ -212,26 +246,31 @@ class Child extends Model
     }
 
     /**
-     * Assign the next child number within the family and generate the code.
+     * Give the child its number and code at print time, with the family number when the family has none yet.
+     * The child number is the smallest free number of the family (gaps filled).
+     * Once assigned, the numbers never change (a reprinted child keeps its code).
      */
     public function assignChildNumberAndCode(): void
     {
-        DB::transaction(function () {
-            $giftRequest = $this->giftRequest()->lockForUpdate()->first();
+        if ($this->child_number !== null && $this->code !== null) {
+            return;
+        }
 
-            if ($giftRequest->family_number === null) {
-                $giftRequest->family_number = $giftRequest->season->assignNextFamilyNumber();
-                $giftRequest->save();
+        DB::transaction(function () {
+            $giftRequest = $this->giftRequest;
+            $familyNumber = $giftRequest->assignFamilyNumber();
+
+            if ($this->child_number === null) {
+                GiftRequest::whereKey($giftRequest->id)->lockForUpdate()->first();
+
+                $this->child_number = NumberSequence::firstFree(
+                    self::where('gift_request_id', $giftRequest->id)->whereNotNull('child_number')->pluck('child_number')
+                );
             }
 
-            $maxChildNumber = Child::where('gift_request_id', $giftRequest->id)
-                ->whereNotNull('child_number')
-                ->max('child_number');
-
-            $this->child_number = ($maxChildNumber ?? 0) + 1;
             $this->code = self::generateCode(
                 Setting::getCodePrefix(),
-                $giftRequest->family_number,
+                $familyNumber,
                 $this->child_number,
                 Setting::getCodeFamilyPadding()
             );

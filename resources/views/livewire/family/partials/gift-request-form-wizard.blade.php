@@ -254,6 +254,12 @@
                 >
                     <h3 class="section-title">Enfant {{ $currentChildIndex + 1 }}</h3>
 
+                    @unless($child['can_modify'] ?? true)
+                        <div class="notice-warning">
+                            Cet enfant ne peut plus être modifié ({{ \App\Models\Child::statusLabels()[$child['status'] ?? ''] ?? ($child['status'] ?? '') }}).
+                        </div>
+                    @endunless
+
                     @if($filledPreviousChildren->isNotEmpty())
                         <div class="space-y-2">
                             <p class="detail-label">Enfants déjà remplis</p>

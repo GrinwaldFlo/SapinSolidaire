@@ -185,3 +185,38 @@ test('request complete mail collapses the pickup date placeholder when there is 
     expect($mail->content()->with['bodyText'])
         ->toContain("cadeaux souhaités à l'heure");
 });
+
+test('mail dates are in french even when the app locale is english', function () {
+    app()->setLocale('en');
+    [$giftRequest, $season] = makeGiftRequestWithSeason();
+    $giftRequest->update([
+        'slot_start_datetime' => '2026-12-23 10:00:00',
+        'slot_end_datetime' => '2026-12-23 11:00:00',
+    ]);
+    $season->pickupSlots()->create([
+        'start_datetime' => '2026-12-23 09:00:00',
+        'end_datetime' => '2026-12-23 12:00:00',
+    ]);
+
+    $completeMail = new RequestCompleteMail($giftRequest, $season, collect());
+    $receivedMail = new GiftReceivedMail($giftRequest->fresh(), $season);
+
+    expect($completeMail->content()->with['bodyText'])->toContain('le mercredi 23 décembre 2026')
+        ->and($receivedMail->content()->with['slotDate'])->toBe('mercredi 23 décembre 2026');
+});
+
+test('pickup date text spanning several days is in french', function () {
+    app()->setLocale('en');
+    [, $season] = makeGiftRequestWithSeason();
+    $season->pickupSlots()->create([
+        'start_datetime' => '2026-12-12 09:00:00',
+        'end_datetime' => '2026-12-12 12:00:00',
+    ]);
+    $season->pickupSlots()->create([
+        'start_datetime' => '2026-12-13 09:00:00',
+        'end_datetime' => '2026-12-13 12:00:00',
+    ]);
+
+    expect($season->pickupDateText())
+        ->toBe('entre le samedi 12 décembre 2026 et le dimanche 13 décembre 2026');
+});

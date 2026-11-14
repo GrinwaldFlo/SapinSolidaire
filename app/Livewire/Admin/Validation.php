@@ -41,9 +41,12 @@ class Validation extends Component
 
     public array $selectedChildMessageKeys = []; // child_id => message index
 
-    public function getHasPendingDecisionsProperty(): bool
+    /**
+     * Children may be left pending (e.g. a correction asked for one child only), but at least one must be decided.
+     */
+    public function getHasNoDecisionProperty(): bool
     {
-        return in_array('pending', $this->childDecisions, true);
+        return array_diff($this->childDecisions, ['pending']) === [];
     }
 
     public function mount(): void
@@ -154,7 +157,7 @@ class Validation extends Component
 
     public function submitValidation(): void
     {
-        if (! $this->currentRequest) {
+        if (! $this->currentRequest || $this->has_no_decision) {
             return;
         }
 
@@ -188,19 +191,19 @@ class Validation extends Component
                 $comment = $this->childComments[$child->id] ?? '';
 
                 if ($decision === 'validated') {
-                    if (! $child->code) {
-                        $child->assignChildNumberAndCode();
-                    }
                     $child->setStatus(Child::STATUS_VALIDATED);
                     $validatedChildren[] = $child->fresh();
                 } elseif ($decision === 'correction') {
                     $child->setStatus(Child::STATUS_REJECTED, $comment);
-                    $combinedComments[] = "Pour l'enfant {$child->first_name} :\n - ".$comment;
+                    $combinedComments[] = self::childRejectionComment($child->first_name, $comment);
                 } elseif ($decision === 'rejected') {
                     $child->setStatus(Child::STATUS_REJECTED_FINAL, $comment);
-                    $combinedComments[] = "Refus pour l'enfant {$child->first_name} :\n - ".$comment;
+                    $combinedComments[] = self::childRejectionComment($child->first_name, $comment, true);
                 }
             }
+
+            // Children left pending: the family goes to the end of the queue
+            $request->touch();
 
             return true;
         });
@@ -216,7 +219,7 @@ class Validation extends Component
         $this->logValidatedChildren($validatedChildren);
 
         if (! empty($combinedComments)) {
-            $finalComment = implode("\n-------------------\n", $combinedComments);
+            $finalComment = self::combineRejectionComments($combinedComments);
             // The family stays validated: it receives a correction email (with access link), never a final rejection
             $this->sendRejectionEmail($this->currentRequest, false, $finalComment);
         }

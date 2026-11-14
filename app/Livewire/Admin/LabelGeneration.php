@@ -13,6 +13,7 @@ use App\Services\FamilyMailer;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 
@@ -36,13 +37,13 @@ class LabelGeneration extends Component
             return;
         }
 
-        $this->validatedCount = Child::whereHas('giftRequest', function ($q) {
-            $q->where('season_id', $this->activeSeason->id);
-        })->where('status', Child::STATUS_VALIDATED)->count();
+        $this->validatedCount = Child::readyToPrint($this->activeSeason)->count();
 
         // Families that will receive the "request complete" mail once the validated children are printed
+        // (only validated requests are printed, see Child::readyToPrint)
         $this->requestCompleteMailCount = $this->requestsWithChildrenInStatus(Child::STATUS_VALIDATED)
-            ->filter(fn (GiftRequest $request) => $request->isRequestCompleteMailDue([Child::STATUS_VALIDATED]))
+            ->filter(fn (GiftRequest $request) => $request->status === GiftRequest::STATUS_VALIDATED
+                && $request->isRequestCompleteMailDue([Child::STATUS_VALIDATED]))
             ->count();
     }
 
@@ -67,19 +68,7 @@ class LabelGeneration extends Component
             return;
         }
 
-        // Get validated children ordered by validation date
-        $children = Child::with('giftRequest.family')
-            ->whereHas('giftRequest', function ($q) {
-                $q->where('season_id', $this->activeSeason->id);
-            })
-            ->where('status', Child::STATUS_VALIDATED)
-            ->orderBy('validated_at')
-            ->get();
-
-        // Update status to printed
-        foreach ($children as $child) {
-            $child->setStatus(Child::STATUS_PRINTED);
-        }
+        $children = $this->printReadyChildren();
 
         // Generate PDF
         $pdfStyle = Setting::getPdfStyle();
@@ -120,6 +109,32 @@ class LabelGeneration extends Component
             fn () => print (Storage::disk('local')->get($path)),
             $filename
         );
+    }
+
+    /**
+     * Mark the validated children as printed, in validation order, giving them their code (and the family
+     * its number) at that moment. The season lock keeps two simultaneous prints apart.
+     *
+     * @return Collection<int, Child>
+     */
+    protected function printReadyChildren(): Collection
+    {
+        return DB::transaction(function () {
+            Season::whereKey($this->activeSeason->id)->lockForUpdate()->first();
+
+            $children = Child::with('giftRequest.family')
+                ->readyToPrint($this->activeSeason)
+                ->orderBy('validated_at')
+                ->lockForUpdate()
+                ->get();
+
+            foreach ($children as $child) {
+                $child->assignChildNumberAndCode();
+                $child->setStatus(Child::STATUS_PRINTED);
+            }
+
+            return $children;
+        });
     }
 
     /**

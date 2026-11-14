@@ -6,6 +6,7 @@ use App\Models\GiftRequest;
 use App\Models\Season;
 use App\Models\Setting;
 use App\Services\CustomText;
+use App\Support\FrenchDate;
 use Carbon\CarbonInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -68,7 +69,7 @@ class GiftReceivedMail extends Mailable implements ShouldQueue
                 'introText' => CustomText::get(CustomText::MAIL_GIFT_RECEIVED_INTRO, ['famille' => $familyName]),
                 'remindersText' => CustomText::get(CustomText::MAIL_GIFT_RECEIVED_REMINDERS),
                 'closingText' => CustomText::get(CustomText::MAIL_GIFT_RECEIVED_CLOSING, ['famille' => $familyName]),
-                'slotDate' => $start?->translatedFormat('l d F Y'),
+                'slotDate' => FrenchDate::format($start),
                 'slotStartTime' => $start?->format('H:i'),
                 'slotEndTime' => $end?->format('H:i'),
                 'pickupAddress' => $this->season->pickup_address,
