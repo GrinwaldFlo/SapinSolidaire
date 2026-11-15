@@ -87,18 +87,35 @@
                     </form>
                 @endif
             @else
-                <div class="text-center">
-                    <span class="text-6xl mb-4 block">✉️</span>
-                    <h2 class="text-2xl font-bold text-green-600 dark:text-green-400 mb-4">E-mail envoyé !</h2>
-                    <p class="text-muted mb-4">
-                        Un lien d'accès a été envoyé à <strong>{{ $email }}</strong>.
-                    </p>
-                    <p class="text-sm text-muted">
-                        Vérifiez votre boîte de réception (et vos spams) et cliquez sur le lien pour continuer votre demande.
-                    </p>
-                    <p class="text-sm text-muted mt-4">
-                        Le lien est valable pendant 48 heures.
-                    </p>
+                <div class="page-stack">
+                    <div class="text-center">
+                        <span class="text-6xl mb-4 block">✉️</span>
+                        <h2 class="text-2xl font-bold text-green-600 dark:text-green-400 mb-4">E-mail envoyé !</h2>
+                        <p class="text-muted mb-4">
+                            Un lien d'accès a été envoyé à <strong>{{ $email }}</strong>.
+                        </p>
+                        <p class="text-muted">
+                            Cliquez sur le lien reçu pour continuer votre demande. Le lien est valable pendant 48 heures.
+                        </p>
+                    </div>
+
+                    <div class="notice-warning text-left">
+                        <p class="notice-title">Vous ne recevez pas l'e-mail ?</p>
+                        <ul class="notice-list">
+                            <li>Vérifiez votre dossier <strong>spam</strong> (courrier indésirable).</li>
+                            <li>Vérifiez que votre boîte de réception n'est pas pleine : l'e-mail ne peut pas être reçu s'il n'y a plus assez d'espace.</li>
+                            <li>Vérifiez que l'adresse <strong>{{ $email }}</strong> est correcte.</li>
+                        </ul>
+                    </div>
+
+                    @if($season?->responsible_email)
+                        <div class="notice-info text-left">
+                            <p>
+                                En cas de problème, vous pouvez nous contacter à l'adresse
+                                <a href="mailto:{{ $season->responsible_email }}" class="link">{{ $season->responsible_email }}</a>.
+                            </p>
+                        </div>
+                    @endif
                 </div>
             @endif
         </div>
