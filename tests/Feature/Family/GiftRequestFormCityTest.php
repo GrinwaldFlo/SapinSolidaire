@@ -114,8 +114,28 @@ test('pickup condition text uses season slots and pickup address', function () {
     Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
         ->call('acceptConsecutiveYears')
         ->assertSee('Je viendrai chercher le cadeau')
+        ->assertSee("à l'adresse suivante :")
         ->assertSee("Temple d'Yverdon")
         ->assertSee('mercredi 23 décembre 2026');
+});
+
+test('pickup condition sentence ends with a period when there is no pickup address', function () {
+    $this->season->update(['pickup_address' => null]);
+
+    Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
+        ->call('acceptConsecutiveYears')
+        ->assertSee('Je viendrai chercher le cadeau le mercredi 23 décembre 2026.')
+        ->assertDontSee("l'adresse suivante");
+});
+
+test('pickup condition sentence introduces the address when there is no pickup slot', function () {
+    $this->season->pickupSlots()->delete();
+
+    Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
+        ->call('acceptConsecutiveYears')
+        ->assertSee("Je viendrai chercher le cadeau à l'adresse suivante :")
+        ->assertSee("Temple d'Yverdon")
+        ->assertDontSee('décembre 2026');
 });
 
 // --- Submit validation with city ---
