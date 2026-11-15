@@ -21,6 +21,22 @@ test('home page shows the custom introduction text', function () {
     Livewire::test(Home::class)->assertSee('Bienvenue chez Sapin Solidaire');
 });
 
+test('home page hides the introduction text when registrations are closed', function () {
+    Season::create([
+        'name' => 'Active',
+        'start_date' => now()->subDay(),
+        'end_date' => now()->addMonth(),
+    ]);
+    Setting::setValue(CustomText::HOME_INTRODUCTION, 'Bienvenue chez {site}');
+    Setting::setValue(Setting::REGISTRATION_BLOCKED, '1');
+    Setting::setValue(CustomText::REGISTRATION_BLOCKED, 'Inscriptions suspendues');
+
+    Livewire::test(Home::class)
+        ->assertSee('Inscriptions closes')
+        ->assertSee('Inscriptions suspendues')
+        ->assertDontSee('Bienvenue chez Sapin Solidaire');
+});
+
 test('urls in custom texts are shown as links on family pages', function () {
     Season::create([
         'name' => 'Active',

@@ -51,10 +51,8 @@
                             <p class="notice-title">Inscriptions closes</p>
                             <p class="notice-text">@linkify($registrationClosedMessage)</p>
                         </div>
-                    @else
-                        @if($introductionText)
-                            <div class="intro-text text-multiline">@linkify($introductionText)</div>
-                        @endif
+                    @elseif($introductionText)
+                        <div class="intro-text text-multiline">@linkify($introductionText)</div>
                     @endif
                 </div>
 

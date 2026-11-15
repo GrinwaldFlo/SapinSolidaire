@@ -128,6 +128,16 @@ test('pickup condition sentence ends with a period when there is no pickup addre
         ->assertDontSee("l'adresse suivante");
 });
 
+test('pickup condition sentence introduces the address when there is no pickup slot', function () {
+    $this->season->pickupSlots()->delete();
+
+    Livewire::test(GiftRequestForm::class, ['token' => $this->emailToken->token])
+        ->call('acceptConsecutiveYears')
+        ->assertSee("Je viendrai chercher le cadeau à l'adresse suivante :")
+        ->assertSee("Temple d'Yverdon")
+        ->assertDontSee('décembre 2026');
+});
+
 // --- Submit validation with city ---
 
 test('submit accepts allowed city', function () {
