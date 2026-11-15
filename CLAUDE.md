@@ -346,7 +346,7 @@ Table helpers: table-full (full width table with row dividers), table-head (thea
 
 Statistic helpers: stat-bar (horizontal bar on a progress element, no inline width needed), stat-grid (responsive three-column grid, stat-grid--spaced adds top spacing), stat-item (centered statistic inside a stat-grid), stat-pair (two statistics side by side inside one stat-card, e.g. families / children).
 
-Text helpers: text-multiline (free text keeping line breaks, e.g. custom texts outside notices), intro-text (introduction paragraph on public pages, combine with text-multiline for custom texts).
+Text helpers: text-multiline (free text keeping line breaks, e.g. custom texts outside notices), intro-text (introduction paragraph on public pages, combine with text-multiline for custom texts), pickup-address (pickup address on its own line under the family pickup commitment sentence).
 
 Selectable list helpers: checkbox-input (row / select-all checkbox), table-header-checkbox + table-cell-checkbox (narrow checkbox column), selection-bar (selection count + action button), table-cell-comment (free text comment cell keeping line breaks), cell-subtext (small muted second line in a table cell).
 

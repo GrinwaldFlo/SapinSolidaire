@@ -52,6 +52,22 @@ trait HandlesGiftRequestEligibility
         return $this->season?->pickupDateText() ?? '';
     }
 
+    /**
+     * Pickup commitment sentence. The address is shown on its own after
+     * "à l'adresse suivante :", which reads correctly whatever the address
+     * looks like (place name, street, multi-line).
+     */
+    public function pickupCommitmentSentence(): string
+    {
+        $sentence = trim('Je viendrai chercher le cadeau '.$this->pickupConditionDateText);
+
+        if ($this->pickupConditionAddressText !== '') {
+            return $sentence." à l'adresse suivante :";
+        }
+
+        return $sentence.'.';
+    }
+
     public function requestCityChange(): void
     {
         $this->cityConfirmed = false;

@@ -101,16 +101,10 @@
                 @if($consecutiveYearsAccepted && !$pickupCommitmentAccepted)
                     <div class="border border-gray-200 dark:border-zinc-600 rounded-lg p-6">
                         <h3 class="section-title mb-2">Retrait du cadeau</h3>
-                        <p class="text-muted mb-4">
-                            Je viendrai chercher le cadeau
-                            @if(!empty($pickupConditionDateText))
-                                {{ $pickupConditionDateText }}
-                            @endif
-                            @if(!empty($pickupConditionAddressText))
-                                à {{ $pickupConditionAddressText }}
-                            @endif
-                            .
-                        </p>
+                        <p class="text-muted mb-4">{{ $this->pickupCommitmentSentence() }}</p>
+                        @if($pickupConditionAddressText !== '')
+                            <p class="pickup-address text-multiline">{{ $pickupConditionAddressText }}</p>
+                        @endif
                         <button wire:click="acceptPickupCommitment" class="btn-confirm">
                             Je confirme
                         </button>

@@ -251,6 +251,11 @@ select:focus[data-flux-control] {
         @apply whitespace-pre-line;
     }
 
+    /* Pickup address shown on its own under the pickup commitment sentence */
+    .pickup-address {
+        @apply font-medium text-gray-700 dark:text-gray-200 mb-4;
+    }
+
     /* Introduction paragraph on public pages */
     .intro-text {
         @apply text-gray-600 dark:text-gray-300 mb-6;
