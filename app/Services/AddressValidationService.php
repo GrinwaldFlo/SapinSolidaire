@@ -98,6 +98,20 @@ class AddressValidationService
     }
 
     /**
+     * Full house number of a verified address: Swiss Post returns the number
+     * and its addition (e.g. 24 + A) in separate fields.
+     */
+    public static function formattedHouseNo(array $verification): ?string
+    {
+        $houseNo = trim((string) ($verification['HouseNo'] ?? ''));
+        if ($houseNo === '') {
+            return null;
+        }
+
+        return $houseNo.trim((string) ($verification['HouseNoAddition'] ?? ''));
+    }
+
+    /**
      * Raw Swiss Post building verification call.
      */
     public function buildingverification4(string $streetname, string $houseNo, string $zipcode, string $townname): array

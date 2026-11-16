@@ -216,7 +216,7 @@ trait HandlesGiftRequestShared
             if (! empty($addressResult['FormatedAddress'])) {
                 $formatted = $addressResult['FormatedAddress'];
                 $this->streetName = $formatted['StreetName'] ?? $this->streetName;
-                $this->houseNo = $formatted['HouseNo'] ?? $this->houseNo;
+                $this->houseNo = AddressValidationService::formattedHouseNo($formatted) ?? $this->houseNo;
                 $this->postalCode = $formatted['ZipCode'] ?? $this->postalCode;
             }
         }
